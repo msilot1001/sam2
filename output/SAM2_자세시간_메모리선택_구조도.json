@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "SAM 2.1 자세·경과시간 기반 메모리 선택 구조",
+    "quality_profile": "showcase",
+    "viewBox": [1280, 660]
+  },
+  "components": [
+    { "id": "rgb", "type": "external", "label": "수신 RGB 프레임", "sublabel": "누락 뒤 도착한 현재 영상", "pos": [30, 120], "size": [155, 72] },
+    { "id": "encoder", "type": "backend", "label": "Image Encoder", "sublabel": "현재 영상 특징", "pos": [225, 120], "size": [150, 72] },
+    { "id": "attention", "type": "backend", "label": "Memory Attention", "sublabel": "현재 특징 + 과거 기억", "pos": [430, 120], "size": [165, 72] },
+    { "id": "decoder", "type": "backend", "label": "Mask Decoder", "sublabel": "객체 마스크 추론", "pos": [650, 120], "size": [150, 72] },
+    { "id": "mask", "type": "frontend", "label": "예측 마스크", "sublabel": "현재 프레임 출력", "pos": [855, 120], "size": [150, 72] },
+    { "id": "evaluation", "type": "external", "label": "사후 평가", "sublabel": "GT로 J&F·회복 측정", "pos": [1070, 120], "size": [170, 72] },
+    { "id": "memory_encoder", "type": "backend", "label": "Memory Encoder", "sublabel": "예측 뒤 후보 생성", "pos": [855, 305], "size": [160, 72] },
+    { "id": "candidate_queue", "type": "database", "label": "후보 큐 L=32", "sublabel": "CPU의 과거 메모리", "tag": "변경", "pos": [650, 305], "size": [155, 72] },
+    { "id": "selector", "type": "security", "label": "메모리 선택기", "sublabel": "recent / time / pose / 결합", "tag": "핵심 변경", "pos": [430, 305], "size": [165, 72] },
+    { "id": "active_memory", "type": "messagebus", "label": "활성 메모리 K=7", "sublabel": "최초 1 + 최근 1 + 선택 5", "pos": [225, 305], "size": [165, 72] },
+    { "id": "pose_time", "type": "external", "label": "카메라 자세·경과시간", "sublabel": "extrinsic + 원본 Δt", "tag": "추가 입력", "pos": [430, 485], "size": [195, 72] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "우리 연구에서 추가·변경하는 영역", "wraps": ["candidate_queue", "selector", "pose_time"], "pad": 22 }
+  ],
+  "connections": [
+    { "id": "rgb_encoder", "from": "rgb", "to": "encoder", "label": "수신 영상", "labelAt": [205, 106] },
+    { "id": "encoder_attention", "from": "encoder", "to": "attention", "label": "현재 특징" },
+    { "id": "memory_attention", "from": "active_memory", "to": "attention", "label": "7개 참조", "variant": "emphasis" },
+    { "id": "attention_decoder", "from": "attention", "to": "decoder", "label": "결합 특징" },
+    { "id": "decoder_mask", "from": "decoder", "to": "mask", "label": "분할 결과" },
+    { "id": "mask_evaluation", "from": "mask", "to": "evaluation", "label": "예측", "variant": "dashed" },
+    { "id": "mask_memory_encoder", "from": "mask", "to": "memory_encoder", "label": "예측 완료 뒤", "fromSide": "bottom", "toSide": "top", "labelAt": [1035, 250] },
+    { "id": "memory_encoder_queue", "from": "memory_encoder", "to": "candidate_queue", "label": "후보 저장", "labelAt": [830, 397] },
+    { "id": "queue_selector", "from": "candidate_queue", "to": "selector", "label": "최대 32개" },
+    { "id": "pose_selector", "from": "pose_time", "to": "selector", "label": "선택 기준", "variant": "emphasis", "fromSide": "top", "toSide": "bottom", "labelAt": [650, 433] },
+    { "id": "selector_active", "from": "selector", "to": "active_memory", "label": "5개 선택", "variant": "emphasis", "labelAt": [410, 397] }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "고정하는 것",
+      "items": ["SAM 2.1 Hiera-Tiny 가중치", "활성 메모리 K=7·forward 횟수", "RGB·최초 GT mask·누락 위치"]
+    },
+    {
+      "dot": "amber",
+      "title": "바꾸는 것",
+      "items": ["과거 메모리 선택 규칙만 변경", "카메라 자세 비용 + 실제 경과시간 구간", "recent-K 포함 네 정책 비교"]
+    },
+    {
+      "dot": "emerald",
+      "title": "검증하는 것",
+      "items": ["J&F와 burst 뒤 회복 시간", "정지·이동 차량 및 자세 오차", "latency·FPS·VRAM·CPU 저장량"]
+    }
+  ]
+}
