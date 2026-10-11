@@ -28,3 +28,8 @@ __pycache__/
 .venv/
 data/
 checkpoints/
+
+# Milestone 0 pipeline
+outputs/
+.pytest_cache/
+*.egg-info/

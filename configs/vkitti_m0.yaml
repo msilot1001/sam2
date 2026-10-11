@@ -1,0 +1,15 @@
+# Milestone 0 data pipeline. Selection criteria are pre-registered: do not tune on SAM2 results.
+root: data/vkitti2
+scene: Scene01
+variation: clone
+camera_id: 0
+output_dir: outputs/milestone0
+
+track_selection:            # mentor_plan_revision.md §8
+  min_area_frac: 0.001      # prompt-frame mask >= 0.1% of image
+  min_frames: 40            # frames with >= 1 mask pixel
+  max_tracks: 4             # per scene
+
+extrinsic_checks:           # flag implausible per-frame camera jumps
+  max_step_m: 3.0           # ~108 km/h at 10 Hz
+  max_step_rot_deg: 15.0

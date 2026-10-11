@@ -21,6 +21,17 @@
 - 계획 데이터: Virtual KITTI 2의 clone 변형에서 왼쪽 카메라 RGB·instance mask·카메라 `extrinsic.txt`를 사용한다. 개발 장면은 01·06, 시험 장면은 02·18·20이다.
 - 주 지표: 객체별 `J&F` 및 `pose+Δt − recent-K` 차이. 누락 후 회복, 지연 시간, FPS, GPU·CPU 메모리 비용도 기록한다.
 
+## Milestone 0: Virtual KITTI 2 데이터 파이프라인
+
+RGB·instance mask·카메라 extrinsic 로더, 차량 track 선택, 검증 스크립트. SAM 2.1 추론은 아직 포함하지 않는다. 자세한 내용은 [docs/MILESTONE_0.md](docs/MILESTONE_0.md).
+
+```bash
+uv sync                                   # Python 3.12 환경 (uv.lock 고정)
+python3 scripts/setup_vkitti.py           # VKITTI2 다운로드·MD5 검증·Scene01/clone/Camera_0 추출 (CC BY-NC-SA 3.0)
+uv run pytest                             # 단위 테스트 + 실데이터 통합 테스트
+uv run python scripts/inspect_vkitti.py   # 실데이터 smoke test → outputs/milestone0/
+```
+
 ## 다른 컴퓨터나 에이전트에서 이어서 작업하기
 
 ```bash
