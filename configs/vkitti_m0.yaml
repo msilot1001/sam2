@@ -5,7 +5,8 @@ variation: clone
 camera_id: 0
 output_dir: outputs/milestone0
 
-track_selection:            # mentor_plan_revision.md §8
+track_selection:            # mentor_plan_revision.md §8, src/vkitti/tracks.py
+  rule: first_area          # first_visible = M0 rule, kept for comparison
   min_area_frac: 0.001      # prompt-frame mask >= 0.1% of image
   min_frames: 40            # frames with >= 1 mask pixel
   max_tracks: 4             # per scene

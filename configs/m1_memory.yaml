@@ -1,0 +1,19 @@
+# Milestone 1: memory-selection separability on DEVELOPMENT scenes, no frame drops, no SAM2.
+root: data/vkitti2
+variation: clone
+camera_id: 0
+dev_scenes: [Scene01, Scene06]
+test_scenes: [Scene02, Scene18, Scene20]   # never loaded by the M1 analysis
+output_dir: outputs/milestone1
+
+track_selection: {rule: first_area, min_area_frac: 0.001, min_frames: 40, max_tracks: 4}
+
+memory:
+  K: 7
+  L: 32
+  scale_percentile: 95      # sT, sR from dev-scene (current, candidate) pairs
+  w_t: 0.5                  # placeholder until M6 picks from {0, .25, .5, .75, 1}
+
+camera_state:               # descriptive split of current frames, not used by any policy
+  stopped_step_m: 0.05
+  turning_step_deg: 0.5
