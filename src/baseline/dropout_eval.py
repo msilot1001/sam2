@@ -92,8 +92,26 @@ def drop_runs(frames: pd.DataFrame) -> list[tuple[int, int]]:
     return runs
 
 
+def _first_pair(ok: list[bool]) -> int | None:
+    """1-based k of the first two consecutive True values."""
+    return next((i + 1 for i in range(len(ok) - 1) if ok[i] and ok[i + 1]), None)
+
+
+def _classify(n_win: int, k: int | None, next_run) -> str:
+    if not n_win:
+        return "no_observation"
+    if k == 1:
+        return "intact_at_first_frame"
+    if k:
+        return "recovered_later"
+    if n_win < 2:
+        return "insufficient_observation"
+    return "unrecovered_next_burst" if next_run is not None else "unrecovered_end"
+
+
 def recovery_events(frames: pd.DataFrame, j_by_frame: dict | None = None, j_threshold: float = 0.5,
-                    lost_j: float = 0.1, within: int = 5) -> pd.DataFrame:
+                    lost_j: float = 0.1, within: int = 5, visible_by_frame: dict | None = None,
+                    ref_j_by_frame: dict | None = None) -> pd.DataFrame:
     """One row per dropped run (= per burst in burst conditions).
 
     frames: manifest frame table. j_by_frame: {original_frame_id: J} for received frames of the
@@ -107,6 +125,13 @@ def recovery_events(frames: pd.DataFrame, j_by_frame: dict | None = None, j_thre
       unrecovered_end          no pair before the clip end (censored by the end)
     degraded_after_drop = J of the first received frame < thr. pre_drop_J flags runs that start
     while tracking is already poor (degradation not attributable to the drop).
+
+    Optional, never replacing the primary J rule:
+      visible_by_frame -> visible_* columns: the same rule, but each frame of the confirming pair must
+        also have a non-empty GT (an empty prediction on a fully occluded target scores J=1 under the
+        DAVIS convention and would otherwise look like re-acquisition).
+      ref_j_by_frame -> nodrop_* columns: matched no-drop J on the same window frames, to separate
+        dropout-specific degradation from regions that are hard anyway.
     """
     f = frames.reset_index(drop=True)
     pos = {fid: i for i, fid in enumerate(f.original_frame_id)}
@@ -128,17 +153,8 @@ def recovery_events(frames: pd.DataFrame, j_by_frame: dict | None = None, j_thre
                "within_n_determinable": len(win) >= within}
         if j_by_frame is not None:
             js = [j_by_frame[x] for x in win]
-            k = next((i + 1 for i in range(len(js) - 1) if js[i] >= j_threshold and js[i + 1] >= j_threshold), None)
-            if not win:
-                cls = "no_observation"
-            elif k == 1:
-                cls = "intact_at_first_frame"
-            elif k:
-                cls = "recovered_later"
-            elif len(win) < 2:
-                cls = "insufficient_observation"
-            else:
-                cls = "unrecovered_next_burst" if nxt is not None else "unrecovered_end"
+            k = _first_pair([j >= j_threshold for j in js])
+            cls = _classify(len(win), k, nxt)
             row.update({
                 "window_J": js, "pre_drop_J": j_by_frame.get(row["pre_drop_frame"]),
                 "first_J": js[0] if js else None,
@@ -153,6 +169,20 @@ def recovery_events(frames: pd.DataFrame, j_by_frame: dict | None = None, j_thre
                 # True also for intact runs -- use class / degraded_after_drop before calling it "recovery".
                 "confirmed_within_n": (k + 1 <= within) if k else (False if len(win) >= within else None),
             })
+            if visible_by_frame is not None:
+                vis = [bool(visible_by_frame[x]) for x in win]
+                kv = _first_pair([j >= j_threshold and v for j, v in zip(js, vis)])
+                row.update({"window_visible": vis, "visible_class": _classify(len(win), kv, nxt),
+                            "visible_onset_received_k": kv,
+                            "visible_confirmed_within_n": (kv + 1 <= within) if kv else
+                            (False if len(win) >= within else None),
+                            "first_frame_gt_visible": bool(vis[0]) if vis else None})
+            if ref_j_by_frame is not None:
+                rj = [ref_j_by_frame[x] for x in win]
+                row.update({"nodrop_window_J": rj, "nodrop_first_J": rj[0] if rj else None,
+                            "nodrop_degraded_first": bool(rj and rj[0] < j_threshold),
+                            "nodrop_pre_drop_J": ref_j_by_frame.get(row["pre_drop_frame"]),
+                            "nodrop_class": _classify(len(win), _first_pair([j >= j_threshold for j in rj]), nxt)})
         rows.append(row)
     return pd.DataFrame(rows)
 

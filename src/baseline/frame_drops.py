@@ -63,6 +63,7 @@ def burst_drop_positions(n: int, rate: float, key: str, L: int = 4, gap: int = 1
 class DropPattern:
     meta: dict
     frames: pd.DataFrame = field(repr=False)
+    csv_sha256: str | None = None          # set by load(): sha256 of the saved frames CSV
 
     @property
     def received_ids(self) -> tuple[int, ...]:
@@ -201,4 +202,5 @@ def load(jpath: Path, regenerate_check: bool = True) -> DropPattern:
                          m["burst_length"] or 4, m["min_gap_between_bursts"] or 1)
         if again.meta != p.meta or not again.frames.equals(frames):
             raise ManifestError(f"{jpath}: generator no longer reproduces this manifest")
+    p.csv_sha256 = meta["frames_csv_sha256"]
     return p
