@@ -1,0 +1,23 @@
+# Milestone 3: deterministic frame-drop patterns for the 8 development tracks (no M4 sweep here).
+m2_config: configs/m2_baseline.yaml       # tracks, data root, SAM 2 model, evaluation settings
+m2_output_dir: outputs/milestone2         # no-drop reference predictions (read-only)
+output_dir: outputs/milestone3
+
+seeds: [0, 1, 2]                          # mentor plan fixes "three seeds" but no values
+burst_length: 4                           # original consecutive frames (plan §8)
+min_gap_between_bursts: 1                 # >= 1 received frame between bursts: no merging
+conditions:
+  random_30: {kind: random, rate: 0.30}
+  random_50: {kind: random, rate: 0.50}
+  burst_30: {kind: burst, rate: 0.30}
+  burst_50: {kind: burst, rate: 0.50}
+
+recovery:                                 # plan §10.3-4
+  j_threshold: 0.5
+  consecutive: 2
+  within_received_frames: 5
+
+smoke:                                    # short end-to-end SAM 2 check (not the M4 sweep)
+  - {scene: Scene01, track_id: 86, condition: burst_50, seed: 0}
+  - {scene: Scene06, track_id: 12, condition: random_30, seed: 0}
+  - {scene: Scene01, track_id: 86, condition: burst_30, seed: 0}   # first drop at 345: 6-frame causality prefix
