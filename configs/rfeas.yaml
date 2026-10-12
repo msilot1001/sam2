@@ -1,0 +1,34 @@
+# Risk-prediction / memory-gate feasibility study (exploratory). PRE-REGISTERED on 2026-10-12
+# before any SAM 2 output on these units was produced. Do not edit after results are seen; add a
+# dated amendment section instead.
+output_dir: outputs/research_feasibility
+device: mps                         # float32, no autocast (same as M2-M4.5)
+datasets:
+  davis: {split_file: val}          # DAVIS 2017 val, all objects present in frame 0 (dense GT)
+  vkitti: {scenes: [Scene01, Scene06]}   # dev scenes only, all first_area-eligible tracks
+split: "video-level, dev if sha256('rfeas-split|'+video) % 2 == 0 else val"
+
+check1:
+  horizon: 5                        # next 5 received frames (primary)
+  horizon_sensitivity: 10
+  event_j: 0.5                      # primary: a future VISIBLE-GT frame with J < 0.5
+  severe_j: 0.1
+  eligibility: "non-prompt frame t with t+H <= last frame and >= 1 visible-GT frame in (t, t+H]"
+  features: [obj_score, pred_iou, pred_iou_spread, log_area, mean_prob_in_mask, consistency_iou_prev,
+             log_area_ratio_prev, d_obj_score, d_pred_iou, min3_pred_iou, min3_obj_score]
+  model: "L2 logistic regression (lambda=1 on standardized features), fit on dev units only"
+  calibration: "Platt (1-D logistic on the model score) fit on dev only, only if dev has >= 10 failure episodes"
+  bootstrap: "10000 resamples of VAL VIDEOS (clusters), seed 0"
+  min_episodes_for_claims: 10
+
+check2:
+  units: "first 12 VAL units ordered by sha256('rfeas-check2|'+unit.name)"
+  policies:
+    native: "official behaviour"
+    presence_gate: "skip write if object_score_logit < 0 (SAM 2's own presence boundary)"
+    iou_gate: "skip write if predicted IoU < 0.7 (MoSAM admission threshold)"
+    consistency_gate: "skip write if IoU(mask_t, mask_t-1) < 0.5"
+    risk_gate: "skip write if CHECK-1 dev model risk >= the dev 90th percentile of risk (fixed 10% budget on dev)"
+    random_matched: "per unit, skip with probability = risk_gate's realised skip fraction on that unit (sha256 RNG)"
+  intervention: "skip-write = remove frame t from non_cond_frame_outputs after prediction (spatial memory AND object pointer); encoding still computed; no substitute memory"
+  single_frame_test: "per CHECK-2 unit, skip exactly one frame: (a) the frame with highest dev-model risk, (b) a sha256-chosen frame; compare with native"
