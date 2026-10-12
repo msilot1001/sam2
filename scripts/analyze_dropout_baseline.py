@@ -26,12 +26,18 @@ from baseline.metrics import seg2bmap  # noqa: E402
 from vkitti.calibration import rotation_angle_deg  # noqa: E402
 from vkitti.dataset import VKittiDataset  # noqa: E402
 
-CFG = yaml.safe_load(Path("configs/m4_dropout_baseline.yaml").read_text())
+import os  # noqa: E402
+
+CFG = yaml.safe_load(Path(os.environ.get("M4_CONFIG", "configs/m4_dropout_baseline.yaml")).read_text())
 M3 = yaml.safe_load(Path(CFG["m3_config"]).read_text())
+COND_SRC = yaml.safe_load(Path(CFG["conditions_from"]).read_text()) if "conditions_from" in CFG else M3
 M2 = yaml.safe_load(Path(M3["m2_config"]).read_text())
 OUT = Path(CFG["output_dir"])
 REP, FIG = OUT / "reports", OUT / "figures"
-CONDS = list(M3["conditions"])
+CONDS = list(COND_SRC["conditions"])
+SEEDS = COND_SRC["seeds"]
+BURSTS = [c for c, v in COND_SRC["conditions"].items() if v["kind"] == "burst"]
+TIMELINE = CFG.get("timeline_condition", "burst_50")
 COLORS = dict(zip(CONDS, ["#4C72B0", "#1F3B73", "#DD8452", "#8C3B0F"]))
 THR, LOST = M3["recovery"]["j_threshold"], M2["evaluation"]["lost_j"]
 OFFICIAL_FILES = ["modeling/sam2_base.py", "sam2_video_predictor.py", "modeling/memory_attention.py",
@@ -51,7 +57,7 @@ def tag(track):
 
 # ----------------------------------------------------------------------------- load + validate
 def load_all():
-    specs = experiment_matrix(CFG["tracks"], CONDS, M3["seeds"])
+    specs = experiment_matrix(CFG["tracks"], CONDS, SEEDS)
     ds = {s: VKittiDataset(M2["root"], s, M2["variation"], M2["camera_id"]) for s in CFG["tracks"]}
     shape = next(iter(ds.values())).image_shape
     pkg = Path(find_spec("sam2").origin).parent
@@ -115,17 +121,17 @@ def fig_timelines(m2pf, paired, patterns):
     tracks = list(m2pf.groupby(["scene", "track_id"], sort=False))
     fig, axes = plt.subplots(len(tracks), 1, figsize=(13, 2.1 * len(tracks)), squeeze=False)
     for ax, ((sc, tr), g) in zip(axes[:, 0], tracks):
-        p = patterns[f"{sc}_track{tr:03d}/burst_50_seed0"]
+        p = patterns[f"{sc}_track{tr:03d}/{TIMELINE}_seed0"]
         for s, e in drop_runs(p.frames):
             ax.axvspan(s - 0.5, e + 0.5, color="#C44E52", alpha=0.15, lw=0)
         e = g[~g.is_prompt]
         ax.plot(e.original_frame_id, e.J, color="0.55", lw=1, label="no-drop J (M2, all frames)")
-        d = paired[(paired.scene == sc) & (paired.track_id == tr) & (paired.condition == "burst_50") & (paired.seed == 0)]
-        ax.plot(d.original_frame_id, d.J_drop, ".", ms=4, color="#8C3B0F", label="burst_50 seed0 J (received frames)")
+        d = paired[(paired.scene == sc) & (paired.track_id == tr) & (paired.condition == TIMELINE) & (paired.seed == 0)]
+        ax.plot(d.original_frame_id, d.J_drop, ".", ms=4, color="#8C3B0F", label=f"{TIMELINE} seed0 J (received frames)")
         ax.set(ylim=(-0.02, 1.02), ylabel=f"{sc}\ntrack {tr}")
     axes[0, 0].legend(ncol=2, fontsize=8, loc="lower left")
     axes[-1, 0].set_xlabel("original VKITTI frame (red = dropped burst)")
-    return save(fig, "01_matched_J_over_time_burst50_seed0.png")
+    return save(fig, f"01_matched_J_over_time_{TIMELINE}_seed0.png")
 
 
 def fig_delta_hist(paired, metric, name):
@@ -223,11 +229,12 @@ def fig_size(paired):
 
 
 def fig_recovery(ev):
-    b = ev[ev.condition.isin(["burst_30", "burst_50"])]
-    fig, axes = plt.subplots(1, 2, figsize=(14, 4.5), sharey=True)
+    b = ev[ev.condition.isin(BURSTS)]
+    fig, axes = plt.subplots(1, len(BURSTS), figsize=(7 * len(BURSTS), 4.5), sharey=True, squeeze=False)
+    axes = axes[0]
     cls_col = {"intact_at_first_frame": "#55A868", "recovered_later": "#4C72B0", "unrecovered_next_burst": "#C44E52",
                "unrecovered_end": "#8C3B0F", "insufficient_observation": "#BBBBBB", "no_observation": "#BBBBBB"}
-    for ax, c in zip(axes, ["burst_30", "burst_50"]):
+    for ax, c in zip(axes, BURSTS):
         for wj, cls in b[b.condition == c][["window_J", "class"]].itertuples(index=False):
             js = json.loads(wj) if isinstance(wj, str) else []
             if js:
@@ -241,9 +248,9 @@ def fig_recovery(ev):
 
 
 def fig_censoring(ev):
-    b = ev[ev.condition.isin(["burst_30", "burst_50"])]
+    b = ev[ev.condition.isin(BURSTS)]
     fig, axes = plt.subplots(1, 2, figsize=(14, 4.5))
-    for c in ["burst_30", "burst_50"]:
+    for c in BURSTS:
         w = b[b.condition == c].window_length
         axes[0].hist(w, bins=np.arange(-0.5, w.max() + 1.5), histtype="step", lw=1.5, color=COLORS[c],
                      label=f"{c} (n={len(w)})")
@@ -372,7 +379,7 @@ def main():
     streaks.to_csv(REP / "failure_streaks_J_lt_0.5.csv", index=False)
 
     # Recovery (burst conditions) + censoring.
-    b = ev[ev.condition.isin(["burst_30", "burst_50"])].copy()
+    b = ev[ev.condition.isin(BURSTS)].copy()
     rec_rows = []
     for c, g in b.groupby("condition"):
         deg = g[g.degraded_after_drop]

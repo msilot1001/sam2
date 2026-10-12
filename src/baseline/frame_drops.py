@@ -37,8 +37,8 @@ def hash_order(key: str, n: int) -> list[int]:
     return sorted(range(n), key=lambda i: hashlib.sha256(f"{key}|{i}".encode()).digest())
 
 
-def rng_key(scene, variation, camera_id, track_id, condition, seed) -> str:
-    return f"m3|{scene}|{variation}|cam{camera_id}|track{track_id}|{condition}|seed{seed}"
+def rng_key(scene, variation, camera_id, track_id, condition, seed, namespace: str = "m3") -> str:
+    return f"{namespace}|{scene}|{variation}|cam{camera_id}|track{track_id}|{condition}|seed{seed}"
 
 
 def random_drop_positions(n: int, rate: float, key: str) -> list[int]:
@@ -75,14 +75,16 @@ class DropPattern:
 
 
 def generate(scene: str, variation: str, camera_id: int, track_id: int, original_frame_ids, condition: str,
-             kind: str, rate: float, seed: int, burst_length: int = 4, min_gap: int = 1) -> DropPattern:
+             kind: str, rate: float, seed: int, burst_length: int = 4, min_gap: int = 1,
+             namespace: str = "m3") -> DropPattern:
+    """namespace separates experiment families (M3 primary = "m3"; M4.5 exploratory stress = "m45")."""
     ids = [int(f) for f in original_frame_ids]
     if not ids or ids != list(range(ids[0], ids[0] + len(ids))):
         raise ValueError("original_frame_ids must be a non-empty contiguous increasing range")
     if not 0 <= rate <= 1:
         raise ValueError("rate must be in [0, 1]")
     n = len(ids) - 1
-    key = rng_key(scene, variation, camera_id, track_id, condition, seed)
+    key = rng_key(scene, variation, camera_id, track_id, condition, seed, namespace)
     bursts, k_req, fits = [], None, True
     if kind == "random":
         drop_pos = random_drop_positions(n, rate, key)
@@ -113,6 +115,8 @@ def generate(scene: str, variation: str, camera_id: int, track_id: int, original
         "total_original_frames": len(ids), "post_prompt_frames": n,
         "total_received_frames": len(ids) - len(dropped), "total_dropped_frames": len(dropped),
     }
+    if namespace != "m3":  # M3 manifests predate this field and must stay byte-identical
+        meta["namespace"] = namespace
     pattern = DropPattern(meta, frames)
     validate(pattern)
     return pattern
@@ -199,7 +203,7 @@ def load(jpath: Path, regenerate_check: bool = True) -> DropPattern:
         m = p.meta
         again = generate(m["scene"], m["variation"], m["camera_id"], m["track_id"], frames.original_frame_id,
                          m["condition"], m["kind"], m["requested_drop_rate"], m["seed"],
-                         m["burst_length"] or 4, m["min_gap_between_bursts"] or 1)
+                         m["burst_length"] or 4, m["min_gap_between_bursts"] or 1, m.get("namespace", "m3"))
         if again.meta != p.meta or not again.frames.equals(frames):
             raise ManifestError(f"{jpath}: generator no longer reproduces this manifest")
     p.csv_sha256 = meta["frames_csv_sha256"]

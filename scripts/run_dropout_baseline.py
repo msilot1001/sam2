@@ -66,7 +66,8 @@ def main():
         datasets[scene] = ds
     image_shape = next(iter(datasets.values())).image_shape
 
-    specs = [s for s in experiment_matrix(cfg["tracks"], list(m3["conditions"]), m3["seeds"])
+    cond_src = yaml.safe_load(Path(cfg["conditions_from"]).read_text()) if "conditions_from" in cfg else m3
+    specs = [s for s in experiment_matrix(cfg["tracks"], list(cond_src["conditions"]), cond_src["seeds"])
              if (a.scene in (None, s.scene)) and (a.track in (None, s.track_id))
              and (a.condition in (None, s.condition)) and (a.seed in (None, s.seed))]
 

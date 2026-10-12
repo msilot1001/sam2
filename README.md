@@ -70,6 +70,21 @@ uv run python scripts/run_dropout_baseline.py --all      # 재개 가능, 순차
 uv run python scripts/analyze_dropout_baseline.py        # → outputs/milestone4/{reports,figures}
 ```
 
+## Milestone 4.5: 연구 타당성 검토 (탐색적)
+
+다음 세 가지를 점검해 원래 가설을 검증할 수 있는지 판단했다.
+- 실패 시점에 SAM 2가 쓸 수 있던 메모리
+- 긴 burst(8·16) 스트레스 실험 96 run
+- 정책 분리도·pose 잡음 tolerance·합성 재방문 기하, 시뮬레이터 대안
+
+결론과 다음 단계 권고는 [docs/MILESTONE_4_5.md](docs/MILESTONE_4_5.md)에 있다.
+
+```bash
+uv run python scripts/run_dropout_baseline.py --config configs/m45_stress_runner.yaml --all
+M4_CONFIG=configs/m45_stress_runner.yaml uv run python scripts/analyze_dropout_baseline.py
+uv run python scripts/m45_feasibility.py
+```
+
 ## 다른 컴퓨터나 에이전트에서 이어서 작업하기
 
 ```bash

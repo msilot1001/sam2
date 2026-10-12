@@ -1,0 +1,19 @@
+# Milestone 4.5 EXPLORATORY stress test (not the pre-registered main experiment).
+# Same tracks, model, prompt, metrics and M3 rules; only the burst length/rate differ.
+# Fixed before any stress inference was run (2026-10-12).
+m2_config: configs/m2_baseline.yaml
+m2_output_dir: outputs/milestone2
+output_dir: outputs/milestone45
+manifests_dir: outputs/milestone45/stress_manifests
+namespace: m45                            # separate rng namespace -> independent of M3 patterns
+seeds: [0, 1, 2]
+burst_length: 4                           # default only; every stress condition sets its own
+min_gap_between_bursts: 1                 # as M3
+conditions:
+  stress_b8_30: {kind: burst, rate: 0.30, burst_length: 8}
+  stress_b8_50: {kind: burst, rate: 0.50, burst_length: 8}
+  stress_b16_30: {kind: burst, rate: 0.30, burst_length: 16}
+  stress_b16_50: {kind: burst, rate: 0.50, burst_length: 16}
+window_figure_condition: stress_b16_50
+recovery: {j_threshold: 0.5, consecutive: 2, within_received_frames: 5}
+smoke: []

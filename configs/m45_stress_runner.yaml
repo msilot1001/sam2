@@ -1,0 +1,11 @@
+# Milestone 4.5 EXPLORATORY stress runs: same runner, model and M2 reference as M4.
+m3_config: configs/m3_frame_drop.yaml     # M2 reference + recovery rule (unchanged)
+conditions_from: configs/m45_stress.yaml  # stress_b8_30/50, stress_b16_30/50, seeds 0-2
+manifests_dir: outputs/milestone45/stress_manifests
+output_dir: outputs/milestone45/stress_runs
+device: mps
+tracks:
+  Scene01: [90, 86, 63, 54]
+  Scene06: [12, 9, 11, 13]
+min_free_memory_percent: 10
+timeline_condition: stress_b16_50

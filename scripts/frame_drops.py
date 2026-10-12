@@ -61,7 +61,7 @@ def plot_track_timeline(patterns, title, path):
         ax.scatter(f[f.is_received].original_frame_id, [r] * f.is_received.sum(), marker="|", s=90, c="#4C72B0")
         ax.scatter(f[f.is_dropped].original_frame_id, [r] * f.is_dropped.sum(), marker="|", s=90, c="#DDDDDD")
         for b in p.meta["bursts"]:
-            ax.add_patch(plt.Rectangle((b["start"] - 0.5, r - 0.35), 4, 0.7, fc="none", ec="#C44E52", lw=1))
+            ax.add_patch(plt.Rectangle((b["start"] - 0.5, r - 0.35), b["length"], 0.7, fc="none", ec="#C44E52", lw=1))
         ax.scatter([p.meta["prompt_original_frame_id"]], [r], marker="*", s=80, c="gold", edgecolors="k", zorder=3)
     ax.set_yticks(range(len(patterns)))
     ax.set_yticklabels([f"{p.name} ({p.meta['actual_drop_rate']:.0%})" for p in patterns], fontsize=8)
@@ -126,7 +126,8 @@ def plot_recovery_windows(p, ev, title, path, j=None):
 # ----------------------------------------------------------------------------- commands
 def cmd_generate(cfg):
     out = Path(cfg["output_dir"])
-    man, figs, rep = out / "manifests", out / "figures", out / "reports"
+    man = Path(cfg.get("manifests_dir", out / "manifests"))
+    figs, rep = out / "figures", out / "reports"
     for d in (man, figs, rep):
         d.mkdir(parents=True, exist_ok=True)
     m2 = cfg["m2"]
@@ -138,8 +139,8 @@ def cmd_generate(cfg):
             for cond, spec in cfg["conditions"].items():
                 for seed in cfg["seeds"]:
                     p = fd.generate(scene, m2["variation"], m2["camera_id"], int(tr.track_id), clip.original_frame_ids,
-                                    cond, spec["kind"], spec["rate"], seed, cfg["burst_length"],
-                                    cfg["min_gap_between_bursts"])
+                                    cond, spec["kind"], spec["rate"], seed, spec.get("burst_length", cfg["burst_length"]),
+                                    cfg["min_gap_between_bursts"], cfg.get("namespace", "m3"))
                     jpath, _ = fd.save(p, man)
                     p = fd.load(jpath)  # round trip + regeneration check
                     pats.append(p)
@@ -159,8 +160,9 @@ def cmd_generate(cfg):
                 seed0 = [p for p in pats if p.meta["seed"] == 0]
                 figures.append(plot_index_map(seed0, f"{tag}: received video index vs original frame (seed 0)",
                                               figs / f"{tag}_index_map.png"))
-                b = next(p for p in pats if p.meta["condition"] == "burst_50" and p.meta["seed"] == 0)
-                figures.append(plot_recovery_windows(b, recovery_events(b.frames), f"{tag} burst_50 seed0: bursts "
+                hard = cfg.get("window_figure_condition", "burst_50")
+                b = next(p for p in pats if p.meta["condition"] == hard and p.meta["seed"] == 0)
+                figures.append(plot_recovery_windows(b, recovery_events(b.frames), f"{tag} {hard} seed0: bursts "
                                                      "and recovery observation windows", figs / f"{tag}_burst_windows.png"))
     summary = pd.DataFrame(rows)
     summary.to_csv(rep / "manifest_summary.csv", index=False)

@@ -19,6 +19,9 @@ import numpy as np
 from vkitti.calibration import rotation_angle_deg
 
 POLICIES = ("recent-K", "time-distributed", "pose-only", "pose+dt")
+# M4.5 diagnostic control (not a primary policy): newest candidate in each time bin, empty bins
+# filled with the newest unselected candidates. Separates "pose" from "recency within a bin".
+DIAGNOSTIC_POLICIES = ("recent-per-bin",)
 BINS = ((1, 2), (3, 5), (6, 10), (11, 20), (21, None))  # age in original frames; None = open
 MIN_SCALE_T_M = 0.01      # floors for sT / sR (plan §13): a near-stationary dev set must not
 MIN_SCALE_R_DEG = 0.01    # turn tiny pose noise into full-range cost differences
@@ -39,10 +42,16 @@ class Memory:
 
 @dataclass(frozen=True)
 class PoseScale:
-    """C = w_t * clip(dT/s_t, 0, 1) + (1 - w_t) * clip(dR/s_r, 0, 1)."""
+    """C = w_t * clip(dT/s_t, 0, 1) + (1 - w_t) * clip(dR/s_r, 0, 1).
+
+    tol_t_m / tol_r_deg (M4.5, default 0 = original behaviour): differences below the tolerance are
+    treated as 0, so near-identical poses tie and the recency tie-break decides.
+    """
     s_t: float
     s_r_deg: float
     w_t: float = 0.5
+    tol_t_m: float = 0.0
+    tol_r_deg: float = 0.0
 
     def __post_init__(self):
         if not 0 <= self.w_t <= 1:
@@ -74,6 +83,8 @@ def pose_difference(a: Memory, b: Memory) -> tuple[float, float]:
 
 def pose_cost(current: Memory, cand: Memory, scale: PoseScale) -> float:
     dt, dr = pose_difference(current, cand)
+    dt = 0.0 if dt < scale.tol_t_m else dt
+    dr = 0.0 if dr < scale.tol_r_deg else dr
     return scale.w_t * min(dt / scale.s_t, 1.0) + (1 - scale.w_t) * min(dr / scale.s_r_deg, 1.0)
 
 
@@ -116,12 +127,12 @@ class Selection(NamedTuple):
 
 class MemorySelector:
     def __init__(self, policy: str, scale: PoseScale | None = None, K: int = 7, bins=BINS):
-        if policy not in POLICIES:
-            raise ValueError(f"unknown policy {policy!r}; expected one of {POLICIES}")
+        if policy not in POLICIES + DIAGNOSTIC_POLICIES:
+            raise ValueError(f"unknown policy {policy!r}; expected one of {POLICIES + DIAGNOSTIC_POLICIES}")
         if policy.startswith("pose") and scale is None:
             raise ValueError(f"{policy} needs a PoseScale")
         self.n = K - 2
-        if policy in ("time-distributed", "pose+dt") and len(bins) != self.n:
+        if policy in ("time-distributed", "pose+dt", "recent-per-bin") and len(bins) != self.n:
             raise ValueError(f"{len(bins)} time bins but K-2={self.n} slots")
         self.policy, self.scale, self.K, self.bins = policy, scale, K, bins
 
@@ -138,7 +149,7 @@ class MemorySelector:
         else:
             cost = {c.original_frame_id: pose_cost(current, c, self.scale) for c in pool} if self.scale else {}
             method = {"time-distributed": self._time_distributed, "pose-only": self._pose_only,
-                      "pose+dt": self._pose_dt}[self.policy]
+                      "pose+dt": self._pose_dt, "recent-per-bin": self._recent_per_bin}[self.policy]
             chosen = method(pool, age, cost, (bank.prompt.original_frame_id, recent.original_frame_id))
         fixed = {bank.prompt.original_frame_id: bank.prompt, recent.original_frame_id: recent}
         active = {**fixed, **{c.original_frame_id: c for c in chosen}}
@@ -158,6 +169,12 @@ class MemorySelector:
 
     def _pose_dt(self, pool, age, cost, fixed_ids):
         key = lambda c: (cost[c.original_frame_id], age[c.original_frame_id])  # noqa: E731
+        chosen = [min(g, key=key) for g in self._binned(pool, age) if g]
+        rest = sorted((c for c in pool if c not in chosen), key=key)
+        return chosen + rest[: self.n - len(chosen)]
+
+    def _recent_per_bin(self, pool, age, cost, fixed_ids):
+        key = lambda c: age[c.original_frame_id]  # noqa: E731  -- newest first
         chosen = [min(g, key=key) for g in self._binned(pool, age) if g]
         rest = sorted((c for c in pool if c not in chosen), key=key)
         return chosen + rest[: self.n - len(chosen)]
