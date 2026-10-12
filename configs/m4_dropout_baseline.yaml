@@ -1,0 +1,9 @@
+# Milestone 4: unmodified SAM 2.1 Hiera-Tiny on the 96 M3 frame-drop manifests (dev scenes only).
+m3_config: configs/m3_frame_drop.yaml     # conditions, seeds, recovery rule, manifests, M2 reference
+manifests_dir: outputs/milestone3/manifests
+output_dir: outputs/milestone4
+device: mps                               # float32, no autocast (as M2)
+tracks:                                   # fixed by M1/M2; the runner refuses if selection changes
+  Scene01: [90, 86, 63, 54]
+  Scene06: [12, 9, 11, 13]
+min_free_memory_percent: 10               # wait before a run if macOS reports less free memory

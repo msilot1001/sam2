@@ -61,6 +61,15 @@ uv run python scripts/frame_drops.py generate            # → outputs/milestone
 uv run python scripts/frame_drops.py smoke --device mps  # 누락 clip 3개로 SAM 2 smoke test
 ```
 
+## Milestone 4: 프레임 누락 강건성 기준선
+
+M3 manifest 96개(track 8개 × 4조건 × 3 seed)에 순정 SAM 2.1 Tiny를 실행하고, 같은 원본 frame에서 M2 무손실 예측과 비교했다. 30–50% 누락에서 track 평균 ΔJ&F는 −0.002 ~ +0.0005였다. 결과와 연구 판단은 [docs/MILESTONE_4.md](docs/MILESTONE_4.md)에 있다.
+
+```bash
+uv run python scripts/run_dropout_baseline.py --all      # 재개 가능, 순차 실행 (MPS 약 80분)
+uv run python scripts/analyze_dropout_baseline.py        # → outputs/milestone4/{reports,figures}
+```
+
 ## 다른 컴퓨터나 에이전트에서 이어서 작업하기
 
 ```bash
