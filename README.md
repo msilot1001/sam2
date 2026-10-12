@@ -41,6 +41,17 @@ python3 scripts/setup_vkitti.py --scenes Scene01 Scene06 --skip-download
 uv run python scripts/analyze_memory_selection.py   # → outputs/milestone1/
 ```
 
+## Milestone 2: 순정 SAM 2.1 Hiera-Tiny baseline
+
+공식 SAM 2를 upstream commit에 고정해 패키지로 설치하고(소스 복사 없음), 개발 track에서 첫 프레임 GT mask만 주고 순방향 추적한 뒤 J/F/J&F로 평가한다. 결과는 [docs/MILESTONE_2.md](docs/MILESTONE_2.md)에 있다.
+
+```bash
+uv sync                                                        # torch + sam-2 (pyproject의 sam2 그룹)
+curl -L -o checkpoints/sam2.1_hiera_tiny.pt https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_tiny.pt
+uv run python scripts/run_sam2_baseline.py --device mps --smoke 10   # 1 track, 10 frames
+uv run python scripts/run_sam2_baseline.py --device mps              # → outputs/milestone2/
+```
+
 ## 다른 컴퓨터나 에이전트에서 이어서 작업하기
 
 ```bash

@@ -1,0 +1,22 @@
+# Milestone 2: unmodified official SAM 2.1 Hiera-Tiny baseline on VKITTI2 dev scenes, no frame drops.
+root: data/vkitti2
+variation: clone
+camera_id: 0
+scenes: [Scene01, Scene06]                 # development only; Scene02/18/20 are not touched
+output_dir: outputs/milestone2
+
+track_selection: {rule: first_area, min_area_frac: 0.001, min_frames: 40, max_tracks: 4}
+
+sam2:
+  upstream_commit: 2b90b9f5ceec907a1c18123530e92e794ad901a4
+  config: configs/sam2.1/sam2.1_hiera_t.yaml  # resolved inside the installed sam2 package
+  checkpoint: checkpoints/sam2.1_hiera_tiny.pt
+  checkpoint_url: https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_tiny.pt
+  checkpoint_sha256: 7402e0d864fa82708a20fbd15bc84245c2f26dff0eb43a4b5b93452deb34be69
+  apply_postprocessing: true                 # official default of build_sam2_video_predictor
+  mask_threshold: 0.0                        # logits > 0, as in the official notebooks
+
+evaluation:
+  boundary_th: 0.008                         # DAVIS: fraction of image diagonal (= 11 px here)
+  boundary_th_strict: 2                      # secondary F with a 2-px tolerance (not DAVIS)
+  lost_j: 0.1                                # plan §9: J < 0.1 counts as tracking loss
