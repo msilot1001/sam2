@@ -29,7 +29,16 @@ RGB·instance mask·카메라 extrinsic 로더, 차량 track 선택, 검증 스�
 uv sync                                   # Python 3.12 환경 (uv.lock 고정)
 python3 scripts/setup_vkitti.py           # VKITTI2 다운로드·MD5 검증·Scene01/clone/Camera_0 추출 (CC BY-NC-SA 3.0)
 uv run pytest                             # 단위 테스트 + 실데이터 통합 테스트
-uv run python scripts/inspect_vkitti.py   # 실데이터 smoke test → outputs/milestone0/
+uv run python scripts/inspect_vkitti.py   # 실데이터 smoke test → outputs/milestone0/ (--scene Scene06)
+```
+
+## Milestone 1: 메모리 선택 정책 분리도 분석
+
+SAM2와 독립된 `MemorySelector`(recent-K, time-distributed, pose-only, pose+Δt)를 구현하고, 개발 장면 01·06에서 네 정책이 실제로 다른 메모리를 고르는지 분석했다. 결과와 연구 판단은 [docs/MILESTONE_1.md](docs/MILESTONE_1.md)에 있다.
+
+```bash
+python3 scripts/setup_vkitti.py --scenes Scene01 Scene06 --skip-download
+uv run python scripts/analyze_memory_selection.py   # → outputs/milestone1/
 ```
 
 ## 다른 컴퓨터나 에이전트에서 이어서 작업하기
