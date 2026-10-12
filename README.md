@@ -52,6 +52,15 @@ uv run python scripts/run_sam2_baseline.py --device mps --smoke 10   # 1 track, 
 uv run python scripts/run_sam2_baseline.py --device mps              # → outputs/milestone2/
 ```
 
+## Milestone 3: 결정론적 프레임 누락 생성
+
+`random_30/50`, `burst_30/50`(길이 4) 조건을 seed 0·1·2로 생성하고, track별 manifest(CSV + JSON, sha256 검증)를 만든다. 누락 clip 구성, 무손실 대비 paired 평가, burst 회복 사건 추출도 포함한다. 결과는 [docs/MILESTONE_3.md](docs/MILESTONE_3.md)에 있다.
+
+```bash
+uv run python scripts/frame_drops.py generate            # → outputs/milestone3/manifests (96개)
+uv run python scripts/frame_drops.py smoke --device mps  # 누락 clip 3개로 SAM 2 smoke test
+```
+
 ## 다른 컴퓨터나 에이전트에서 이어서 작업하기
 
 ```bash

@@ -21,6 +21,12 @@ class Clip:
     scene: str
     track_id: int
     original_frame_ids: tuple[int, ...]   # video_idx i <-> original_frame_ids[i]; [0] is the prompt frame
+    variant: str = ""                      # e.g. "burst_30_seed0"; "" = full no-drop clip (M2)
+
+    def __post_init__(self):
+        ids = self.original_frame_ids
+        if not ids or any(b <= a for a, b in zip(ids, ids[1:])):
+            raise ValueError("clip frames must be non-empty and strictly increasing original ids")
 
     @property
     def name(self) -> str:
@@ -38,13 +44,35 @@ def make_clip(scene: str, track_row, max_frames: int | None = None) -> Clip:
     return Clip(scene, int(track_row.track_id), ids[:max_frames] if max_frames else ids)
 
 
+def clip_from_pattern(pattern) -> Clip:
+    """Received frames only (dropped frames are absent, never replaced); prompt stays at video_idx 0."""
+    m = pattern.meta
+    ids = pattern.received_ids
+    if ids[0] != m["prompt_original_frame_id"]:
+        raise ValueError("prompt frame must be video_idx 0")
+    return Clip(m["scene"], int(m["track_id"]), ids, variant=pattern.name)
+
+
+def verify_clip_folder(ds, clip: Clip, folder: Path) -> None:
+    """Folder holds exactly {0..N-1}.jpg, each a symlink to the RGB of the mapped original frame."""
+    folder = Path(folder)
+    jpgs = sorted(folder.glob("*.jpg"))
+    if [p.name for p in jpgs] != [f"{i:05d}.jpg" for i in range(len(clip.original_frame_ids))]:
+        raise RuntimeError(f"{folder}: unexpected frame files")
+    for i, f in enumerate(clip.original_frame_ids):
+        if (folder / f"{i:05d}.jpg").resolve() != ds.rgb_path(f).resolve():
+            raise RuntimeError(f"{folder}: video_idx {i} does not point to original frame {f}")
+    if not pd.read_csv(folder / "mapping.csv").equals(clip.mapping()):
+        raise RuntimeError(f"{folder}: mapping.csv differs from the clip")
+
+
 def write_clip_folder(ds, clip: Clip, root: Path) -> Path:
     """Folder of {video_idx:05d}.jpg symlinks to the original RGB files + mapping.csv."""
     if ds.scene != clip.scene:
         raise ValueError(f"dataset scene {ds.scene} != clip scene {clip.scene}")
-    d = root / clip.name
+    d = root / clip.variant / clip.name if clip.variant else root / clip.name  # per condition+seed
     d.mkdir(parents=True, exist_ok=True)
-    for old in d.glob("*.jpg"):
+    for old in d.glob("*.jpg"):  # stale frames from a previous run (incl. broken symlinks)
         old.unlink()
     for i, f in enumerate(clip.original_frame_ids):
         src = ds.rgb_path(f).resolve()
@@ -52,6 +80,7 @@ def write_clip_folder(ds, clip: Clip, root: Path) -> Path:
             raise FileNotFoundError(src)
         (d / f"{i:05d}.jpg").symlink_to(src)
     clip.mapping().to_csv(d / "mapping.csv", index=False)
+    verify_clip_folder(ds, clip, d)
     return d
 
 
