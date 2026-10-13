@@ -1,0 +1,645 @@
+{
+  "created": "2026-10-13 11:03:33",
+  "created_before_any_m6_output": true,
+  "model": "SAM 2.1 Hiera-T, official ckpt, CUDA FP32, TF32 off, video offloaded to CPU",
+  "conventions": "GT mask prompt at video_idx 0, prompted frame excluded, M5.5 J/F (F 11px, F_strict 2px), original res",
+  "sets": {
+    "DAVIS_val": "61 objects (explored in M5.5/M5.6)",
+    "PUMaVOS_A": "9 objects (explored in M5.6)",
+    "PUMaVOS_B": "6 objects (development)",
+    "SegTrack": "24 objects (auxiliary control)",
+    "PUMaVOS_C": "11 objects, untouched; opened once only for one frozen candidate that passed its gate"
+  },
+  "small": "prompt-frame area < 1% of frame (m55.strata 'small'; unchanged since M5.5)",
+  "unit_of_analysis": "object (unit) means over all evaluated frames; CIs = 2000x bootstrap clustered by video",
+  "arms": {
+    "B1": "P5 baseline (M5.5): full-res prompt memory; reference for every comparison",
+    "A1": "virtual camera: square crop side s = max(box_h, box_w)/0.25 of the prompt box, clamped to >= min(H,W)/4; no crop (== B1) if s >= min(H,W). Centre = box centre of the previous OUTPUT mask (prompt GT at t=1); kept if empty. Crop shifted inside the frame. SAM 2 sees only crops (one scale), output pasted back.",
+    "A2": "global-local: A1 crop state and B1 full-frame state run independently (no memory exchange). Frame t output = crop mask if crop obj score > 0, crop mask non-empty and not touching an interior crop edge; else the B1 mask. Next crop centre = box centre of this fused output (kept if empty)."
+  },
+  "A2_trigger": "run A2 only if A1 shows >= 3 small units with dJF >= +0.03 (opportunity) or >= 3 small units with dJF <= -0.03 (context loss / escape)",
+  "gate_A": {
+    "set": "small units of DAVIS_val + PUMaVOS_B (vs B1)",
+    "pass_all": [
+      "mean small-unit dJF >= +0.03",
+      "fraction of small units with dJF < -0.01 below 20%",
+      "mean non-small-unit dJF >= -0.005 (DAVIS_val + PUMaVOS_B)"
+    ],
+    "secondary_not_gating": "PUMaVOS_A, SegTrack, video-clustered CI, episodes, latency"
+  },
+  "track_B": {
+    "event": "reappearance: GT visible (area >= 25% of the unit's median visible area) at frame t after >= 1 frame that is GT-empty or below 25% of median; eligible frames = t..t+4",
+    "absence_type": "out_of_frame if the last visible GT box before absence is within 2 px of the frame border, else occluded; annotation-defined absence flagged by visual check (guitar in M5.6)",
+    "online_opportunity": "existing SAM 2 output: best of the 3 multimask candidates J >= 0.5 while output J < 0.5 (needs a selector); first-frame appearance: M5.6 I1 history reset resolves",
+    "B3_trigger": ">= 4 non-annotation reappearance events in >= 3 videos where B1 J < 0.5 on the first eligible frame AND an online opportunity exists; else Track B is underpowered and no prototype is built",
+    "B3_gate": "if built: mean J over eligible frames +0.10 on triggering events, >= 3 videos improved, no unit whole-sequence dJF < -0.01, overall mean dJF >= 0"
+  },
+  "track_C": {
+    "diagnostic": "RETROSPECTIVE upper bound: SAM 2 image mode with GT box (+inner point), best of 3, on every 5th GT-visible frame of small units, full frame vs square crop of the A1 side centred on the GT box; also the 256 ceiling at both scales",
+    "rule": "input scale is a fixable bottleneck if crop oracle - full oracle >= +0.05 mean and positive in >= 60% of small units; decoder-output bottleneck if 256-ceiling J < 0.8 on >= 25% of small-unit frames",
+    "C3": "assessment only, no training in M6"
+  },
+  "confirmation": "PUMaVOS C evaluated at most once, only for exactly one frozen candidate that passed its gate; all 11 units reported; nothing tuned afterwards",
+  "rows": [
+    {
+      "unit": "davis__davis/bike-packing__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/bike-packing__obj2",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/blackswan__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/bmx-trees__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/bmx-trees__obj2",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/breakdance__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/camel__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/car-roundabout__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/car-shadow__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/cows__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/dance-twirl__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/dog__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/dogs-jump__obj1",
+      "set": "DAVIS_val",
+      "small": true,
+      "crop_side": 416
+    },
+    {
+      "unit": "davis__davis/dogs-jump__obj2",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/dogs-jump__obj3",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/drift-chicane__obj1",
+      "set": "DAVIS_val",
+      "small": true,
+      "crop_side": 332
+    },
+    {
+      "unit": "davis__davis/drift-straight__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": 396
+    },
+    {
+      "unit": "davis__davis/goat__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/gold-fish__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/gold-fish__obj2",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/gold-fish__obj3",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/gold-fish__obj4",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/gold-fish__obj5",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/horsejump-high__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/horsejump-high__obj2",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/india__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/india__obj2",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/india__obj3",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/judo__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/judo__obj2",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/kite-surf__obj1",
+      "set": "DAVIS_val",
+      "small": true,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/kite-surf__obj2",
+      "set": "DAVIS_val",
+      "small": true,
+      "crop_side": 312
+    },
+    {
+      "unit": "davis__davis/kite-surf__obj3",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/lab-coat__obj1",
+      "set": "DAVIS_val",
+      "small": true,
+      "crop_side": 120
+    },
+    {
+      "unit": "davis__davis/lab-coat__obj2",
+      "set": "DAVIS_val",
+      "small": true,
+      "crop_side": 120
+    },
+    {
+      "unit": "davis__davis/lab-coat__obj3",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/lab-coat__obj4",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/lab-coat__obj5",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/libby__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/loading__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/loading__obj2",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/loading__obj3",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/mbike-trick__obj1",
+      "set": "DAVIS_val",
+      "small": true,
+      "crop_side": 452
+    },
+    {
+      "unit": "davis__davis/mbike-trick__obj2",
+      "set": "DAVIS_val",
+      "small": true,
+      "crop_side": 368
+    },
+    {
+      "unit": "davis__davis/motocross-jump__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/motocross-jump__obj2",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": 428
+    },
+    {
+      "unit": "davis__davis/paragliding-launch__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/paragliding-launch__obj2",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/paragliding-launch__obj3",
+      "set": "DAVIS_val",
+      "small": true,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/parkour__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/pigs__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/pigs__obj2",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/pigs__obj3",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/scooter-black__obj1",
+      "set": "DAVIS_val",
+      "small": true,
+      "crop_side": 400
+    },
+    {
+      "unit": "davis__davis/scooter-black__obj2",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": 460
+    },
+    {
+      "unit": "davis__davis/shooting__obj1",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/shooting__obj2",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/shooting__obj3",
+      "set": "DAVIS_val",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "davis__davis/soapbox__obj1",
+      "set": "DAVIS_val",
+      "small": true,
+      "crop_side": 448
+    },
+    {
+      "unit": "davis__davis/soapbox__obj2",
+      "set": "DAVIS_val",
+      "small": true,
+      "crop_side": 336
+    },
+    {
+      "unit": "davis__davis/soapbox__obj3",
+      "set": "DAVIS_val",
+      "small": true,
+      "crop_side": 332
+    },
+    {
+      "unit": "pumavos__pumavos/full_face_1__obj1",
+      "set": "PUMaVOS_B",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "pumavos__pumavos/full_face_2__obj1",
+      "set": "PUMaVOS_B",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "pumavos__pumavos/guitar__obj1",
+      "set": "PUMaVOS_B",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "pumavos__pumavos/ice_cream__obj1",
+      "set": "PUMaVOS_B",
+      "small": true,
+      "crop_side": 408
+    },
+    {
+      "unit": "pumavos__pumavos/queen_car__obj1",
+      "set": "PUMaVOS_B",
+      "small": true,
+      "crop_side": 328
+    },
+    {
+      "unit": "pumavos__pumavos/skz__obj1",
+      "set": "PUMaVOS_B",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "pumavos__pumavos/billie_shoes__obj1",
+      "set": "PUMaVOS_A",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "pumavos__pumavos/chair__obj1",
+      "set": "PUMaVOS_A",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "pumavos__pumavos/couple_1_face__obj1",
+      "set": "PUMaVOS_A",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "pumavos__pumavos/eye_area__obj1",
+      "set": "PUMaVOS_A",
+      "small": true,
+      "crop_side": 476
+    },
+    {
+      "unit": "pumavos__pumavos/half_face_1__obj1",
+      "set": "PUMaVOS_A",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "pumavos__pumavos/half_face_2__obj1",
+      "set": "PUMaVOS_A",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "pumavos__pumavos/pants_workout__obj1",
+      "set": "PUMaVOS_A",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "pumavos__pumavos/pimples__obj1",
+      "set": "PUMaVOS_A",
+      "small": true,
+      "crop_side": null
+    },
+    {
+      "unit": "pumavos__pumavos/smile__obj1",
+      "set": "PUMaVOS_A",
+      "small": true,
+      "crop_side": 276
+    },
+    {
+      "unit": "segtrack__segtrack/bird_of_paradise__obj1",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/birdfall__obj1",
+      "set": "SegTrack",
+      "small": true,
+      "crop_side": 120
+    },
+    {
+      "unit": "segtrack__segtrack/bmx__obj1",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/bmx__obj2",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/cheetah__obj1",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": 236
+    },
+    {
+      "unit": "segtrack__segtrack/cheetah__obj2",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/drift__obj1",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/drift__obj2",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/frog__obj1",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/girl__obj1",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/hummingbird__obj1",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/hummingbird__obj2",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/monkey__obj1",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/monkeydog__obj1",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/monkeydog__obj2",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/parachute__obj1",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": 332
+    },
+    {
+      "unit": "segtrack__segtrack/penguin__obj1",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/penguin__obj2",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/penguin__obj3",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/penguin__obj4",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/penguin__obj5",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/penguin__obj6",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/soldier__obj1",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    },
+    {
+      "unit": "segtrack__segtrack/worm__obj1",
+      "set": "SegTrack",
+      "small": false,
+      "crop_side": null
+    }
+  ]
+}
