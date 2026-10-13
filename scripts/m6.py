@@ -231,6 +231,7 @@ def run_unit(pred, heads, s, u, arm, n=None, side=None):
             side = int(round(min(max(max(b[1] - b[0], b[3] - b[2]) / target, min(hw) / vcam.MAX_ZOOM), min(hw))))
         if arm != "B1":
             frames.box = vcam.place(center, side, hw)
+            state["video_height"] = state["video_width"] = side     # output res follows the current crop (A1v)
         m, score, ious, multi, lat = step(pred, state, od, t, heads)
         r = {"set": s, "unit": u.name, "video": u.video, "arm": arm, "video_idx": t, "obj_score": score,
              "iou_pred": float(ious.max()), "iou_cands": json.dumps(np.round(ious, 4).tolist()), "latency_s": lat}
