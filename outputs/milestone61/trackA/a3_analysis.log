@@ -1,0 +1,128 @@
+{
+ "A2d": {
+  "units": 21,
+  "small_gate_units_applied": 13,
+  "small_dJF_over15": 0.01768401812593252,
+  "A2x_small_over15": 0.01768401812593252,
+  "small_vs_A2x_over15": 0.0,
+  "CI_vs_A2x_applied": [
+   0.0,
+   0.0
+  ],
+  "units_below_A2x_0.01": [],
+  "units_above_A2x_0.01": 0,
+  "global_tracker_G_vs_B1_small_over15": 0.0,
+  "oracle_gain_new_vs_old_small_over15": -0.0008441875944804833,
+  "late21_vs_A2x_small": 0.0,
+  "all_sets_vs_A2x": {
+   "DAVIS_val": 0.0,
+   "PUMaVOS_A": 0.0,
+   "PUMaVOS_B": 0.0,
+   "SegTrack": 0.0
+  },
+  "latency_median_s": 0.4303447549973498,
+  "peak_vram_GB": 1.343188992,
+  "write_rate_G": 0.0,
+  "success": false
+ },
+ "A3": {
+  "units": 21,
+  "small_gate_units_applied": 13,
+  "small_dJF_over15": 0.019908786527375814,
+  "A2x_small_over15": 0.01768401812593252,
+  "small_vs_A2x_over15": 0.0022247684014432925,
+  "CI_vs_A2x_applied": [
+   0.00025298740661811655,
+   0.006189759509994921
+  ],
+  "units_below_A2x_0.01": [],
+  "units_above_A2x_0.01": 1,
+  "global_tracker_G_vs_B1_small_over15": 0.008590090174045273,
+  "oracle_gain_new_vs_old_small_over15": 0.00018316388627318176,
+  "late21_vs_A2x_small": 0.004317129508280107,
+  "all_sets_vs_A2x": {
+   "DAVIS_val": 0.002325259684342638,
+   "PUMaVOS_A": 0.0008282339122506754,
+   "PUMaVOS_B": 0.0005181707698470595,
+   "SegTrack": 0.0
+  },
+  "latency_median_s": 0.4358174369990592,
+  "peak_vram_GB": 1.347383296,
+  "write_rate_G": 0.8912444417168045,
+  "success": false
+ },
+ "A3s": {
+  "units": 21,
+  "small_gate_units_applied": 13,
+  "small_dJF_over15": -0.018559161217740896,
+  "A2x_small_over15": 0.01768401812593252,
+  "small_vs_A2x_over15": -0.03624317934367342,
+  "CI_vs_A2x_applied": [
+   -0.12679184963517923,
+   0.001358433348515099
+  ],
+  "units_below_A2x_0.01": [
+   {
+    "unit": "davis__davis/lab-coat__obj1",
+    "d_vs_A2x": -0.5915
+   }
+  ],
+  "units_above_A2x_0.01": 1,
+  "global_tracker_G_vs_B1_small_over15": -0.03126336118393672,
+  "oracle_gain_new_vs_old_small_over15": -0.03881419195473345,
+  "late21_vs_A2x_small": -0.060223293419841596,
+  "all_sets_vs_A2x": {
+   "DAVIS_val": -0.03848332369613843,
+   "PUMaVOS_A": 0.0010079756335270584,
+   "PUMaVOS_B": 5.961649966335081e-05,
+   "SegTrack": 0.0
+  },
+  "latency_median_s": 0.4362292369987699,
+  "peak_vram_GB": 1.347383296,
+  "write_rate_G": 0.8905992720388043,
+  "success": false
+ }
+}
+    arm        set                                unit  small      B1     A2x      JF  d_vs_A2x      dG
+21   A3  DAVIS_val        davis__davis/dogs-jump__obj1   True  0.9522  0.9586  0.9586    0.0000  0.0010
+22   A3  DAVIS_val    davis__davis/drift-chicane__obj1   True  0.9479  0.9602  0.9604    0.0002  0.0076
+23   A3  DAVIS_val   davis__davis/drift-straight__obj1  False  0.9734  0.9754  0.9755    0.0001  0.0014
+24   A3  DAVIS_val        davis__davis/kite-surf__obj2   True  0.4513  0.4753  0.4753    0.0000  0.0044
+25   A3  DAVIS_val         davis__davis/lab-coat__obj1   True  0.7503  0.8105  0.8147    0.0042  0.0338
+26   A3  DAVIS_val         davis__davis/lab-coat__obj2   True  0.7067  0.7290  0.7493    0.0203  0.0070
+27   A3  DAVIS_val      davis__davis/mbike-trick__obj1   True  0.8996  0.9260  0.9260    0.0000  0.0150
+28   A3  DAVIS_val      davis__davis/mbike-trick__obj2   True  0.8696  0.8955  0.9012    0.0057  0.0177
+29   A3  DAVIS_val   davis__davis/motocross-jump__obj2  False  0.8719  0.8742  0.8743    0.0001  0.0011
+30   A3  DAVIS_val    davis__davis/scooter-black__obj1   True  0.9236  0.9339  0.9339    0.0000  0.0007
+31   A3  DAVIS_val    davis__davis/scooter-black__obj2  False  0.9176  0.9280  0.9280    0.0000  0.0022
+32   A3  DAVIS_val          davis__davis/soapbox__obj1   True  0.9316  0.9422  0.9429    0.0006  0.0040
+33   A3  DAVIS_val          davis__davis/soapbox__obj2   True  0.9251  0.9544  0.9544    0.0000  0.0150
+34   A3  DAVIS_val          davis__davis/soapbox__obj3   True  0.9297  0.9489  0.9501    0.0012  0.0073
+35   A3  PUMaVOS_A     pumavos__pumavos/eye_area__obj1   True  0.8641  0.8698  0.8698    0.0000  0.0065
+36   A3  PUMaVOS_A        pumavos__pumavos/smile__obj1   True  0.9212  0.9291  0.9307    0.0017  0.0053
+37   A3  PUMaVOS_B    pumavos__pumavos/ice_cream__obj1   True  0.9470  0.9531  0.9531    0.0000  0.0028
+38   A3  PUMaVOS_B    pumavos__pumavos/queen_car__obj1   True  0.9399  0.9521  0.9531    0.0010  0.0124
+39   A3   SegTrack   segtrack__segtrack/birdfall__obj1   True  0.8836  0.8605  0.8605    0.0000 -0.0105
+40   A3   SegTrack    segtrack__segtrack/cheetah__obj1  False  0.9002  0.9127  0.9127    0.0000  0.0079
+41   A3   SegTrack  segtrack__segtrack/parachute__obj1  False  0.9645  0.9699  0.9699    0.0000  0.0031
+42  A3s  DAVIS_val        davis__davis/dogs-jump__obj1   True  0.9522  0.9586  0.9586    0.0000  0.0010
+43  A3s  DAVIS_val    davis__davis/drift-chicane__obj1   True  0.9479  0.9602  0.9604    0.0002  0.0076
+44  A3s  DAVIS_val   davis__davis/drift-straight__obj1  False  0.9734  0.9754  0.9769    0.0015  0.0016
+45  A3s  DAVIS_val        davis__davis/kite-surf__obj2   True  0.4513  0.4753  0.4753    0.0000  0.0044
+46  A3s  DAVIS_val         davis__davis/lab-coat__obj1   True  0.7503  0.8105  0.2190   -0.5915 -0.5621
+47  A3s  DAVIS_val         davis__davis/lab-coat__obj2   True  0.7067  0.7290  0.7691    0.0401  0.0059
+48  A3s  DAVIS_val      davis__davis/mbike-trick__obj1   True  0.8996  0.9260  0.9260    0.0000  0.0150
+49  A3s  DAVIS_val      davis__davis/mbike-trick__obj2   True  0.8696  0.8955  0.9012    0.0057  0.0177
+50  A3s  DAVIS_val   davis__davis/motocross-jump__obj2  False  0.8719  0.8742  0.8777    0.0035  0.0020
+51  A3s  DAVIS_val    davis__davis/scooter-black__obj1   True  0.9236  0.9339  0.9339    0.0000  0.0007
+52  A3s  DAVIS_val    davis__davis/scooter-black__obj2  False  0.9176  0.9280  0.9280    0.0000  0.0022
+53  A3s  DAVIS_val          davis__davis/soapbox__obj1   True  0.9316  0.9422  0.9428    0.0006  0.0038
+54  A3s  DAVIS_val          davis__davis/soapbox__obj2   True  0.9251  0.9544  0.9544    0.0000  0.0150
+55  A3s  DAVIS_val          davis__davis/soapbox__obj3   True  0.9297  0.9489  0.9500    0.0011  0.0073
+56  A3s  PUMaVOS_A     pumavos__pumavos/eye_area__obj1   True  0.8641  0.8698  0.8698    0.0000  0.0065
+57  A3s  PUMaVOS_A        pumavos__pumavos/smile__obj1   True  0.9212  0.9291  0.9311    0.0020  0.0053
+58  A3s  PUMaVOS_B    pumavos__pumavos/ice_cream__obj1   True  0.9470  0.9531  0.9531    0.0000  0.0028
+59  A3s  PUMaVOS_B    pumavos__pumavos/queen_car__obj1   True  0.9399  0.9521  0.9522    0.0001  0.0120
+60  A3s   SegTrack   segtrack__segtrack/birdfall__obj1   True  0.8836  0.8605  0.8605    0.0000 -0.0105
+61  A3s   SegTrack    segtrack__segtrack/cheetah__obj1  False  0.9002  0.9127  0.9127    0.0000  0.0079
+62  A3s   SegTrack  segtrack__segtrack/parachute__obj1  False  0.9645  0.9699  0.9699    0.0000  0.0031

@@ -1,0 +1,477 @@
+frame loading (JPEG):   0%|          | 0/80 [00:00<?, ?it/s]frame loading (JPEG):  10%|█         | 8/80 [00:00<00:00, 77.56it/s]frame loading (JPEG):  20%|██        | 16/80 [00:00<00:00, 78.97it/s]frame loading (JPEG):  31%|███▏      | 25/80 [00:00<00:00, 80.28it/s]frame loading (JPEG):  42%|████▎     | 34/80 [00:00<00:00, 79.33it/s]frame loading (JPEG):  54%|█████▍    | 43/80 [00:00<00:00, 79.66it/s]frame loading (JPEG):  64%|██████▍   | 51/80 [00:00<00:00, 79.41it/s]frame loading (JPEG):  75%|███████▌  | 60/80 [00:00<00:00, 80.05it/s]frame loading (JPEG):  86%|████████▋ | 69/80 [00:00<00:00, 80.61it/s]frame loading (JPEG):  98%|█████████▊| 78/80 [00:00<00:00, 80.95it/s]frame loading (JPEG): 100%|██████████| 80/80 [00:00<00:00, 80.16it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/car-turn__obj1 0.9882
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/car-turn__obj1 0.9806
+frame loading (JPEG):   0%|          | 0/63 [00:00<?, ?it/s]frame loading (JPEG):  13%|█▎        | 8/63 [00:00<00:00, 77.28it/s]frame loading (JPEG):  25%|██▌       | 16/63 [00:00<00:00, 78.38it/s]frame loading (JPEG):  38%|███▊      | 24/63 [00:00<00:00, 78.84it/s]frame loading (JPEG):  51%|█████     | 32/63 [00:00<00:00, 79.09it/s]frame loading (JPEG):  65%|██████▌   | 41/63 [00:00<00:00, 79.66it/s]frame loading (JPEG):  79%|███████▉  | 50/63 [00:00<00:00, 79.81it/s]frame loading (JPEG):  92%|█████████▏| 58/63 [00:00<00:00, 77.77it/s]frame loading (JPEG): 100%|██████████| 63/63 [00:00<00:00, 78.71it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/classic-car__obj1 0.9433
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/classic-car__obj1 0.9446
+frame loading (JPEG):   0%|          | 0/63 [00:00<?, ?it/s]frame loading (JPEG):  13%|█▎        | 8/63 [00:00<00:00, 79.20it/s]frame loading (JPEG):  27%|██▋       | 17/63 [00:00<00:00, 80.24it/s]frame loading (JPEG):  41%|████▏     | 26/63 [00:00<00:00, 79.95it/s]frame loading (JPEG):  56%|█████▌    | 35/63 [00:00<00:00, 80.51it/s]frame loading (JPEG):  70%|██████▉   | 44/63 [00:00<00:00, 81.01it/s]frame loading (JPEG):  84%|████████▍ | 53/63 [00:00<00:00, 81.64it/s]frame loading (JPEG):  98%|█████████▊| 62/63 [00:00<00:00, 81.02it/s]frame loading (JPEG): 100%|██████████| 63/63 [00:00<00:00, 80.83it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/classic-car__obj2 0.8833
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/classic-car__obj2 0.8919
+frame loading (JPEG):   0%|          | 0/76 [00:00<?, ?it/s]frame loading (JPEG):  11%|█         | 8/76 [00:00<00:00, 78.36it/s]frame loading (JPEG):  21%|██        | 16/76 [00:00<00:00, 78.62it/s]frame loading (JPEG):  32%|███▏      | 24/76 [00:00<00:00, 77.77it/s]frame loading (JPEG):  42%|████▏     | 32/76 [00:00<00:00, 78.49it/s]frame loading (JPEG):  53%|█████▎    | 40/76 [00:00<00:00, 78.22it/s]frame loading (JPEG):  64%|██████▍   | 49/76 [00:00<00:00, 79.04it/s]frame loading (JPEG):  75%|███████▌  | 57/76 [00:00<00:00, 79.20it/s]frame loading (JPEG):  86%|████████▌ | 65/76 [00:00<00:00, 79.26it/s]frame loading (JPEG):  96%|█████████▌| 73/76 [00:00<00:00, 79.40it/s]frame loading (JPEG): 100%|██████████| 76/76 [00:00<00:00, 78.95it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/disc-jockey__obj3 0.8448
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/disc-jockey__obj3 0.8743
+frame loading (JPEG):   0%|          | 0/86 [00:00<?, ?it/s]frame loading (JPEG):   9%|▉         | 8/86 [00:00<00:01, 77.72it/s]frame loading (JPEG):  20%|█▉        | 17/86 [00:00<00:00, 79.52it/s]frame loading (JPEG):  30%|███       | 26/86 [00:00<00:00, 79.87it/s]frame loading (JPEG):  40%|███▉      | 34/86 [00:00<00:00, 78.21it/s]frame loading (JPEG):  49%|████▉     | 42/86 [00:00<00:00, 77.19it/s]frame loading (JPEG):  58%|█████▊    | 50/86 [00:00<00:00, 76.86it/s]frame loading (JPEG):  67%|██████▋   | 58/86 [00:00<00:00, 77.78it/s]frame loading (JPEG):  77%|███████▋  | 66/86 [00:00<00:00, 78.15it/s]frame loading (JPEG):  87%|████████▋ | 75/86 [00:00<00:00, 78.84it/s]frame loading (JPEG):  97%|█████████▋| 83/86 [00:01<00:00, 78.93it/s]frame loading (JPEG): 100%|██████████| 86/86 [00:01<00:00, 78.45it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/dog-gooses__obj2 0.9116
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/dog-gooses__obj2 0.9238
+frame loading (JPEG):   0%|          | 0/86 [00:00<?, ?it/s]frame loading (JPEG):   9%|▉         | 8/86 [00:00<00:00, 79.54it/s]frame loading (JPEG):  19%|█▊        | 16/86 [00:00<00:00, 79.78it/s]frame loading (JPEG):  29%|██▉       | 25/86 [00:00<00:00, 79.82it/s]frame loading (JPEG):  40%|███▉      | 34/86 [00:00<00:00, 80.18it/s]frame loading (JPEG):  50%|█████     | 43/86 [00:00<00:00, 80.32it/s]frame loading (JPEG):  60%|██████    | 52/86 [00:00<00:00, 80.40it/s]frame loading (JPEG):  71%|███████   | 61/86 [00:00<00:00, 79.72it/s]frame loading (JPEG):  81%|████████▏ | 70/86 [00:00<00:00, 80.05it/s]frame loading (JPEG):  92%|█████████▏| 79/86 [00:00<00:00, 80.21it/s]frame loading (JPEG): 100%|██████████| 86/86 [00:01<00:00, 79.89it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/dog-gooses__obj3 0.9188
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/dog-gooses__obj3 0.9543
+frame loading (JPEG):   0%|          | 0/86 [00:00<?, ?it/s]frame loading (JPEG):   9%|▉         | 8/86 [00:00<00:01, 74.72it/s]frame loading (JPEG):  20%|█▉        | 17/86 [00:00<00:00, 80.20it/s]frame loading (JPEG):  30%|███       | 26/86 [00:00<00:00, 80.23it/s]frame loading (JPEG):  41%|████      | 35/86 [00:00<00:00, 78.54it/s]frame loading (JPEG):  50%|█████     | 43/86 [00:00<00:00, 79.03it/s]frame loading (JPEG):  59%|█████▉    | 51/86 [00:00<00:00, 79.30it/s]frame loading (JPEG):  69%|██████▊   | 59/86 [00:00<00:00, 79.27it/s]frame loading (JPEG):  79%|███████▉  | 68/86 [00:00<00:00, 79.85it/s]frame loading (JPEG):  90%|████████▉ | 77/86 [00:00<00:00, 79.85it/s]frame loading (JPEG): 100%|██████████| 86/86 [00:01<00:00, 80.04it/s]frame loading (JPEG): 100%|██████████| 86/86 [00:01<00:00, 79.52it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/dog-gooses__obj4 0.8626
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/dog-gooses__obj4 0.9046
+frame loading (JPEG):   0%|          | 0/86 [00:00<?, ?it/s]frame loading (JPEG):   9%|▉         | 8/86 [00:00<00:00, 79.43it/s]frame loading (JPEG):  19%|█▊        | 16/86 [00:00<00:00, 78.66it/s]frame loading (JPEG):  29%|██▉       | 25/86 [00:00<00:00, 79.38it/s]frame loading (JPEG):  38%|███▊      | 33/86 [00:00<00:00, 79.54it/s]frame loading (JPEG):  49%|████▉     | 42/86 [00:00<00:00, 79.82it/s]frame loading (JPEG):  58%|█████▊    | 50/86 [00:00<00:00, 79.58it/s]frame loading (JPEG):  69%|██████▊   | 59/86 [00:00<00:00, 79.76it/s]frame loading (JPEG):  78%|███████▊  | 67/86 [00:00<00:00, 79.74it/s]frame loading (JPEG):  87%|████████▋ | 75/86 [00:00<00:00, 79.79it/s]frame loading (JPEG):  97%|█████████▋| 83/86 [00:01<00:00, 79.82it/s]frame loading (JPEG): 100%|██████████| 86/86 [00:01<00:00, 79.65it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/dog-gooses__obj5 0.7492
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/dog-gooses__obj5 0.8245
+frame loading (JPEG):   0%|          | 0/91 [00:00<?, ?it/s]frame loading (JPEG):   9%|▉         | 8/91 [00:00<00:01, 79.48it/s]frame loading (JPEG):  19%|█▊        | 17/91 [00:00<00:00, 80.40it/s]frame loading (JPEG):  29%|██▊       | 26/91 [00:00<00:00, 80.98it/s]frame loading (JPEG):  38%|███▊      | 35/91 [00:00<00:00, 81.39it/s]frame loading (JPEG):  48%|████▊     | 44/91 [00:00<00:00, 81.33it/s]frame loading (JPEG):  58%|█████▊    | 53/91 [00:00<00:00, 81.66it/s]frame loading (JPEG):  68%|██████▊   | 62/91 [00:00<00:00, 81.84it/s]frame loading (JPEG):  78%|███████▊  | 71/91 [00:00<00:00, 81.95it/s]frame loading (JPEG):  88%|████████▊ | 80/91 [00:00<00:00, 81.74it/s]frame loading (JPEG):  98%|█████████▊| 89/91 [00:01<00:00, 81.63it/s]frame loading (JPEG): 100%|██████████| 91/91 [00:01<00:00, 81.49it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/drone__obj1 0.3436
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/drone__obj1 0.3442
+frame loading (JPEG):   0%|          | 0/91 [00:00<?, ?it/s]frame loading (JPEG):  10%|▉         | 9/91 [00:00<00:01, 81.08it/s]frame loading (JPEG):  20%|█▉        | 18/91 [00:00<00:00, 81.57it/s]frame loading (JPEG):  30%|██▉       | 27/91 [00:00<00:00, 82.17it/s]frame loading (JPEG):  40%|███▉      | 36/91 [00:00<00:00, 82.62it/s]frame loading (JPEG):  49%|████▉     | 45/91 [00:00<00:00, 82.87it/s]frame loading (JPEG):  59%|█████▉    | 54/91 [00:00<00:00, 82.24it/s]frame loading (JPEG):  69%|██████▉   | 63/91 [00:00<00:00, 82.63it/s]frame loading (JPEG):  79%|███████▉  | 72/91 [00:00<00:00, 82.84it/s]frame loading (JPEG):  89%|████████▉ | 81/91 [00:00<00:00, 81.31it/s]frame loading (JPEG):  99%|█████████▉| 90/91 [00:01<00:00, 81.84it/s]frame loading (JPEG): 100%|██████████| 91/91 [00:01<00:00, 82.12it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/drone__obj2 0.8775
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/drone__obj2 0.4802
+frame loading (JPEG):   0%|          | 0/91 [00:00<?, ?it/s]frame loading (JPEG):  10%|▉         | 9/91 [00:00<00:01, 80.34it/s]frame loading (JPEG):  20%|█▉        | 18/91 [00:00<00:00, 80.46it/s]frame loading (JPEG):  30%|██▉       | 27/91 [00:00<00:00, 81.40it/s]frame loading (JPEG):  40%|███▉      | 36/91 [00:00<00:00, 82.34it/s]frame loading (JPEG):  49%|████▉     | 45/91 [00:00<00:00, 83.05it/s]frame loading (JPEG):  59%|█████▉    | 54/91 [00:00<00:00, 82.92it/s]frame loading (JPEG):  69%|██████▉   | 63/91 [00:00<00:00, 82.24it/s]frame loading (JPEG):  79%|███████▉  | 72/91 [00:00<00:00, 82.17it/s]frame loading (JPEG):  89%|████████▉ | 81/91 [00:00<00:00, 82.54it/s]frame loading (JPEG):  99%|█████████▉| 90/91 [00:01<00:00, 83.36it/s]frame loading (JPEG): 100%|██████████| 91/91 [00:01<00:00, 82.56it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/drone__obj4 0.4932
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/drone__obj4 0.8159
+frame loading (JPEG):   0%|          | 0/75 [00:00<?, ?it/s]frame loading (JPEG):  11%|█         | 8/75 [00:00<00:00, 79.95it/s]frame loading (JPEG):  23%|██▎       | 17/75 [00:00<00:00, 80.68it/s]frame loading (JPEG):  35%|███▍      | 26/75 [00:00<00:00, 80.90it/s]frame loading (JPEG):  47%|████▋     | 35/75 [00:00<00:00, 81.07it/s]frame loading (JPEG):  59%|█████▊    | 44/75 [00:00<00:00, 81.62it/s]frame loading (JPEG):  71%|███████   | 53/75 [00:00<00:00, 82.24it/s]frame loading (JPEG):  83%|████████▎ | 62/75 [00:00<00:00, 81.23it/s]frame loading (JPEG):  95%|█████████▍| 71/75 [00:00<00:00, 81.57it/s]frame loading (JPEG): 100%|██████████| 75/75 [00:00<00:00, 81.48it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/hockey__obj3 0.9193
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/hockey__obj3 0.9119
+frame loading (JPEG):   0%|          | 0/65 [00:00<?, ?it/s]frame loading (JPEG):  12%|█▏        | 8/65 [00:00<00:00, 76.87it/s]frame loading (JPEG):  25%|██▍       | 16/65 [00:00<00:00, 78.60it/s]frame loading (JPEG):  38%|███▊      | 25/65 [00:00<00:00, 79.72it/s]frame loading (JPEG):  52%|█████▏    | 34/65 [00:00<00:00, 79.84it/s]frame loading (JPEG):  66%|██████▌   | 43/65 [00:00<00:00, 80.77it/s]frame loading (JPEG):  80%|████████  | 52/65 [00:00<00:00, 81.33it/s]frame loading (JPEG):  94%|█████████▍| 61/65 [00:00<00:00, 81.00it/s]frame loading (JPEG): 100%|██████████| 65/65 [00:00<00:00, 80.46it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/lady-running__obj2 0.7126
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/lady-running__obj2 0.7141
+frame loading (JPEG):   0%|          | 0/52 [00:00<?, ?it/s]frame loading (JPEG):  17%|█▋        | 9/52 [00:00<00:00, 81.43it/s]frame loading (JPEG):  35%|███▍      | 18/52 [00:00<00:00, 81.84it/s]frame loading (JPEG):  52%|█████▏    | 27/52 [00:00<00:00, 82.16it/s]frame loading (JPEG):  69%|██████▉   | 36/52 [00:00<00:00, 82.20it/s]frame loading (JPEG):  87%|████████▋ | 45/52 [00:00<00:00, 82.19it/s]frame loading (JPEG): 100%|██████████| 52/52 [00:00<00:00, 81.94it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/longboard__obj2 0.8384
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/longboard__obj2 0.8643
+frame loading (JPEG):   0%|          | 0/52 [00:00<?, ?it/s]frame loading (JPEG):  17%|█▋        | 9/52 [00:00<00:00, 81.95it/s]frame loading (JPEG):  35%|███▍      | 18/52 [00:00<00:00, 80.80it/s]frame loading (JPEG):  52%|█████▏    | 27/52 [00:00<00:00, 81.12it/s]frame loading (JPEG):  69%|██████▉   | 36/52 [00:00<00:00, 80.62it/s]frame loading (JPEG):  87%|████████▋ | 45/52 [00:00<00:00, 80.64it/s]frame loading (JPEG): 100%|██████████| 52/52 [00:00<00:00, 80.59it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/longboard__obj3 0.8813
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/longboard__obj3 0.8803
+frame loading (JPEG):   0%|          | 0/52 [00:00<?, ?it/s]frame loading (JPEG):  17%|█▋        | 9/52 [00:00<00:00, 81.73it/s]frame loading (JPEG):  35%|███▍      | 18/52 [00:00<00:00, 82.63it/s]frame loading (JPEG):  52%|█████▏    | 27/52 [00:00<00:00, 83.01it/s]frame loading (JPEG):  69%|██████▉   | 36/52 [00:00<00:00, 82.87it/s]frame loading (JPEG):  87%|████████▋ | 45/52 [00:00<00:00, 82.12it/s]frame loading (JPEG): 100%|██████████| 52/52 [00:00<00:00, 82.26it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/longboard__obj5 0.888
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/longboard__obj5 0.9207
+frame loading (JPEG):   0%|          | 0/70 [00:00<?, ?it/s]frame loading (JPEG):  13%|█▎        | 9/70 [00:00<00:00, 83.52it/s]frame loading (JPEG):  26%|██▌       | 18/70 [00:00<00:00, 83.12it/s]frame loading (JPEG):  39%|███▊      | 27/70 [00:00<00:00, 84.63it/s]frame loading (JPEG):  51%|█████▏    | 36/70 [00:00<00:00, 83.92it/s]frame loading (JPEG):  64%|██████▍   | 45/70 [00:00<00:00, 83.86it/s]frame loading (JPEG):  77%|███████▋  | 54/70 [00:00<00:00, 83.93it/s]frame loading (JPEG):  90%|█████████ | 63/70 [00:00<00:00, 83.85it/s]frame loading (JPEG): 100%|██████████| 70/70 [00:00<00:00, 83.82it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/miami-surf__obj1 0.911
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/miami-surf__obj1 0.9372
+frame loading (JPEG):   0%|          | 0/70 [00:00<?, ?it/s]frame loading (JPEG):  13%|█▎        | 9/70 [00:00<00:00, 84.50it/s]frame loading (JPEG):  26%|██▌       | 18/70 [00:00<00:00, 85.56it/s]frame loading (JPEG):  39%|███▊      | 27/70 [00:00<00:00, 85.80it/s]frame loading (JPEG):  51%|█████▏    | 36/70 [00:00<00:00, 86.32it/s]frame loading (JPEG):  64%|██████▍   | 45/70 [00:00<00:00, 84.45it/s]frame loading (JPEG):  77%|███████▋  | 54/70 [00:00<00:00, 83.58it/s]frame loading (JPEG):  90%|█████████ | 63/70 [00:00<00:00, 83.84it/s]frame loading (JPEG): 100%|██████████| 70/70 [00:00<00:00, 84.51it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/miami-surf__obj2 0.5979
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/miami-surf__obj2 0.5635
+frame loading (JPEG):   0%|          | 0/70 [00:00<?, ?it/s]frame loading (JPEG):  13%|█▎        | 9/70 [00:00<00:00, 83.63it/s]frame loading (JPEG):  26%|██▌       | 18/70 [00:00<00:00, 82.72it/s]frame loading (JPEG):  39%|███▊      | 27/70 [00:00<00:00, 83.29it/s]frame loading (JPEG):  51%|█████▏    | 36/70 [00:00<00:00, 83.57it/s]frame loading (JPEG):  64%|██████▍   | 45/70 [00:00<00:00, 82.92it/s]frame loading (JPEG):  77%|███████▋  | 54/70 [00:00<00:00, 82.31it/s]frame loading (JPEG):  90%|█████████ | 63/70 [00:00<00:00, 82.43it/s]frame loading (JPEG): 100%|██████████| 70/70 [00:00<00:00, 82.62it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/miami-surf__obj3 0.9159
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/miami-surf__obj3 0.92
+frame loading (JPEG):   0%|          | 0/70 [00:00<?, ?it/s]frame loading (JPEG):  13%|█▎        | 9/70 [00:00<00:00, 83.57it/s]frame loading (JPEG):  26%|██▌       | 18/70 [00:00<00:00, 84.03it/s]frame loading (JPEG):  39%|███▊      | 27/70 [00:00<00:00, 84.23it/s]frame loading (JPEG):  51%|█████▏    | 36/70 [00:00<00:00, 84.32it/s]frame loading (JPEG):  64%|██████▍   | 45/70 [00:00<00:00, 83.45it/s]frame loading (JPEG):  77%|███████▋  | 54/70 [00:00<00:00, 83.74it/s]frame loading (JPEG):  90%|█████████ | 63/70 [00:00<00:00, 82.67it/s]frame loading (JPEG): 100%|██████████| 70/70 [00:00<00:00, 83.42it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/miami-surf__obj4 0.8349
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/miami-surf__obj4 0.9048
+frame loading (JPEG):   0%|          | 0/70 [00:00<?, ?it/s]frame loading (JPEG):  13%|█▎        | 9/70 [00:00<00:00, 82.24it/s]frame loading (JPEG):  26%|██▌       | 18/70 [00:00<00:00, 83.86it/s]frame loading (JPEG):  39%|███▊      | 27/70 [00:00<00:00, 84.69it/s]frame loading (JPEG):  51%|█████▏    | 36/70 [00:00<00:00, 85.07it/s]frame loading (JPEG):  64%|██████▍   | 45/70 [00:00<00:00, 85.28it/s]frame loading (JPEG):  77%|███████▋  | 54/70 [00:00<00:00, 85.21it/s]frame loading (JPEG):  90%|█████████ | 63/70 [00:00<00:00, 85.37it/s]frame loading (JPEG): 100%|██████████| 70/70 [00:00<00:00, 85.02it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/miami-surf__obj5 0.928
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/miami-surf__obj5 0.4218
+frame loading (JPEG):   0%|          | 0/70 [00:00<?, ?it/s]frame loading (JPEG):  13%|█▎        | 9/70 [00:00<00:00, 82.43it/s]frame loading (JPEG):  26%|██▌       | 18/70 [00:00<00:00, 83.55it/s]frame loading (JPEG):  39%|███▊      | 27/70 [00:00<00:00, 82.52it/s]frame loading (JPEG):  51%|█████▏    | 36/70 [00:00<00:00, 83.15it/s]frame loading (JPEG):  64%|██████▍   | 45/70 [00:00<00:00, 83.70it/s]frame loading (JPEG):  77%|███████▋  | 54/70 [00:00<00:00, 84.05it/s]frame loading (JPEG):  90%|█████████ | 63/70 [00:00<00:00, 84.68it/s]frame loading (JPEG): 100%|██████████| 70/70 [00:00<00:00, 83.74it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/miami-surf__obj6 0.8706
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/miami-surf__obj6 0.9288
+frame loading (JPEG):   0%|          | 0/60 [00:00<?, ?it/s]frame loading (JPEG):  15%|█▌        | 9/60 [00:00<00:00, 80.69it/s]frame loading (JPEG):  30%|███       | 18/60 [00:00<00:00, 80.72it/s]frame loading (JPEG):  45%|████▌     | 27/60 [00:00<00:00, 81.18it/s]frame loading (JPEG):  60%|██████    | 36/60 [00:00<00:00, 81.48it/s]frame loading (JPEG):  75%|███████▌  | 45/60 [00:00<00:00, 81.70it/s]frame loading (JPEG):  90%|█████████ | 54/60 [00:00<00:00, 81.78it/s]frame loading (JPEG): 100%|██████████| 60/60 [00:00<00:00, 80.79it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/motocross-bumps__obj1 0.9277
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/motocross-bumps__obj1 0.8619
+frame loading (JPEG):   0%|          | 0/60 [00:00<?, ?it/s]frame loading (JPEG):  15%|█▌        | 9/60 [00:00<00:00, 82.63it/s]frame loading (JPEG):  30%|███       | 18/60 [00:00<00:00, 82.81it/s]frame loading (JPEG):  45%|████▌     | 27/60 [00:00<00:00, 83.28it/s]frame loading (JPEG):  60%|██████    | 36/60 [00:00<00:00, 83.20it/s]frame loading (JPEG):  75%|███████▌  | 45/60 [00:00<00:00, 83.80it/s]frame loading (JPEG):  90%|█████████ | 54/60 [00:00<00:00, 83.19it/s]frame loading (JPEG): 100%|██████████| 60/60 [00:00<00:00, 83.36it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/motocross-bumps__obj2 0.8588
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/motocross-bumps__obj2 0.702
+frame loading (JPEG):   0%|          | 0/43 [00:00<?, ?it/s]frame loading (JPEG):  21%|██        | 9/43 [00:00<00:00, 81.79it/s]frame loading (JPEG):  42%|████▏     | 18/43 [00:00<00:00, 80.88it/s]frame loading (JPEG):  63%|██████▎   | 27/43 [00:00<00:00, 81.36it/s]frame loading (JPEG):  84%|████████▎ | 36/43 [00:00<00:00, 81.08it/s]frame loading (JPEG): 100%|██████████| 43/43 [00:00<00:00, 81.79it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/motorbike__obj1 0.8843
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/motorbike__obj1 0.9196
+frame loading (JPEG):   0%|          | 0/43 [00:00<?, ?it/s]frame loading (JPEG):  21%|██        | 9/43 [00:00<00:00, 85.69it/s]frame loading (JPEG):  42%|████▏     | 18/43 [00:00<00:00, 85.88it/s]frame loading (JPEG):  63%|██████▎   | 27/43 [00:00<00:00, 85.61it/s]frame loading (JPEG):  84%|████████▎ | 36/43 [00:00<00:00, 84.85it/s]frame loading (JPEG): 100%|██████████| 43/43 [00:00<00:00, 84.83it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/motorbike__obj2 0.9255
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/motorbike__obj2 0.9323
+frame loading (JPEG):   0%|          | 0/43 [00:00<?, ?it/s]frame loading (JPEG):  21%|██        | 9/43 [00:00<00:00, 81.09it/s]frame loading (JPEG):  42%|████▏     | 18/43 [00:00<00:00, 81.41it/s]frame loading (JPEG):  63%|██████▎   | 27/43 [00:00<00:00, 82.44it/s]frame loading (JPEG):  84%|████████▎ | 36/43 [00:00<00:00, 81.88it/s]frame loading (JPEG): 100%|██████████| 43/43 [00:00<00:00, 82.06it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/motorbike__obj3 0.9183
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/motorbike__obj3 0.9359
+frame loading (JPEG):   0%|          | 0/46 [00:00<?, ?it/s]frame loading (JPEG):  20%|█▉        | 9/46 [00:00<00:00, 83.27it/s]frame loading (JPEG):  39%|███▉      | 18/46 [00:00<00:00, 81.80it/s]frame loading (JPEG):  59%|█████▊    | 27/46 [00:00<00:00, 81.49it/s]frame loading (JPEG):  78%|███████▊  | 36/46 [00:00<00:00, 82.20it/s]frame loading (JPEG):  98%|█████████▊| 45/46 [00:00<00:00, 81.90it/s]frame loading (JPEG): 100%|██████████| 46/46 [00:00<00:00, 81.98it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/night-race__obj1 0.9719
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/night-race__obj1 0.8947
+frame loading (JPEG):   0%|          | 0/46 [00:00<?, ?it/s]frame loading (JPEG):  20%|█▉        | 9/46 [00:00<00:00, 83.53it/s]frame loading (JPEG):  39%|███▉      | 18/46 [00:00<00:00, 79.70it/s]frame loading (JPEG):  59%|█████▊    | 27/46 [00:00<00:00, 80.35it/s]frame loading (JPEG):  78%|███████▊  | 36/46 [00:00<00:00, 81.47it/s]frame loading (JPEG):  98%|█████████▊| 45/46 [00:00<00:00, 82.38it/s]frame loading (JPEG): 100%|██████████| 46/46 [00:00<00:00, 81.80it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/night-race__obj2 0.9706
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/night-race__obj2 0.9277
+frame loading (JPEG):   0%|          | 0/70 [00:00<?, ?it/s]frame loading (JPEG):  11%|█▏        | 8/70 [00:00<00:00, 79.05it/s]frame loading (JPEG):  23%|██▎       | 16/70 [00:00<00:00, 79.08it/s]frame loading (JPEG):  36%|███▌      | 25/70 [00:00<00:00, 79.93it/s]frame loading (JPEG):  47%|████▋     | 33/70 [00:00<00:00, 79.31it/s]frame loading (JPEG):  60%|██████    | 42/70 [00:00<00:00, 79.73it/s]frame loading (JPEG):  73%|███████▎  | 51/70 [00:00<00:00, 80.10it/s]frame loading (JPEG):  86%|████████▌ | 60/70 [00:00<00:00, 80.37it/s]frame loading (JPEG):  99%|█████████▊| 69/70 [00:00<00:00, 80.54it/s]frame loading (JPEG): 100%|██████████| 70/70 [00:00<00:00, 80.08it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/paragliding__obj1 0.9329
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/paragliding__obj1 0.9674
+frame loading (JPEG):   0%|          | 0/50 [00:00<?, ?it/s]frame loading (JPEG):  18%|█▊        | 9/50 [00:00<00:00, 80.27it/s]frame loading (JPEG):  36%|███▌      | 18/50 [00:00<00:00, 79.83it/s]frame loading (JPEG):  52%|█████▏    | 26/50 [00:00<00:00, 79.68it/s]frame loading (JPEG):  68%|██████▊   | 34/50 [00:00<00:00, 79.29it/s]frame loading (JPEG):  84%|████████▍ | 42/50 [00:00<00:00, 79.22it/s]frame loading (JPEG): 100%|██████████| 50/50 [00:00<00:00, 79.18it/s]frame loading (JPEG): 100%|██████████| 50/50 [00:00<00:00, 79.35it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/rallye__obj1 0.9584
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/rallye__obj1 0.8184
+frame loading (JPEG):   0%|          | 0/80 [00:00<?, ?it/s]frame loading (JPEG):  10%|█         | 8/80 [00:00<00:00, 76.99it/s]frame loading (JPEG):  20%|██        | 16/80 [00:00<00:00, 76.73it/s]frame loading (JPEG):  30%|███       | 24/80 [00:00<00:00, 77.25it/s]frame loading (JPEG):  40%|████      | 32/80 [00:00<00:00, 77.56it/s]frame loading (JPEG):  50%|█████     | 40/80 [00:00<00:00, 77.43it/s]frame loading (JPEG):  60%|██████    | 48/80 [00:00<00:00, 77.74it/s]frame loading (JPEG):  70%|███████   | 56/80 [00:00<00:00, 77.06it/s]frame loading (JPEG):  80%|████████  | 64/80 [00:00<00:00, 77.24it/s]frame loading (JPEG):  90%|█████████ | 72/80 [00:00<00:00, 76.82it/s]frame loading (JPEG): 100%|██████████| 80/80 [00:01<00:00, 77.12it/s]frame loading (JPEG): 100%|██████████| 80/80 [00:01<00:00, 77.18it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/schoolgirls__obj6 0.9166
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/schoolgirls__obj6 0.934
+frame loading (JPEG):   0%|          | 0/91 [00:00<?, ?it/s]frame loading (JPEG):  10%|▉         | 9/91 [00:00<00:00, 82.65it/s]frame loading (JPEG):  20%|█▉        | 18/91 [00:00<00:00, 81.52it/s]frame loading (JPEG):  30%|██▉       | 27/91 [00:00<00:00, 81.64it/s]frame loading (JPEG):  40%|███▉      | 36/91 [00:00<00:00, 81.52it/s]frame loading (JPEG):  49%|████▉     | 45/91 [00:00<00:00, 80.34it/s]frame loading (JPEG):  59%|█████▉    | 54/91 [00:00<00:00, 80.55it/s]frame loading (JPEG):  69%|██████▉   | 63/91 [00:00<00:00, 80.24it/s]frame loading (JPEG):  79%|███████▉  | 72/91 [00:00<00:00, 79.85it/s]frame loading (JPEG):  89%|████████▉ | 81/91 [00:01<00:00, 80.38it/s]frame loading (JPEG):  99%|█████████▉| 90/91 [00:01<00:00, 80.65it/s]frame loading (JPEG): 100%|██████████| 91/91 [00:01<00:00, 80.72it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/scooter-board__obj2 0.7547
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/scooter-board__obj2 0.693
+frame loading (JPEG):   0%|          | 0/68 [00:00<?, ?it/s]frame loading (JPEG):  12%|█▏        | 8/68 [00:00<00:00, 75.25it/s]frame loading (JPEG):  24%|██▎       | 16/68 [00:00<00:00, 77.01it/s]frame loading (JPEG):  35%|███▌      | 24/68 [00:00<00:00, 76.98it/s]frame loading (JPEG):  47%|████▋     | 32/68 [00:00<00:00, 76.70it/s]frame loading (JPEG):  59%|█████▉    | 40/68 [00:00<00:00, 74.33it/s]frame loading (JPEG):  71%|███████   | 48/68 [00:00<00:00, 75.51it/s]frame loading (JPEG):  82%|████████▏ | 56/68 [00:00<00:00, 76.05it/s]frame loading (JPEG):  94%|█████████▍| 64/68 [00:00<00:00, 77.22it/s]frame loading (JPEG): 100%|██████████| 68/68 [00:00<00:00, 76.61it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/sheep__obj3 0.9363
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/sheep__obj3 0.952
+frame loading (JPEG):   0%|          | 0/68 [00:00<?, ?it/s]frame loading (JPEG):  12%|█▏        | 8/68 [00:00<00:00, 78.91it/s]frame loading (JPEG):  24%|██▎       | 16/68 [00:00<00:00, 78.92it/s]frame loading (JPEG):  35%|███▌      | 24/68 [00:00<00:00, 78.70it/s]frame loading (JPEG):  49%|████▊     | 33/68 [00:00<00:00, 79.66it/s]frame loading (JPEG):  60%|██████    | 41/68 [00:00<00:00, 79.55it/s]frame loading (JPEG):  72%|███████▏  | 49/68 [00:00<00:00, 79.37it/s]frame loading (JPEG):  84%|████████▍ | 57/68 [00:00<00:00, 79.30it/s]frame loading (JPEG):  96%|█████████▌| 65/68 [00:00<00:00, 79.10it/s]frame loading (JPEG): 100%|██████████| 68/68 [00:00<00:00, 79.16it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/sheep__obj4 0.6775
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/sheep__obj4 0.7155
+frame loading (JPEG):   0%|          | 0/68 [00:00<?, ?it/s]frame loading (JPEG):  12%|█▏        | 8/68 [00:00<00:00, 78.81it/s]frame loading (JPEG):  25%|██▌       | 17/68 [00:00<00:00, 79.75it/s]frame loading (JPEG):  37%|███▋      | 25/68 [00:00<00:00, 79.75it/s]frame loading (JPEG):  49%|████▊     | 33/68 [00:00<00:00, 79.44it/s]frame loading (JPEG):  60%|██████    | 41/68 [00:00<00:00, 79.20it/s]frame loading (JPEG):  72%|███████▏  | 49/68 [00:00<00:00, 78.98it/s]frame loading (JPEG):  84%|████████▍ | 57/68 [00:00<00:00, 77.98it/s]frame loading (JPEG):  96%|█████████▌| 65/68 [00:00<00:00, 78.31it/s]frame loading (JPEG): 100%|██████████| 68/68 [00:00<00:00, 78.80it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/sheep__obj5 0.9084
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/sheep__obj5 0.9331
+frame loading (JPEG):   0%|          | 0/80 [00:00<?, ?it/s]frame loading (JPEG):  11%|█▏        | 9/80 [00:00<00:00, 80.82it/s]frame loading (JPEG):  22%|██▎       | 18/80 [00:00<00:00, 81.16it/s]frame loading (JPEG):  34%|███▍      | 27/80 [00:00<00:00, 81.30it/s]frame loading (JPEG):  45%|████▌     | 36/80 [00:00<00:00, 81.39it/s]frame loading (JPEG):  56%|█████▋    | 45/80 [00:00<00:00, 81.51it/s]frame loading (JPEG):  68%|██████▊   | 54/80 [00:00<00:00, 81.42it/s]frame loading (JPEG):  79%|███████▉  | 63/80 [00:00<00:00, 80.78it/s]frame loading (JPEG):  90%|█████████ | 72/80 [00:00<00:00, 81.08it/s]frame loading (JPEG): 100%|██████████| 80/80 [00:00<00:00, 81.34it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/skate-park__obj1 0.9256
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/skate-park__obj1 0.9532
+frame loading (JPEG):   0%|          | 0/80 [00:00<?, ?it/s]frame loading (JPEG):  11%|█▏        | 9/80 [00:00<00:00, 82.28it/s]frame loading (JPEG):  22%|██▎       | 18/80 [00:00<00:00, 83.29it/s]frame loading (JPEG):  34%|███▍      | 27/80 [00:00<00:00, 84.69it/s]frame loading (JPEG):  45%|████▌     | 36/80 [00:00<00:00, 85.40it/s]frame loading (JPEG):  56%|█████▋    | 45/80 [00:00<00:00, 84.06it/s]frame loading (JPEG):  68%|██████▊   | 54/80 [00:00<00:00, 83.96it/s]frame loading (JPEG):  79%|███████▉  | 63/80 [00:00<00:00, 83.77it/s]frame loading (JPEG):  90%|█████████ | 72/80 [00:00<00:00, 83.65it/s]frame loading (JPEG): 100%|██████████| 80/80 [00:00<00:00, 83.50it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/skate-park__obj2 0.5809
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/skate-park__obj2 0.5484
+frame loading (JPEG):   0%|          | 0/71 [00:00<?, ?it/s]frame loading (JPEG):  13%|█▎        | 9/71 [00:00<00:00, 80.90it/s]frame loading (JPEG):  25%|██▌       | 18/71 [00:00<00:00, 80.78it/s]frame loading (JPEG):  38%|███▊      | 27/71 [00:00<00:00, 78.90it/s]frame loading (JPEG):  51%|█████     | 36/71 [00:00<00:00, 79.86it/s]frame loading (JPEG):  63%|██████▎   | 45/71 [00:00<00:00, 80.47it/s]frame loading (JPEG):  76%|███████▌  | 54/71 [00:00<00:00, 80.72it/s]frame loading (JPEG):  89%|████████▊ | 63/71 [00:00<00:00, 78.99it/s]frame loading (JPEG): 100%|██████████| 71/71 [00:00<00:00, 79.83it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/stunt__obj1 0.789
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/stunt__obj1 0.8536
+frame loading (JPEG):   0%|          | 0/55 [00:00<?, ?it/s]frame loading (JPEG):  15%|█▍        | 8/55 [00:00<00:00, 79.72it/s]frame loading (JPEG):  31%|███       | 17/55 [00:00<00:00, 82.23it/s]frame loading (JPEG):  47%|████▋     | 26/55 [00:00<00:00, 82.61it/s]frame loading (JPEG):  64%|██████▎   | 35/55 [00:00<00:00, 82.34it/s]frame loading (JPEG):  80%|████████  | 44/55 [00:00<00:00, 82.35it/s]frame loading (JPEG):  96%|█████████▋| 53/55 [00:00<00:00, 82.67it/s]frame loading (JPEG): 100%|██████████| 55/55 [00:00<00:00, 82.37it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/surf__obj2 0.8821
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/surf__obj2 0.9032
+frame loading (JPEG):   0%|          | 0/60 [00:00<?, ?it/s]frame loading (JPEG):  15%|█▌        | 9/60 [00:00<00:00, 81.34it/s]frame loading (JPEG):  30%|███       | 18/60 [00:00<00:00, 81.46it/s]frame loading (JPEG):  45%|████▌     | 27/60 [00:00<00:00, 81.47it/s]frame loading (JPEG):  60%|██████    | 36/60 [00:00<00:00, 81.27it/s]frame loading (JPEG):  75%|███████▌  | 45/60 [00:00<00:00, 80.67it/s]frame loading (JPEG):  90%|█████████ | 54/60 [00:00<00:00, 81.03it/s]frame loading (JPEG): 100%|██████████| 60/60 [00:00<00:00, 80.89it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/swing__obj3 0.7518
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/swing__obj3 0.8518
+frame loading (JPEG):   0%|          | 0/70 [00:00<?, ?it/s]frame loading (JPEG):  11%|█▏        | 8/70 [00:00<00:00, 79.94it/s]frame loading (JPEG):  24%|██▍       | 17/70 [00:00<00:00, 80.38it/s]frame loading (JPEG):  37%|███▋      | 26/70 [00:00<00:00, 81.32it/s]frame loading (JPEG):  50%|█████     | 35/70 [00:00<00:00, 80.64it/s]frame loading (JPEG):  63%|██████▎   | 44/70 [00:00<00:00, 80.72it/s]frame loading (JPEG):  76%|███████▌  | 53/70 [00:00<00:00, 80.96it/s]frame loading (JPEG):  89%|████████▊ | 62/70 [00:00<00:00, 81.22it/s]frame loading (JPEG): 100%|██████████| 70/70 [00:00<00:00, 81.04it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/tennis__obj2 0.8924
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/tennis__obj2 0.9091
+frame loading (JPEG):   0%|          | 0/76 [00:00<?, ?it/s]frame loading (JPEG):  11%|█         | 8/76 [00:00<00:00, 76.86it/s]frame loading (JPEG):  21%|██        | 16/76 [00:00<00:00, 78.57it/s]frame loading (JPEG):  33%|███▎      | 25/76 [00:00<00:00, 79.62it/s]frame loading (JPEG):  43%|████▎     | 33/76 [00:00<00:00, 79.74it/s]frame loading (JPEG):  55%|█████▌    | 42/76 [00:00<00:00, 79.91it/s]frame loading (JPEG):  66%|██████▌   | 50/76 [00:00<00:00, 79.89it/s]frame loading (JPEG):  76%|███████▋  | 58/76 [00:00<00:00, 77.18it/s]frame loading (JPEG):  87%|████████▋ | 66/76 [00:00<00:00, 77.16it/s]frame loading (JPEG):  97%|█████████▋| 74/76 [00:00<00:00, 76.96it/s]frame loading (JPEG): 100%|██████████| 76/76 [00:00<00:00, 78.14it/s]
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+B1 davis__davis/tractor-sand__obj2 0.847
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/sam2_video_predictor.py:786: UserWarning: cannot import name '_C' from 'sam2' (/home/sojak/sam2/.venv/lib/python3.12/site-packages/sam2/__init__.py)
+
+Skipping the post-processing step due to the error above. You can still use SAM 2 and it's OK to ignore the error above, although some post-processing functionality may be limited (which doesn't affect the results in most cases; see https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
+  pred_masks_gpu = fill_holes_in_mask_scores(
+A1 davis__davis/tractor-sand__obj2 0.8911

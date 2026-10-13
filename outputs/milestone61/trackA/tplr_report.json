@@ -1,0 +1,22 @@
+{
+ "units_applied": 21,
+ "gate_small_units_applied": 13,
+ "oracle_value_small_mean_over_applied": 0.0013604649809694012,
+ "oracle_value_small_mean_over_15": 0.001179069650173481,
+ "T1_small_dJF_over_15": -0.003844776757059513,
+ "A2x_small_dJF_over_15": 0.01768401812593252,
+ "T1_nonsmall_applied": -0.08165276948914917,
+ "T1_up_down_small": [
+  0,
+  1
+ ],
+ "all_sets_T1_vs_B1": {
+  "DAVIS_val": -0.021368074675554443,
+  "PUMaVOS_A": -0.15452320797853059,
+  "PUMaVOS_B": -0.0017384571827889772,
+  "SegTrack": -0.01860373658646164
+ },
+ "latency_local_median_s": 0.0796580979986174,
+ "adds_information": false,
+ "deployable_success": false
+}

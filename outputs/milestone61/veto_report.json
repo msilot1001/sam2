@@ -1,0 +1,56 @@
+{
+  "dev": {
+    "units": 21,
+    "small_gate_applied": 13,
+    "A2v_small_over15": 0.01680704082898965,
+    "A2x_small_over15": 0.01768401812593252,
+    "A2v_minus_A2x_small_over15": -0.0008769772969428713,
+    "CI_applied": [
+      -0.0035876343965844733,
+      0.0
+    ],
+    "units_changed_0.005": [
+      {
+        "unit": "davis__davis/kite-surf__obj2",
+        "d_vs_A2x": -0.0132
+      }
+    ],
+    "noninferior": true
+  },
+  "replication": {
+    "units": 43,
+    "small_n": 41,
+    "videos": 22,
+    "A2v_small": 0.019507165947353574,
+    "CI": [
+      0.01120086596792692,
+      0.02870204949925484
+    ],
+    "A2d_small": 0.00930149944757733,
+    "A2v_minus_A2d": 0.010205666499776198,
+    "CI_diff": [
+      -0.004728544141191433,
+      0.03243961687480942
+    ],
+    "up_down": [
+      26,
+      2
+    ],
+    "miami_surf_obj5": 0.000972086374740444,
+    "worse_than_A2d_0.01": [
+      {
+        "unit": "davis__davis/dog-gooses__obj5",
+        "A2v_minus_A2d": -0.0558
+      },
+      {
+        "unit": "davis__davis/lady-running__obj2",
+        "A2v_minus_A2d": -0.019
+      },
+      {
+        "unit": "davis__davis/scooter-board__obj2",
+        "A2v_minus_A2d": -0.0169
+      }
+    ],
+    "catastrophe_removed": true
+  }
+}

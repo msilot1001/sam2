@@ -1,20 +1,20 @@
 {
-  "updated_kst": "2026-10-14 02:28",
+  "updated_kst": "2026-10-14 03:58",
   "deadline_kst": "2026-10-14 08:00",
   "gpu_hard_stop_kst": "06:40",
   "branch": "exp/m61-overnight-deep-research",
   "base_commit": "fb19a21",
   "completed": [
-    "F2 flip control: +0.001 overall [-0.0005,+0.0024], small +0.0001; A2x-F2 small +0.018 [+0.009,+0.026] -> incumbent gain is mechanism-specific",
-    "comparison_report.json with B0/B1/A2x/A2c/A3/F2/HEAD"
+    "replication A3: small +0.013 [-0.014,+0.036]; A3-A2d +0.004 [-0.0002,+0.008]",
+    "A2v veto: dev -0.0009 vs A2x (noninferior point estimate; CI low -0.0036); replication +0.020 [+0.011,+0.029] but post-hoc and driven by miami-surf obj5 (ex-miami -0.0015)",
+    "second independent review applied (SGGL and SGGL-V co-primary for M7)",
+    "full test suite 256 passed"
   ],
-  "running": [
-    "replication A2d,A3 on DAVIS train crop units (GPU)"
-  ],
+  "running": [],
   "failed": [],
-  "strongest_candidate": "A2x/SGGL; A3 one-way write-back best measured variant (+0.0022 vs A2x)",
-  "gpu_used_min": 225,
-  "next_action": "replication analysis -> final docs -> independent review -> tests/commit/push",
+  "strongest_candidate": "global-local direction: SGGL (A2x) and SGGL-V co-primary, PROVISIONAL",
+  "gpu_used_min": 305,
+  "next_action": "commit + push + Korean final report",
   "blocking": [],
   "pumavos_C": "untouched"
 }

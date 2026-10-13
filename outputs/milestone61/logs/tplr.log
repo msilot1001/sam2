@@ -1,0 +1,25 @@
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/torchvision/transforms/functional.py:154: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
+  img = torch.from_numpy(pic.transpose((2, 0, 1))).contiguous()
+T1 davis__davis/dogs-jump__obj1 0.9469 0.9522
+T1 davis__davis/drift-chicane__obj1 0.9503 0.9479
+T1 davis__davis/drift-straight__obj1 0.9039 0.9734
+T1 davis__davis/kite-surf__obj2 0.4511 0.4513
+T1 davis__davis/lab-coat__obj1 0.7436 0.7503
+T1 davis__davis/lab-coat__obj2 0.7134 0.7067
+T1 davis__davis/mbike-trick__obj1 0.9014 0.8996
+T1 davis__davis/mbike-trick__obj2 0.8764 0.8696
+T1 davis__davis/motocross-jump__obj2 0.7133 0.8719
+T1 davis__davis/scooter-black__obj1 0.9153 0.9236
+T1 davis__davis/scooter-black__obj2 0.9008 0.9176
+T1 davis__davis/soapbox__obj1 0.877 0.9316
+T1 davis__davis/soapbox__obj2 0.9213 0.9251
+T1 davis__davis/soapbox__obj3 0.9367 0.9297
+T1 pumavos__pumavos/eye_area__obj1 0.5649 0.8641
+T1 pumavos__pumavos/ice_cream__obj1 0.9525 0.947
+T1 pumavos__pumavos/queen_car__obj1 0.931 0.9399
+T1 pumavos__pumavos/smile__obj1 0.9113 0.9212
+T1 segtrack__segtrack/birdfall__obj1 0.8491 0.8836
+T1 segtrack__segtrack/cheetah__obj1 0.8796 0.9002
+T1 segtrack__segtrack/parachute__obj1 0.9638 0.9645

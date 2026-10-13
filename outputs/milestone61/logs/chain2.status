@@ -1,0 +1,5 @@
+head_train exit=0
+head_image exit=0
+head_video DAVIS_val,PUMaVOS_B exit=0
+head_video PUMaVOS_A,SegTrack exit=143
+DONE

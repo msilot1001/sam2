@@ -1,0 +1,50 @@
+set,unit,video,video_idx,used_local,iou_T,box,latency_s,J,F,JF,F_strict,gt_empty
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,1,True,0.6727439761161804,"[98, 410, 324, 636]",0.07735835900166421,0.31871838111298484,0.92018779342723,0.6194530872701074,0.5133107884766966,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,2,True,0.8134809136390686,"[91, 403, 346, 658]",0.0775036259983608,0.4857142857142857,1.0,0.7428571428571429,0.9046849757673667,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,3,True,0.8055969476699829,"[96, 408, 340, 652]",0.07712593000178458,0.42857142857142855,1.0,0.7142857142857143,0.8723205964585276,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,4,True,0.8496659398078918,"[103, 415, 335, 647]",0.07678755400047521,0.48951048951048953,1.0,0.7447552447552448,0.8864696734059098,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,5,True,0.8841754198074341,"[104, 416, 333, 645]",0.07687315400107764,0.6814814814814815,1.0,0.8407407407407408,0.9850712508482244,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,6,True,0.8938599824905396,"[103, 415, 324, 636]",0.0769860129985318,0.6805555555555556,1.0,0.8402777777777778,0.9015151515151515,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,7,True,0.8968721032142639,"[97, 409, 320, 632]",0.07701309199910611,0.8063583815028902,0.9891696750902527,0.8977640282965714,0.9783126157101296,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,8,True,0.8616465330123901,"[92, 404, 310, 622]",0.07763181499831262,0.7403100775193798,1.0,0.8701550387596899,0.9459459459459459,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,9,True,0.8417092561721802,"[88, 400, 302, 614]",0.07698260200049845,0.7118055555555556,1.0,0.8559027777777778,0.8676245796392539,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,10,True,0.8604171872138977,"[82, 394, 292, 604]",0.07696158399994601,0.5682539682539682,0.976,0.7721269841269841,0.7407975460122699,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,11,True,0.8463945388793945,"[84, 396, 288, 600]",0.07712060199992266,0.6232114467408585,0.8837209302325582,0.7534661884867083,0.7460611677479146,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,12,True,0.8649163246154785,"[88, 400, 284, 596]",0.07718124099847046,0.6794117647058824,0.91005291005291,0.7947323373793962,0.8625336927223719,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,13,True,0.8464208841323853,"[92, 404, 287, 599]",0.0772065900018788,0.49230769230769234,0.8210526315789474,0.6566801619433198,0.782608695652174,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,14,False,,,0.00010069900235976093,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,15,False,,,4.025999805890024e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,16,False,,,3.8538997614523396e-05,1.0,1.0,1.0,1.0,True
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,17,False,,,3.730000025825575e-05,1.0,1.0,1.0,1.0,True
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,18,False,,,3.699899752973579e-05,1.0,1.0,1.0,1.0,True
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,19,False,,,3.6739002098329365e-05,1.0,1.0,1.0,1.0,True
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,20,False,,,3.6139997973805293e-05,1.0,1.0,1.0,1.0,True
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,21,False,,,3.859899879898876e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,22,False,,,4.054999953950755e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,23,False,,,3.588799881981686e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,24,False,,,3.721900066011585e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,25,False,,,3.705899871420115e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,26,False,,,3.680900044855662e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,27,False,,,3.785900116781704e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,28,False,,,3.682000169646926e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,29,False,,,3.639800343080424e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,30,False,,,3.6368997825775295e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,31,False,,,3.659899812191725e-05,1.0,1.0,1.0,1.0,True
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,32,False,,,3.636000110418536e-05,1.0,1.0,1.0,1.0,True
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,33,False,,,3.543999991961755e-05,1.0,1.0,1.0,1.0,True
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,34,False,,,3.6059002013644204e-05,1.0,1.0,1.0,1.0,True
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,35,False,,,3.825000021606684e-05,1.0,1.0,1.0,1.0,True
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,36,False,,,3.569899854483083e-05,1.0,1.0,1.0,1.0,True
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,37,False,,,3.540900070220232e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,38,False,,,3.7189001886872575e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,39,False,,,3.5870001738658175e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,40,False,,,3.580000338843092e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,41,False,,,3.571999695850536e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,42,False,,,3.590000051190145e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,43,False,,,3.467999704298563e-05,1.0,1.0,1.0,1.0,True
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,44,False,,,3.588899926398881e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,45,False,,,3.477999780443497e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,46,False,,,3.697099964483641e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,47,False,,,3.696899875649251e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,48,False,,,3.609000123105943e-05,0.0,0.0,0.0,0.0,False
+DAVIS_val,davis__davis/kite-surf__obj2,davis/kite-surf,49,False,,,3.4738997783279046e-05,0.0,0.0,0.0,0.0,False

@@ -1,0 +1,26 @@
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/sojak/sam2/.venv/lib/python3.12/site-packages/torchvision/transforms/functional.py:154: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
+  img = torch.from_numpy(pic.transpose((2, 0, 1))).contiguous()
+{
+ "small": {
+  "units": 19,
+  "dJ": -0.008549032316924143,
+  "dJF": -0.008548356802901233,
+  "CI_dJF": [
+   -0.014126576605463851,
+   -0.004503977299048094
+  ],
+  "frac_pos": 0.15789473684210525
+ },
+ "ordinary": {
+  "units": 58,
+  "dJ": -0.0007604517537017926,
+  "dJF": 0.0013981083225349086,
+  "CI_dJF": [
+   -0.0034134986374394134,
+   0.005957126525335622
+  ],
+  "frac_pos": 0.5517241379310345
+ }
+}

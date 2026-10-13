@@ -1,0 +1,85 @@
+{
+  "A2d": {
+    "units": 21,
+    "small_gate_units_applied": 13,
+    "small_dJF_over15": 0.01768401812593252,
+    "A2x_small_over15": 0.01768401812593252,
+    "small_vs_A2x_over15": 0.0,
+    "CI_vs_A2x_applied": [
+      0.0,
+      0.0
+    ],
+    "units_below_A2x_0.01": [],
+    "units_above_A2x_0.01": 0,
+    "global_tracker_G_vs_B1_small_over15": 0.0,
+    "oracle_gain_new_vs_old_small_over15": -0.0008441875944804833,
+    "late21_vs_A2x_small": 0.0,
+    "all_sets_vs_A2x": {
+      "DAVIS_val": 0.0,
+      "PUMaVOS_A": 0.0,
+      "PUMaVOS_B": 0.0,
+      "SegTrack": 0.0
+    },
+    "latency_median_s": 0.4303447549973498,
+    "peak_vram_GB": 1.343188992,
+    "write_rate_G": 0.0,
+    "success": false
+  },
+  "A3": {
+    "units": 21,
+    "small_gate_units_applied": 13,
+    "small_dJF_over15": 0.019908786527375814,
+    "A2x_small_over15": 0.01768401812593252,
+    "small_vs_A2x_over15": 0.0022247684014432925,
+    "CI_vs_A2x_applied": [
+      0.00025298740661811655,
+      0.006189759509994921
+    ],
+    "units_below_A2x_0.01": [],
+    "units_above_A2x_0.01": 1,
+    "global_tracker_G_vs_B1_small_over15": 0.008590090174045273,
+    "oracle_gain_new_vs_old_small_over15": 0.00018316388627318176,
+    "late21_vs_A2x_small": 0.004317129508280107,
+    "all_sets_vs_A2x": {
+      "DAVIS_val": 0.002325259684342638,
+      "PUMaVOS_A": 0.0008282339122506754,
+      "PUMaVOS_B": 0.0005181707698470595,
+      "SegTrack": 0.0
+    },
+    "latency_median_s": 0.4358174369990592,
+    "peak_vram_GB": 1.347383296,
+    "write_rate_G": 0.8912444417168045,
+    "success": false
+  },
+  "A3s": {
+    "units": 21,
+    "small_gate_units_applied": 13,
+    "small_dJF_over15": -0.018559161217740896,
+    "A2x_small_over15": 0.01768401812593252,
+    "small_vs_A2x_over15": -0.03624317934367342,
+    "CI_vs_A2x_applied": [
+      -0.12679184963517923,
+      0.001358433348515099
+    ],
+    "units_below_A2x_0.01": [
+      {
+        "unit": "davis__davis/lab-coat__obj1",
+        "d_vs_A2x": -0.5915
+      }
+    ],
+    "units_above_A2x_0.01": 1,
+    "global_tracker_G_vs_B1_small_over15": -0.03126336118393672,
+    "oracle_gain_new_vs_old_small_over15": -0.03881419195473345,
+    "late21_vs_A2x_small": -0.060223293419841596,
+    "all_sets_vs_A2x": {
+      "DAVIS_val": -0.03848332369613843,
+      "PUMaVOS_A": 0.0010079756335270584,
+      "PUMaVOS_B": 5.961649966335081e-05,
+      "SegTrack": 0.0
+    },
+    "latency_median_s": 0.4362292369987699,
+    "peak_vram_GB": 1.347383296,
+    "write_rate_G": 0.8905992720388043,
+    "success": false
+  }
+}

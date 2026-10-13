@@ -1,7 +1,12 @@
-# 최종 알고리즘 명세: SGGL (Self-Gated Global–Local SAM 2) + M7 ablation W (단방향 국소→전역 메모리 되쓰기)
+# 최종 알고리즘 명세: SGGL-V (Self-Gated Global–Local SAM 2 with cross-View presence reliability) + M7 ablation W
 
 > **상태: 잠정 (PROVISIONAL).**
-> - **주 알고리즘은 SGGL(= M6 A2x)이다.**
+> - **M7 공동 1차 arm은 SGGL(= A2x)과 SGGL-V(= A2x + 전역 object score > 0 거부권, M6.1 A2v)다.**
+>   - 거부권의 측정 이득은 객체 1개(miami-surf obj5)에서만 나온다. 그 객체를 빼면 A2x 대비 −0.0015 [−0.005, +0.001]이다.
+>   - 극소 객체(< 0.1%)에서는 한 번도 발동하지 않았다.
+>   - 개발 비열등: A2x 대비 −0.0009 (사전 기준 ≥ −0.003).
+>   - 복제 세트(DAVIS train 41 / 22): +0.020 [+0.011, +0.029]. 단, 거부권은 이 세트에서 실패를 보고 만들었으므로 사후 근거다.
+> - **기준선 SGGL(= M6 A2x):**
 >   - 개발 세트 작은 객체 +0.018 [+0.009, +0.025], 영상 10개. 사전 관문 +0.03에는 미달했다.
 >   - 같은 2× 계산의 F2 대비 +0.018 [+0.009, +0.026].
 > - **W(M6.1 A3)는 기본값이 꺼진 ablation이다.**
@@ -24,6 +29,7 @@ flowchart TB
   C --> L["상태 L: SAM 2 crop 영상<br/>(P5 prompt 메모리, crop 좌표 메모리)"]
   G -->|"m_G (H×W), score_G"| S{"gate:<br/>score_L > 0 ∧ m_L ≠ ∅<br/>∧ 내부 crop 경계 미접촉"}
   L -->|"m_L (s×s), score_L"| S
+  G -->|"score_G > 0 (존재 거부권)"| S
   S -->|예| P["paste(m_L) → 출력"]
   S -->|아니오| Q["m_G → 출력"]
   P -->|"W: 전체 좌표 마스크를 G 메모리에 재부호화<br/>(frame t의 maskmem 교체)"| G
@@ -47,7 +53,7 @@ flowchart TB
 ## 3. 의사코드
 
 ```python
-def sggl(frames, gt0, P, write_back=False):           # W는 M7 ablation, 기본 off
+def sggl_v(frames, gt0, P, write_back=False):         # W는 M7 ablation, 기본 off
     H, W = gt0.shape
     s = crop_side(gt0, target=0.25, max_zoom=4)       # vcam.crop_side
     G = start_p5(P, frames, gt0)                       # m56.start(p5=True)
@@ -60,7 +66,7 @@ def sggl(frames, gt0, P, write_back=False):           # W는 M7 ablation, 기본
         Lf.box = b = place(c, s, (H, W))               # t-1까지의 출력만 사용
         oG, mG, _, sG = step(P, G, t)                  # engine.predict + 저장
         oL, mL, _, sL = step(P, L, t)
-        ok = sL > 0 and mL.any() and not touches_interior_edge(mL, b, (H, W))
+        ok = sL > 0 and mL.any() and not touches_interior_edge(mL, b, (H, W)) and sG > 0   # V: 전역 존재 거부권
         out = paste(mL, b, (H, W)) if ok else mG
         if write_back and ok:                          # 한 방향만 (L → G)
             hi = to_model(out) * 20 - 10               # add_new_mask와 같은 resize
@@ -87,8 +93,8 @@ def sggl(frames, gt0, P, write_back=False):           # W는 M7 ablation, 기본
 |---|---|---|
 | `src/spatial/vcam.py` | 있음 | `crop_side`, `place`, `paste`, `touches_border`, `center_of`, `LazyCropFrames`, `lazy_loader` |
 | `scripts/m56.py:start/start_dir` | 있음 | P5 시작 |
-| `scripts/m61.py:run_dual` | 있음 (실험용) | `(pred, set, unit, arm∈{A2d, A3, A3s}, n)` → (프레임 표, 마스크). A2d = SGGL |
-| **`src/spatial/sggl.py`** | **새로 만들 것 (M7)** | `SGGL(predictor, gate="self"|"agreement"|"none", write_back="none"|"l2g"|"l2g_reliable")`. `.start(frames_dir, gt0)`, `.step(t) -> (mask, info)`. 실험 코드에서 분리한 단일 구현 |
+| `scripts/m61.py:run_dual` | 있음 (실험용) | `(pred, set, unit, arm∈{A2d, A2v, A3, A3s}, n)` → (프레임 표, 마스크). A2d = SGGL, A2v = SGGL-V |
+| **`src/spatial/sggl.py`** | **새로 만들 것 (M7)** | `SGGL(predictor, gate="self"|"self+presence"|"agreement"|"none", write_back="none"|"l2g"|"l2g_reliable")`. 기본값은 `self+presence`. `.start(frames_dir, gt0)`, `.step(t) -> (mask, info)`. 실험 코드에서 분리한 단일 구현 |
 
 ## 5. 상태 전이 (frame별)
 
@@ -96,7 +102,7 @@ def sggl(frames, gt0, P, write_back=False):           # W는 M7 ablation, 기본
 |---|---|---|---|
 | NO_LOCAL | s 없음 (큰 대상) | m_G | G 기본 |
 | LOCAL_ACCEPT | ok | paste(m_L) | L 기본. G 기본. (W arm에서만 G의 frame t 메모리를 출력으로 교체) |
-| LOCAL_REJECT | ¬ok (object score ≤ 0, 경계 접촉, 빈 마스크) | m_G | 둘 다 기본 (L은 자기 출력, G는 자기 출력) |
+| LOCAL_REJECT | ¬ok (crop object score ≤ 0, 경계 접촉, 빈 마스크, **또는 전역 object score ≤ 0**) | m_G | 둘 다 기본 (L은 자기 출력, G는 자기 출력) |
 
 - crop 중심은 항상 출력 box 중심을 따른다.
 - LOCAL_REJECT가 이어지면 crop이 G 출력 쪽으로 이동해 재획득한다(escape 복구).
@@ -127,6 +133,8 @@ def sggl(frames, gt0, P, write_back=False):           # W는 M7 ablation, 기본
 | 예측 IoU가 확대 입력에서 과대 (극소 대상에서 +0.11) | M6.1 D1 | 예측 IoU를 gate에 쓰지 않음 |
 | 양방향 메모리 피드백 붕괴 | A3s lab-coat obj1 −0.59 | 단방향만 허용 |
 | 단방향 되쓰기의 피드백 위험 | A3에서는 관찰되지 않음 | 위험은 남아 있음. M7에서 붕괴 감지 지표(되쓰기 후 G object score 급락) 기록 |
+| **진짜 부재 후 국소 오재획득 (확신)** | 복제 miami-surf obj5 −0.477 (crop score 최대 7.8, 전역은 부재로 판단) | **전역 존재 거부권 (V)** → +0.001 |
+| 거부권의 대가: 전역이 극소 대상을 놓친 경우 | dog-gooses obj5 −0.056, kite-surf obj2 −0.013 등 | M7: 부재 후 재등장 순간에만 거부권, 또는 지속 시간 조건 |
 | 얇은 줄 객체 (kite 줄, paragliding 줄) | box가 커서 crop 미적용 | 범위 밖. 출력 해상도 문제 |
 | 확신에 찬 잘못된 영역 포착 (billie_shoes) | crop 미적용 큰 대상 | 범위 밖 |
 
