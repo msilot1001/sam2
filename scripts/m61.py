@@ -596,6 +596,95 @@ def head_video(sets="DAVIS_val,PUMaVOS_B,PUMaVOS_A,SegTrack"):
     status(completed=f"trackB head_video {sets}")
 
 
+# ----------------------------------------------------------------------------- Track A (round 2): memory write-back
+PREREG_R2 = {
+    "created_after": "round 1: TPLR rejected (no new information), calibrated gate no gain over self gate (selection "
+                     "saturated: self gate reaches ~89% of the A2o selection oracle), head v2 image-level negative. "
+                     "Frozen before any A3 output.",
+    "hypothesis": "selection among fixed global/local candidates is saturated; the global tracker's own memory keeps "
+                  "propagating its coarse small-target masks. Writing the accepted local (crop) mask back into the global "
+                  "state's memory (exact: the mask is already in full-frame coordinates, re-encoded like P5) makes the "
+                  "global candidate itself better on later frames, i.e. it creates NEW candidates.",
+    "arms": {"A2d": "live dual-state A2x (G and L run together, no write-back); must reproduce the logged A2x exactly",
+             "A3": "A2d + when the crop is accepted at t, re-encode G's memory for frame t from the fused full-res mask "
+                   "(detail.to_model -> +-10 logits, G's object score)",
+             "A3s": "A3 + when the crop is rejected and G's mask is non-empty, re-encode L's memory for frame t from G's "
+                    "mask cropped to the current crop box (exact crop+resize, G's object score)"},
+    "units": "the 21 dev units where A1/A2x crop (same as M6)",
+    "success": "gate-set small-unit dJF (vs B1, 15 small units, uncropped = 0) >= A2x + 0.01 AND no cropped unit below "
+               "-0.01 vs A2x AND retrospective per-frame oracle over {G', L'} exceeds the oracle over {B1, A1} by >= 0.01",
+    "secondary": "live G' alone vs B1 (does write-back improve the global tracker itself?), frames 21+, latency",
+}
+
+
+def prereg_r2():
+    m55._freeze(OUT / "preregistration_r2.json", {**PREREG_R2, "rows": []})
+
+
+def run_dual(pred, s, u, arm, n=None):
+    from spatial import detail
+    n, hw = n or len(u.frames), m6.gt(u, 0).shape
+    side = vcam.crop_side(m6.gt(u, 0))
+    stG, odG = m56.start(pred, u, p5=True)
+    center = vcam.center_of(m6.gt(u, 0))
+    stL, odL, frames = m6.start_crop(pred, u, side, center)
+    rows, masks = [], []
+    for t in range(1, n):
+        frames.box = box = vcam.place(center, side, hw)
+        stL["video_height"] = stL["video_width"] = side
+        t0 = time.perf_counter()
+        oG, mG, _, sG = engine.predict(pred, stG, odG, t)
+        odG["non_cond_frame_outputs"][t] = oG
+        oL, mL, _, sL = engine.predict(pred, stL, odL, t)
+        odL["non_cond_frame_outputs"][t] = oL
+        touch = vcam.touches_border(mL, box, hw)
+        ok = sL > 0 and mL.any() and not touch
+        out = vcam.paste(mL, box, hw) if ok else mG
+        wrote = ""
+        with torch.inference_mode():
+            if arm in ("A3", "A3s") and ok:
+                hi = detail.to_model(out).to("cuda") * 20.0 - 10.0
+                oG["maskmem_features"], oG["maskmem_pos_enc"] = pred._run_memory_encoder(stG, t, 1, hi, oG["object_score_logits"], True)
+                wrote = "G"
+            if arm == "A3s" and not ok and mG.any():
+                y0, y1, x0, x1 = box
+                hi = detail.to_model(mG[y0:y1, x0:x1]).to("cuda") * 20.0 - 10.0
+                oL["maskmem_features"], oL["maskmem_pos_enc"] = pred._run_memory_encoder(stL, t, 1, hi, oG["object_score_logits"], True)
+                wrote = "L"
+        torch.cuda.synchronize()
+        g = m6.gt(u, t)
+        rows.append({"set": s, "unit": u.name, "video": u.video, "arm": arm, "video_idx": t, "source": "crop" if ok else "global",
+                     "wrote": wrote, "score_G": sG, "score_L": sL, "latency_s": time.perf_counter() - t0, "gt_empty": not g.any(),
+                     **m55.jf(out, g), "JF_G": m55.jf(mG, g)["JF"], "JF_L": m55.jf(vcam.paste(mL, box, hw), g)["JF"],
+                     "J_G": j_measure(mG, g), "J_L": j_measure(vcam.paste(mL, box, hw), g)})
+        masks.append(out)
+        c = vcam.center_of(out)
+        center = c if c is not None else center
+    peak = torch.cuda.max_memory_allocated()
+    pred.reset_state(stG)
+    pred.reset_state(stL)
+    return pd.DataFrame(rows).assign(peak_vram_bytes=peak), masks
+
+
+def dual(arms="A2d,A3,A3s"):
+    pred = m55.build_predictor()
+    controlled.install(pred, None, {})
+    for arm in arms.split(","):
+        d = OUT / "trackA" / arm
+        d.mkdir(parents=True, exist_ok=True)
+        for f in sorted((M6R / "A2x").glob("*.csv")):
+            if (d / f.name).exists():
+                continue
+            u = m6._UNITS()[pd.read_csv(f, nrows=1).unit[0]]
+            s = pd.read_csv(f, nrows=1).set[0]
+            torch.cuda.reset_peak_memory_stats()
+            df, masks = run_dual(pred, s, u, arm)
+            atomic_npz(d / f"{f.stem}.npz", **{arm: np.packbits(np.stack(masks))})
+            atomic_csv(df, d / f.name)
+            print(arm, u.name, round(df.JF.mean(), 4), round(df.JF_G.mean(), 4), flush=True)
+    status(completed=f"trackA dual {arms}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("what")

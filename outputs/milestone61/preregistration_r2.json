@@ -1,0 +1,14 @@
+{
+  "created": "2026-10-13 15:22:49",
+  "created_after": "round 1: TPLR rejected (no new information), calibrated gate no gain over self gate (selection saturated: self gate reaches ~89% of the A2o selection oracle), head v2 image-level negative. Frozen before any A3 output.",
+  "hypothesis": "selection among fixed global/local candidates is saturated; the global tracker's own memory keeps propagating its coarse small-target masks. Writing the accepted local (crop) mask back into the global state's memory (exact: the mask is already in full-frame coordinates, re-encoded like P5) makes the global candidate itself better on later frames, i.e. it creates NEW candidates.",
+  "arms": {
+    "A2d": "live dual-state A2x (G and L run together, no write-back); must reproduce the logged A2x exactly",
+    "A3": "A2d + when the crop is accepted at t, re-encode G's memory for frame t from the fused full-res mask (detail.to_model -> +-10 logits, G's object score)",
+    "A3s": "A3 + when the crop is rejected and G's mask is non-empty, re-encode L's memory for frame t from G's mask cropped to the current crop box (exact crop+resize, G's object score)"
+  },
+  "units": "the 21 dev units where A1/A2x crop (same as M6)",
+  "success": "gate-set small-unit dJF (vs B1, 15 small units, uncropped = 0) >= A2x + 0.01 AND no cropped unit below -0.01 vs A2x AND retrospective per-frame oracle over {G', L'} exceeds the oracle over {B1, A1} by >= 0.01",
+  "secondary": "live G' alone vs B1 (does write-back improve the global tracker itself?), frames 21+, latency",
+  "rows": []
+}

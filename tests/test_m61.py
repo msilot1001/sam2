@@ -38,3 +38,24 @@ def test_boundary_loss_zero_grad_free_and_finite():
     y[..., 100:200, 100:200] = 1
     good, bad = m._loss(y * 20 - 10, y), m._loss(-(y * 20 - 10), y)
     assert torch.isfinite(good) and good < bad
+
+
+import pytest
+
+
+@pytest.mark.realdata
+def test_dual_disabled_reproduces_logged_A2x_and_is_causal():
+    import pandas as pd
+    if not torch.cuda.is_available() or not (ROOT / "outputs/milestone6/runs/A2x").exists():
+        pytest.skip("no CUDA / M6 runs")
+    from memint import controlled
+    m = load()
+    pred = m.m55.build_predictor()
+    controlled.install(pred, None, {})
+    u = m.m6._UNITS()["davis__davis/lab-coat__obj1"]
+    ref = pd.read_csv(ROOT / "outputs/milestone6/runs/A2x/davis__davis_lab-coat__obj1.csv")
+    a, ma = m.run_dual(pred, "DAVIS_val", u, "A2d", n=7)
+    assert a.JF.round(10).tolist() == ref.JF.round(10).tolist()[:6]               # live dual == logged A2x
+    b, mb = m.run_dual(pred, "DAVIS_val", u, "A3", n=5)
+    c, mc = m.run_dual(pred, "DAVIS_val", u, "A3", n=8)
+    assert all(np.array_equal(x, y) for x, y in zip(mb, mc[:4]))                 # no future dependence
