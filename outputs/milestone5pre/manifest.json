@@ -1,0 +1,488 @@
+{
+  "frozen_unix": 1791855475.240673,
+  "rule": "Group A = prespecified known cases; Group B = first 7 other units (>= 25 frames) by sha256('m5pre-groupB|unit'); 6 frames per unit by sha256('m5pre-frame|unit|t') among idx in [9, n-1-10]",
+  "rows": [
+    {
+      "group": "A_known",
+      "unit": "davis__davis/pigs__obj2",
+      "frame_idx": 10,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "davis__davis/pigs__obj2",
+      "frame_idx": 18,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "davis__davis/pigs__obj2",
+      "frame_idx": 26,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "davis__davis/pigs__obj2",
+      "frame_idx": 33,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "davis__davis/pigs__obj2",
+      "frame_idx": 63,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "davis__davis/pigs__obj2",
+      "frame_idx": 66,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "davis__davis/gold-fish__obj1",
+      "frame_idx": 18,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "davis__davis/gold-fish__obj1",
+      "frame_idx": 20,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "davis__davis/gold-fish__obj1",
+      "frame_idx": 24,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "davis__davis/gold-fish__obj1",
+      "frame_idx": 28,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "davis__davis/gold-fish__obj1",
+      "frame_idx": 51,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "davis__davis/gold-fish__obj1",
+      "frame_idx": 52,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "davis__davis/gold-fish__obj2",
+      "frame_idx": 23,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "davis__davis/gold-fish__obj2",
+      "frame_idx": 35,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "davis__davis/gold-fish__obj2",
+      "frame_idx": 40,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "davis__davis/gold-fish__obj2",
+      "frame_idx": 49,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "davis__davis/gold-fish__obj2",
+      "frame_idx": 54,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "davis__davis/gold-fish__obj2",
+      "frame_idx": 64,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "vkitti__vkitti/Scene06__obj9",
+      "frame_idx": 12,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "vkitti__vkitti/Scene06__obj9",
+      "frame_idx": 26,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "vkitti__vkitti/Scene06__obj9",
+      "frame_idx": 35,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "vkitti__vkitti/Scene06__obj9",
+      "frame_idx": 46,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "vkitti__vkitti/Scene06__obj9",
+      "frame_idx": 47,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "vkitti__vkitti/Scene06__obj9",
+      "frame_idx": 53,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "vkitti__vkitti/Scene01__obj86",
+      "frame_idx": 23,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "vkitti__vkitti/Scene01__obj86",
+      "frame_idx": 26,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "vkitti__vkitti/Scene01__obj86",
+      "frame_idx": 46,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "vkitti__vkitti/Scene01__obj86",
+      "frame_idx": 49,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "vkitti__vkitti/Scene01__obj86",
+      "frame_idx": 68,
+      "rule": "hash"
+    },
+    {
+      "group": "A_known",
+      "unit": "vkitti__vkitti/Scene01__obj86",
+      "frame_idx": 72,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/kite-surf__obj1",
+      "frame_idx": 15,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/kite-surf__obj1",
+      "frame_idx": 17,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/kite-surf__obj1",
+      "frame_idx": 26,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/kite-surf__obj1",
+      "frame_idx": 29,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/kite-surf__obj1",
+      "frame_idx": 32,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/kite-surf__obj1",
+      "frame_idx": 33,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "vkitti__vkitti/Scene06__obj3",
+      "frame_idx": 15,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "vkitti__vkitti/Scene06__obj3",
+      "frame_idx": 19,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "vkitti__vkitti/Scene06__obj3",
+      "frame_idx": 20,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "vkitti__vkitti/Scene06__obj3",
+      "frame_idx": 22,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "vkitti__vkitti/Scene06__obj3",
+      "frame_idx": 23,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "vkitti__vkitti/Scene06__obj3",
+      "frame_idx": 34,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/india__obj1",
+      "frame_idx": 16,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/india__obj1",
+      "frame_idx": 30,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/india__obj1",
+      "frame_idx": 48,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/india__obj1",
+      "frame_idx": 49,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/india__obj1",
+      "frame_idx": 60,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/india__obj1",
+      "frame_idx": 61,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "vkitti__vkitti/Scene01__obj60",
+      "frame_idx": 23,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "vkitti__vkitti/Scene01__obj60",
+      "frame_idx": 24,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "vkitti__vkitti/Scene01__obj60",
+      "frame_idx": 25,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "vkitti__vkitti/Scene01__obj60",
+      "frame_idx": 28,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "vkitti__vkitti/Scene01__obj60",
+      "frame_idx": 35,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "vkitti__vkitti/Scene01__obj60",
+      "frame_idx": 37,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/paragliding-launch__obj3",
+      "frame_idx": 25,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/paragliding-launch__obj3",
+      "frame_idx": 33,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/paragliding-launch__obj3",
+      "frame_idx": 38,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/paragliding-launch__obj3",
+      "frame_idx": 40,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/paragliding-launch__obj3",
+      "frame_idx": 46,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/paragliding-launch__obj3",
+      "frame_idx": 50,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/dance-twirl__obj1",
+      "frame_idx": 36,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/dance-twirl__obj1",
+      "frame_idx": 54,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/dance-twirl__obj1",
+      "frame_idx": 55,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/dance-twirl__obj1",
+      "frame_idx": 65,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/dance-twirl__obj1",
+      "frame_idx": 66,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/dance-twirl__obj1",
+      "frame_idx": 76,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/motocross-jump__obj1",
+      "frame_idx": 17,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/motocross-jump__obj1",
+      "frame_idx": 18,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/motocross-jump__obj1",
+      "frame_idx": 20,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/motocross-jump__obj1",
+      "frame_idx": 22,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/motocross-jump__obj1",
+      "frame_idx": 26,
+      "rule": "hash"
+    },
+    {
+      "group": "B_control",
+      "unit": "davis__davis/motocross-jump__obj1",
+      "frame_idx": 27,
+      "rule": "hash"
+    }
+  ],
+  "excluded": [
+    {
+      "unit": "davis__davis/pigs__obj2",
+      "excluded_frames": "idx < 9 (too few memories) or > n-1-10 (no rollout room)"
+    },
+    {
+      "unit": "davis__davis/gold-fish__obj1",
+      "excluded_frames": "idx < 9 (too few memories) or > n-1-10 (no rollout room)"
+    },
+    {
+      "unit": "davis__davis/gold-fish__obj2",
+      "excluded_frames": "idx < 9 (too few memories) or > n-1-10 (no rollout room)"
+    },
+    {
+      "unit": "vkitti__vkitti/Scene06__obj9",
+      "excluded_frames": "idx < 9 (too few memories) or > n-1-10 (no rollout room)"
+    },
+    {
+      "unit": "vkitti__vkitti/Scene01__obj86",
+      "excluded_frames": "idx < 9 (too few memories) or > n-1-10 (no rollout room)"
+    },
+    {
+      "unit": "davis__davis/kite-surf__obj1",
+      "excluded_frames": "idx < 9 (too few memories) or > n-1-10 (no rollout room)"
+    },
+    {
+      "unit": "vkitti__vkitti/Scene06__obj3",
+      "excluded_frames": "idx < 9 (too few memories) or > n-1-10 (no rollout room)"
+    },
+    {
+      "unit": "davis__davis/india__obj1",
+      "excluded_frames": "idx < 9 (too few memories) or > n-1-10 (no rollout room)"
+    },
+    {
+      "unit": "vkitti__vkitti/Scene01__obj60",
+      "excluded_frames": "idx < 9 (too few memories) or > n-1-10 (no rollout room)"
+    },
+    {
+      "unit": "davis__davis/paragliding-launch__obj3",
+      "excluded_frames": "idx < 9 (too few memories) or > n-1-10 (no rollout room)"
+    },
+    {
+      "unit": "davis__davis/dance-twirl__obj1",
+      "excluded_frames": "idx < 9 (too few memories) or > n-1-10 (no rollout room)"
+    },
+    {
+      "unit": "davis__davis/motocross-jump__obj1",
+      "excluded_frames": "idx < 9 (too few memories) or > n-1-10 (no rollout room)"
+    }
+  ]
+}
