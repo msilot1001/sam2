@@ -249,6 +249,7 @@ def gates():
              "iou": dv.iou_L > dv.iou_G,
              "calibrated": p > 0.5}
     rules["ctu"] = rules["ctu"] & (dv.box_ratio <= 0.1) & (dv.area_L > 0)
+    rules = {k: np.asarray(v, bool) for k, v in rules.items()}
     for k, v in rules.items():
         dv[f"JF_{k}"] = np.where(v, dv.JF_L, dv.JF_G)
         dv[f"use_{k}"] = v
@@ -275,7 +276,7 @@ def gates():
                   "nonsmall_dJF": float(G[~G.small][f"d_{k}"].mean()),
                   "all_dev_dJF": float(U[f"d_{k}"].mean())}
         if k in rules:
-            v = dv[rules[k].to_numpy()] if k != "none" else dv
+            rules[k] = np.asarray(rules[k], bool)
             rep[k]["adopt_rate"] = float(rules[k].mean())
             rep[k]["wrong_adopt"] = float(((rules[k]) & (dv.JF_L < dv.JF_G - 0.05)).mean())
             rep[k]["missed_helpful"] = float(((~rules[k]) & (dv.JF_L > dv.JF_G + 0.05)).mean())
@@ -437,6 +438,73 @@ def head_pc():
     atomic_json(rep, OUT / "trackB" / "positive_control.json")
     print(json.dumps(rep, indent=1))
     status(completed=f"trackB positive control pass={rep['pass']}")
+
+
+PREREG_PC2 = {
+    "created_after": "head_pc failed (train J 0.809 -> 0.814 after 400 steps); diagnostic of the optimization, not of the task",
+    "setup": "the same 32 DAVIS-train frames (75 objects), frozen SAM 2 outputs cached once; batch = all objects of one frame",
+    "variants": {"V1": "HeadV2 as pre-registered, AdamW 1e-3 constant, 3000 steps",
+                 "V2": "V1 + fixed feature standardization (s0 / 0.084, s1 / 0.177; constants measured on one frame)",
+                 "V3": "V2 with lr 3e-4"},
+    "pass": "train J(head) - J(frozen) >= +0.05 on the 75 objects (same rule as head_pc); 20 min wall cap in total",
+    "next": "if a variant passes: main training with that variant (30 min) and the round-1 evaluation protocol unchanged; "
+            "else Track B = technically inconclusive",
+}
+
+
+class HeadV2N(HeadV2):
+    def forward(self, logit, s0, s1, rgb1024):
+        return super().forward(logit, s0 / 0.084, s1 / 0.177, rgb1024)
+
+
+def head_pc2():
+    from PIL import Image
+    from rfeas.units import davis_gt
+    m55._freeze(OUT / "trackB" / "preregistration_pc2.json", {**PREREG_PC2, "rows": []})
+    items = _samples()
+    rng = np.random.default_rng(1)
+    pc = [items[i] for i in rng.choice(len(items), 32, replace=False)]
+    ipred = m55.build_image_predictor()
+    cache = []
+    for us, t in pc:
+        im = np.asarray(Image.open(m55.frame_dir(us[0]) / f"{us[0].frames[t]}.jpg").convert("RGB"))
+        objs = []
+        for u in us:
+            g = davis_gt(u, u.frames[t])
+            if g.any():
+                with torch.no_grad():
+                    lg, s0, s1 = _frozen_box(ipred, im, g)
+                objs.append((lg, g, _gt1024(g)))
+        if objs:
+            cache.append((s0.clone(), s1.clone(), _rgb1024(im), objs))
+    del ipred
+    rep = {}
+    for name, cls, lr in (("V1", HeadV2, 1e-3), ("V2", HeadV2N, 1e-3), ("V3", HeadV2N, 3e-4)):
+        torch.manual_seed(0)
+        head = cls().cuda()
+        opt = torch.optim.AdamW(head.parameters(), lr, weight_decay=1e-4)
+        t0, log = time.time(), []
+        for k in range(3000):
+            if time.time() - t0 > 6 * 60:
+                break
+            s0, s1, rgb, objs = cache[k % len(cache)]
+            loss = sum(_loss(head(lg, s0, s1, rgb), y) for lg, _, y in objs) / len(objs)
+            opt.zero_grad()
+            loss.backward()
+            opt.step()
+            log.append(float(loss.detach()))
+        jf, jh = [], []
+        with torch.no_grad():
+            for s0, s1, rgb, objs in cache:
+                for lg, g, _ in objs:
+                    jf.append(j_measure(_to_frame_1024(Fn.interpolate(lg, size=(1024, 1024), mode="bilinear", align_corners=False), g.shape), g))
+                    jh.append(j_measure(_to_frame_1024(head(lg, s0, s1, rgb), g.shape), g))
+        rep[name] = {"steps": len(log), "minutes": (time.time() - t0) / 60, "loss_first100": float(np.mean(log[:100])),
+                     "loss_last100": float(np.mean(log[-100:])), "J_frozen": float(np.mean(jf)), "J_head": float(np.mean(jh)),
+                     "pass": float(np.mean(jh) - np.mean(jf)) >= 0.05}
+        print(name, json.dumps(rep[name]), flush=True)
+    atomic_json(rep, OUT / "trackB" / "positive_control2.json")
+    status(completed=f"trackB pc2 {[(k, v['pass']) for k, v in rep.items()]}")
 
 
 def head_train():
