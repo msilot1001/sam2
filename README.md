@@ -115,3 +115,19 @@ cd sam2
 ```bash
 uv run python scripts/m55.py {audit|manifest|survey|ablate|tune|proto_manifest|proto|analyze}
 ```
+
+## M5.6: 실제 영상 실패 종합 감사와 연구 방향 (탐색적, CUDA)
+
+브랜치 `exp/m56-comprehensive-failure-audit`. 보고서: [docs/MILESTONE_5_6.md](docs/MILESTONE_5_6.md), 제안서: [docs/FINAL_RESEARCH_DIRECTION_PROPOSAL.md](docs/FINAL_RESEARCH_DIRECTION_PROPOSAL.md).
+
+- **PUMaVOS (CC BY 4.0) 추가:** 영상 단위로 A 탐색 / B 개발 / C 확인으로 분할했다. C는 실행하지 않았다.
+- **P5 효과:** PUMaVOS +0.003, DAVIS +0.017 J&F. 두 데이터 모두 악화된 객체는 없다.
+- **실패 구간 35개 진단:**
+  - 28개는 GT로 다시 prompt해도 회복되지 않는다.
+  - 배포 가능한 메모리 개입으로 고쳐지는 것은 2개다.
+  - 작은 대상의 결손은 두 데이터셋에서 반복된다.
+- **잠정 방향:** 작은 대상을 위한 메모리 일관 확대 추론. 최소 기각 실험이 먼저 필요하다.
+
+```bash
+uv run python scripts/m56.py {prepare_pumavos|manifest|run|diagnose|scale_probe|analyze}
+```
