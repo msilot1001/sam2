@@ -32,6 +32,39 @@ CKPT = "checkpoints/sam2.1_hiera_tiny.pt"
 AUDIT = [("paragliding-launch", 3), ("kite-surf", 1)]
 
 
+# ----------------------------------------------------------------------------- dataset dispatch (DAVIS / SegTrack v2)
+SEGTRACK = Path("data/segtrackv2/clips")
+_ST = {}
+
+
+def segtrack_units() -> list[Unit]:
+    us = []
+    for v in sorted(p for p in SEGTRACK.iterdir() if p.is_dir()):
+        info = json.loads((v / "frames.json").read_text())
+        us += [Unit("segtrack", f"segtrack/{v.name}", k, tuple(range(len(info["stems"]))))
+               for k in range(1, info["n_objects"] + 1)]
+    return us
+
+
+def _st(u: Unit, k: int) -> np.ndarray:
+    key = (u.video, k)
+    if key not in _ST:
+        _ST[key] = np.load(SEGTRACK / u.video.split("/", 1)[1] / f"obj{k}.npy")
+    return _ST[key]
+
+
+def gt_of(u: Unit, frame) -> np.ndarray:
+    return davis_gt(u, frame) if u.dataset == "davis" else _st(u, u.obj_id)[frame]
+
+
+def frame_dir(u: Unit) -> Path:
+    return davis_frame_dir(u) if u.dataset == "davis" else SEGTRACK / u.video.split("/", 1)[1]
+
+
+def units_of(split) -> list[Unit]:
+    return segtrack_units() if split == "segtrack" else davis_units(split)[0]
+
+
 def build_predictor():
     from sam2.build_sam import build_sam2_video_predictor
     torch.backends.cuda.matmul.allow_tf32 = False
@@ -181,7 +214,12 @@ def strata(gt0: np.ndarray) -> dict:
     return s
 
 
-def manifest():
+def manifest(split=None):
+    if split == "segtrack":     # zero-shot generalisation set, frozen separately (added after the DAVIS freeze)
+        rows = [{"unit": u.name, "split": "segtrack", "role": "zero_shot_not_in_sam2_training", "n_frames": len(u.frames),
+                 **strata(gt_of(u, 0))} for u in segtrack_units()]
+        return _freeze(OUT / "manifest_segtrack.json", {"rows": rows, "strata_rules": STRATA_RULES, "fail_J": FAIL_J,
+                       "class_rules": CLASS_RULES, "selection": "census of every SegTrack v2 object"})
     path = OUT / "manifest.json"
     rows = []
     for split, role in (("val", "primary"), ("train", "secondary_sam2_training_overlap")):
@@ -192,6 +230,11 @@ def manifest():
          "rows": rows, "strata_rules": STRATA_RULES, "fail_J": FAIL_J, "class_rules": CLASS_RULES,
          "A_rule": A_RULE, "G_rule": G_RULE, "ablations": ABLATIONS, "ablation_frames": ABL_FRAMES,
          "ablation_units": "all primary (val) units", "selection": "census of every first-frame object (no sampling)"}
+    _freeze(path, m)
+
+
+def _freeze(path, m):
+    m = {"created": time.strftime("%Y-%m-%d %H:%M:%S"), **{k: v for k, v in m.items() if k != "created"}}
     if path.exists():
         old = json.loads(path.read_text())
         if {k: v for k, v in old.items() if k != "created"} != {k: v for k, v in m.items() if k != "created"}:
@@ -199,11 +242,11 @@ def manifest():
         print("manifest unchanged")
         return
     atomic_json(m, path)
-    print(f"froze {len(rows)} units")
+    print(f"froze {len(m["rows"])} units -> {path}")
 
 
-def load_manifest():
-    return json.loads((OUT / "manifest.json").read_text())
+def load_manifest(split="val"):
+    return json.loads((OUT / ("manifest_segtrack.json" if split == "segtrack" else "manifest.json")).read_text())
 
 
 # ----------------------------------------------------------------------------- 3. survey (native + oracle)
@@ -234,6 +277,9 @@ def image_oracle(ipred, gt: np.ndarray) -> float:
 
 
 def other_gt(u: Unit, frame) -> np.ndarray:
+    if u.dataset == "segtrack":
+        n = json.loads((frame_dir(u) / "frames.json").read_text())["n_objects"]
+        return np.logical_or.reduce([_st(u, k)[frame] for k in range(1, n + 1) if k != u.obj_id] or [np.zeros_like(gt_of(u, frame))])
     from PIL import Image
     split_root = DAVIS / "Annotations/480p" / u.video.split("/", 1)[1]
     a = np.asarray(Image.open(split_root / f"{frame}.png"))
@@ -254,8 +300,8 @@ def frame_metrics(pr, gt, prev_pr, prev_gt, oth) -> dict:
 
 
 def _units_by_video(split):
-    us = {u.name: u for u in davis_units(split)[0]}
-    names = [r["unit"] for r in load_manifest()["rows"] if r["split"] == split]
+    us = {u.name: u for u in units_of(split)}
+    names = [r["unit"] for r in load_manifest(split)["rows"] if r["split"] == split]
     vids = {}
     for n in names:
         vids.setdefault(us[n].video, []).append(us[n])
@@ -274,23 +320,23 @@ def survey(split="val"):
         runs = {}
         for u in todo:                                     # predictions first (no GT beyond the prompt)
             torch.cuda.reset_peak_memory_stats()
-            state, od = engine.start(pred, davis_frame_dir(u), davis_gt(u, u.frames[0]))
+            state, od = engine.start(pred, frame_dir(u), gt_of(u, u.frames[0]))
             t0 = time.perf_counter()
             masks, lat = engine.rollout(pred, state, od, 1, len(u.frames) - 1, record=(rec := {}))
             runs[u.name] = (masks, lat, rec, time.perf_counter() - t0, torch.cuda.max_memory_allocated())
             pred.reset_state(state)
-        jpgs = sorted(davis_frame_dir(todo[0]).glob("*.jpg"))
+        jpgs = sorted(frame_dir(todo[0]).glob("*.jpg"))
         orc = {}
         with torch.inference_mode():
             for t in range(1, len(jpgs)):
                 ipred.set_image(np.asarray(Image.open(jpgs[t]).convert("RGB")))
                 for u in todo:
-                    orc[(u.name, t)] = image_oracle(ipred, davis_gt(u, u.frames[t]))
+                    orc[(u.name, t)] = image_oracle(ipred, gt_of(u, u.frames[t]))
         for u in todo:
             masks, lat, rec, wall, vram = runs[u.name]
             rows, prev = [], (None, None)
             for t in range(1, len(u.frames)):
-                g = davis_gt(u, u.frames[t])
+                g = gt_of(u, u.frames[t])
                 rows.append({"unit": u.name, "video_idx": t, **frame_metrics(masks[t], g, *prev, other_gt(u, u.frames[t])),
                              "J_image_oracle": orc[(u.name, t)], "obj_score": rec[t]["obj_score"], "latency_s": lat[t]})
                 prev = (masks[t], g)
@@ -376,7 +422,9 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     if a.what == "survey":
         return survey(a.split)
-    {"audit": audit, "manifest": manifest, "ablate": ablate, "analyze": analyze}[a.what]()
+    if a.what == "manifest":
+        return manifest(a.split if a.split == "segtrack" else None)
+    {"audit": audit, "ablate": ablate, "analyze": analyze}[a.what]()
 
 
 if __name__ == "__main__":
