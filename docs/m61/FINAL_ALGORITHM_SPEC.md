@@ -1,8 +1,12 @@
-# 최종 알고리즘 명세: SGGL-W (Self-Gated Global–Local SAM 2 with one-way local→global memory Write-back)
+# 최종 알고리즘 명세: SGGL (Self-Gated Global–Local SAM 2) + M7 ablation W (단방향 국소→전역 메모리 되쓰기)
 
 > **상태: 잠정 (PROVISIONAL).**
-> - **핵심 (SGGL = M6 A2x):** 개발 세트 작은 객체 +0.018 [+0.009, +0.025]. 사전 관문 +0.03에는 미달했다.
-> - **확장 W (M6.1 A3):** A2x 대비 +0.0022 [+0.0003, +0.006]. 사전 기준 +0.01에는 미달했다.
+> - **주 알고리즘은 SGGL(= M6 A2x)이다.**
+>   - 개발 세트 작은 객체 +0.018 [+0.009, +0.025], 영상 10개. 사전 관문 +0.03에는 미달했다.
+>   - 같은 2× 계산의 F2 대비 +0.018 [+0.009, +0.026].
+> - **W(M6.1 A3)는 기본값이 꺼진 ablation이다.**
+>   - A2x 대비 +0.0022 [+0.0002, +0.0054]. 사전 조건 3개 중 2개가 미달했다(현직 + 0.01, 새 정보 +0.01 → 실제 +0.0002).
+>   - 이득의 90%가 lab-coat 영상의 객체 3개에서 나왔다.
 > - 둘 다 사후 탐색과 반복 사용한 개발 데이터에서 나왔다.
 > - **비활성 동등성:**
 >   - 되쓰기를 끄면(A2d) 기록된 A2x와 정확히 같다(21/21 객체).
@@ -43,7 +47,7 @@ flowchart TB
 ## 3. 의사코드
 
 ```python
-def sggl_w(frames, gt0, P, write_back=True):
+def sggl(frames, gt0, P, write_back=False):           # W는 M7 ablation, 기본 off
     H, W = gt0.shape
     s = crop_side(gt0, target=0.25, max_zoom=4)       # vcam.crop_side
     G = start_p5(P, frames, gt0)                       # m56.start(p5=True)
@@ -65,8 +69,17 @@ def sggl_w(frames, gt0, P, write_back=True):
         yield t, out
 ```
 
-**금지 사항:**
-- G 마스크를 L 메모리에 쓰지 않는다. 양방향(A3s)은 lab-coat obj1에서 피드백 붕괴(−0.59)를 일으켰다.
+**금지와 주의:**
+- G 마스크를 L 메모리에 쓰지 않는다. 양방향(A3s)은 lab-coat obj1에서 붕괴(−0.59)했다. 객체 1개이고 CI가 0을 포함하지만, 위험 신호로 본다.
+- W는 G의 object score를 넘긴다. 그 값이 ≤ 0이면 SAM 2가 no-object embedding을 메모리에 더한다.
+  - 개발 세트에서는 2,007 frame 중 1회였다.
+  - 극소 대상 세트에서는 잦을 수 있다.
+  - M7에서는 W를 'G score > 0일 때만'으로 제한한 변형도 함께 기록한다.
+- **M7 W arm 3종:**
+  1. W 끔 (주 알고리즘)
+  2. W 항상
+  3. 신뢰도 gate W: crop score와 G score가 모두 > 0이고, 되쓰기 직후 G score가 떨어지지 않을 때만
+     - 지시서의 '신뢰도' 가설을 되쓰기 결정에 적용한 것이다.
 
 ## 4. 모듈 인터페이스 (현재 저장소 기준)
 
@@ -74,15 +87,15 @@ def sggl_w(frames, gt0, P, write_back=True):
 |---|---|---|
 | `src/spatial/vcam.py` | 있음 | `crop_side`, `place`, `paste`, `touches_border`, `center_of`, `LazyCropFrames`, `lazy_loader` |
 | `scripts/m56.py:start/start_dir` | 있음 | P5 시작 |
-| `scripts/m61.py:run_dual` | 있음 (실험용) | `(pred, set, unit, arm∈{A2d, A3, A3s}, n)` → (프레임 표, 마스크) |
-| **`src/spatial/sggl.py`** | **새로 만들 것 (M7)** | `SGGL(predictor, gate="self"|"agreement"|"none", write_back="none"|"l2g")`. `.start(frames_dir, gt0)`, `.step(t) -> (mask, info)`. 실험 코드에서 분리한 단일 구현 |
+| `scripts/m61.py:run_dual` | 있음 (실험용) | `(pred, set, unit, arm∈{A2d, A3, A3s}, n)` → (프레임 표, 마스크). A2d = SGGL |
+| **`src/spatial/sggl.py`** | **새로 만들 것 (M7)** | `SGGL(predictor, gate="self"|"agreement"|"none", write_back="none"|"l2g"|"l2g_reliable")`. `.start(frames_dir, gt0)`, `.step(t) -> (mask, info)`. 실험 코드에서 분리한 단일 구현 |
 
 ## 5. 상태 전이 (frame별)
 
 | 상태 | 조건 | 출력 | 메모리 갱신 |
 |---|---|---|---|
 | NO_LOCAL | s 없음 (큰 대상) | m_G | G 기본 |
-| LOCAL_ACCEPT | ok | paste(m_L) | L 기본. G의 frame t 메모리를 출력으로 교체 (W) |
+| LOCAL_ACCEPT | ok | paste(m_L) | L 기본. G 기본. (W arm에서만 G의 frame t 메모리를 출력으로 교체) |
 | LOCAL_REJECT | ¬ok (object score ≤ 0, 경계 접촉, 빈 마스크) | m_G | 둘 다 기본 (L은 자기 출력, G는 자기 출력) |
 
 - crop 중심은 항상 출력 box 중심을 따른다.

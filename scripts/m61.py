@@ -639,6 +639,8 @@ def run_dual(pred, s, u, arm, n=None):
         odL["non_cond_frame_outputs"][t] = oL
         touch = vcam.touches_border(mL, box, hw)
         ok = sL > 0 and mL.any() and not touch
+        if arm == "A2v":                                   # cross-view presence veto (round 5)
+            ok = ok and sG > 0
         out = vcam.paste(mL, box, hw) if ok else mG
         wrote = ""
         with torch.inference_mode():
@@ -787,6 +789,48 @@ def replicate(arms="A2d,A3"):
             atomic_csv(df, d / f"{stem}.csv")
             print(arm, u.name, round(df.JF.mean(), 4), flush=True)
     status(completed=f"replication {arms}")
+
+
+PREREG_R5 = {
+    "created_after": "round-4 replication on DAVIS train: A2x small +0.009 [-0.019, +0.032] (22 videos; 17 up / 2 down by "
+                     "video); one catastrophic unit miami-surf obj5 -0.477: after a true absence the LOCAL tracker re-acquires "
+                     "a wrong object with high confidence (score_L up to 7.8) while the GLOBAL tracker correctly reports absence "
+                     "(score_G < 0, J_G = 1.0) and the self gate adopts the crop for ~35 frames. EXPLORATORY: the failure "
+                     "was found on the replication set, so results on that set are not independent.",
+    "arm": "A2v = A2x self gate AND global object score > 0 (cross-view presence veto); everything else unchanged",
+    "evaluation": {"dev_gate_set": "21 dev crop units (as A2x); primary: non-inferiority, small-unit dJF (15, uncropped=0) "
+                                   ">= A2x - 0.003",
+                   "replication_set": "43 DAVIS-train crop units: miami-surf obj5 dJF >= -0.05 and small-unit mean >= A2x "
+                                      "(descriptive, not independent)"},
+    "interpretation": "if both hold, cross-view presence consistency is a measured reliability component of the global-local "
+                      "direction (still exploratory); if dev non-inferiority fails, the veto removes A2x's benefit",
+}
+
+
+def prereg_r5():
+    m55._freeze(OUT / "preregistration_r5.json", {**PREREG_R5, "rows": []})
+
+
+def veto(which="dev,train"):
+    from rfeas.units import davis_units
+    pred = m55.build_predictor()
+    controlled.install(pred, None, {})
+    for w in which.split(","):
+        d = OUT / ("trackA" if w == "dev" else "replication") / "A2v"
+        d.mkdir(parents=True, exist_ok=True)
+        if w == "dev":
+            todo = [(pd.read_csv(f, nrows=1).set[0], m6._UNITS()[pd.read_csv(f, nrows=1).unit[0]]) for f in sorted((M6R / "A2x").glob("*.csv"))]
+        else:
+            todo = [("DAVIS_train", u) for u in davis_units("train")[0] if vcam.crop_side(m6.gt(u, 0)) is not None]
+        for s, u in todo:
+            stem = u.name.replace("/", "_")
+            if (d / f"{stem}.csv").exists():
+                continue
+            torch.cuda.reset_peak_memory_stats()
+            df, masks = run_dual(pred, s, u, "A2v")
+            atomic_csv(df, d / f"{stem}.csv")
+            print("A2v", u.name, round(df.JF.mean(), 4), flush=True)
+    status(completed=f"A2v veto {which}")
 
 
 def main():

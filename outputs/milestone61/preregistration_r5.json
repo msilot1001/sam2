@@ -1,0 +1,11 @@
+{
+  "created": "2026-10-13 17:51:12",
+  "created_after": "round-4 replication on DAVIS train: A2x small +0.009 [-0.019, +0.032] (22 videos; 17 up / 2 down by video); one catastrophic unit miami-surf obj5 -0.477: after a true absence the LOCAL tracker re-acquires a wrong object with high confidence (score_L up to 7.8) while the GLOBAL tracker correctly reports absence (score_G < 0, J_G = 1.0) and the self gate adopts the crop for ~35 frames. EXPLORATORY: the failure was found on the replication set, so results on that set are not independent.",
+  "arm": "A2v = A2x self gate AND global object score > 0 (cross-view presence veto); everything else unchanged",
+  "evaluation": {
+    "dev_gate_set": "21 dev crop units (as A2x); primary: non-inferiority, small-unit dJF (15, uncropped=0) >= A2x - 0.003",
+    "replication_set": "43 DAVIS-train crop units: miami-surf obj5 dJF >= -0.05 and small-unit mean >= A2x (descriptive, not independent)"
+  },
+  "interpretation": "if both hold, cross-view presence consistency is a measured reliability component of the global-local direction (still exploratory); if dev non-inferiority fails, the veto removes A2x's benefit",
+  "rows": []
+}

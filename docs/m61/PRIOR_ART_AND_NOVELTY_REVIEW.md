@@ -18,6 +18,11 @@
 | SAMURAI | 프리프린트, READ | SAM2 예측 IoU + Kalman box 점수로 후보 마스크 선택 | 품질 점수 기반 선택 | 배율 간 선택이 아님. 보정 없음 |
 | Alpha-Refine (CVPR'21) | 심사, READ | 추적기 box 약 2배 crop을 학습된 정제기로 처리 | 고정 객체 상대 crop | 별도 학습 모델. SAM2 메모리 없음 |
 
+**추가 선행 계열 (M6.1 독립 검토자 지식 기반, 원문 미확인):**
+- 장기 추적의 국소 탐색 + 전역 재탐지: LTMU (CVPR'20), SPLT (ICCV'19), GlobalTrack (AAAI'20), Siam R-CNN (CVPR'20)
+- 작은 객체 검출을 위한 slicing 추론: SAHI
+- 상호작용 교정 경로: SAM 2 자체가 교정 마스크를 메모리에 넣는다. 되쓰기(W)와 가깝다.
+
 **새로움 위험: 높음.**
 - 'crop 창 + 전역 병렬 + 선택'은 CTU에 있고, '고정 객체 상대 crop'은 Alpha-Refine과 f-BRS에 있다.
 - 남는 차별점은 두 가지뿐이다.

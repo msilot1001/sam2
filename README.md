@@ -155,3 +155,27 @@ uv run python scripts/m56.py {prepare_pumavos|manifest|run|diagnose|scale_probe|
 ```bash
 uv run python scripts/m6.py {prereg*|track B1|track A1|track A1z|track A1v|track A2x|track A2c|cscale|breappear|s1|head_pilot|analyze}
 ```
+
+## M6.1: 야간 심층 연구와 도전자 토너먼트 (탐색적, CUDA)
+
+브랜치 `exp/m61-overnight-deep-research`. 핵심 문서는 [docs/m61/FINAL_RESEARCH_DIRECTION.md](docs/m61/FINAL_RESEARCH_DIRECTION.md)다. 그 밖에 실험 보고서, 비교, 선행연구, 알고리즘 명세, 로드맵이 `docs/m61/`에 있다. 실행 장부는 `outputs/milestone61/EXECUTION_STATUS.json`이다.
+
+**시험한 도전자 (모두 사전 등록):**
+
+| 도전자 | 결과 |
+|---|---|
+| 추적기 prompt 국소 재분할 | 기각 |
+| 보정 gate | 기각 (선택이 포화됨) |
+| 학습 정제 head | 영상 −0.0035로 기각 |
+| 시간 교정 | 검정력 부족 |
+| flip 2× 앙상블 (비용 대조) | +0.001 |
+| 메모리 되쓰기 | 단방향 +0.0022 vs A2x / 양방향은 붕괴 |
+
+**결론:**
+- 현직 A2x의 이득은 계산량이 아니라 메커니즘에서 온다 (A2x − F2: 작은 객체 +0.018).
+- 결정은 KEEP_GLOBAL_LOCAL, 신뢰도는 PROVISIONAL이다. PUMaVOS C는 열지 않았다.
+
+```bash
+uv run python scripts/m61.py {prereg*|tplr|dtrain|gates|head_pc|head_pc2|head_train|head_image|head_video|dual|flip2|replicate}
+uv run python scripts/m61_compare.py; uv run python scripts/m61_a3.py; uv run python scripts/m61_replication.py
+```

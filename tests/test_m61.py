@@ -75,3 +75,8 @@ def test_flip_control_original_branch_equals_B1():
     a, _ = m.run_flip(pred, "DAVIS_val", u, n=6)
     assert a.JF_orig.round(10).tolist() == ref.JF.round(10).tolist()[:5]           # original branch == B1
     assert (a.JF_flip > 0).all()                                                    # flipped branch tracks too
+
+
+def test_veto_arm_only_tightens_the_gate():
+    src = (ROOT / "scripts/m61.py").read_text()
+    assert 'if arm == "A2v":' in src and "ok = ok and sG > 0" in src
