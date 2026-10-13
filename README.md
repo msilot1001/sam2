@@ -131,3 +131,27 @@ uv run python scripts/m55.py {audit|manifest|survey|ablate|tune|proto_manifest|p
 ```bash
 uv run python scripts/m56.py {prepare_pumavos|manifest|run|diagnose|scale_probe|analyze}
 ```
+
+## M6: 연구 방향 토너먼트 (탐색적, CUDA)
+
+브랜치 `exp/m6-research-direction-tournament`. 문서는 [docs/m6/](docs/m6/)에 있다.
+- 실험 보고서: [OVERNIGHT_EXPERIMENT_REPORT](docs/m6/OVERNIGHT_EXPERIMENT_REPORT.md)
+- 결정서: [FINAL_RESEARCH_TOPIC_DECISION](docs/m6/FINAL_RESEARCH_TOPIC_DECISION.md)
+- 그 밖: 알고리즘 명세, 로드맵, 선행연구 비교, 독립 검토
+
+**진행 방식:** 5회차 사전 등록 실험을 했다. PUMaVOS C는 열지 않았다. 통과한 후보가 없었기 때문이다.
+
+**결과:**
+- **확대 (트랙 A):**
+  - 고정 배율 crop은 작은 객체 +0.017이다.
+  - 자기 신호 gate 전역–국소 추론은 +0.018에 회귀 0이며, CTU 일치 gate보다 +0.008 높다.
+  - 둘 다 관문 +0.03에 미달했다.
+  - 강한 확대(−0.044)와 예측 IoU 기반 배율 선택(−0.044)은 해롭다.
+- **재획득 (트랙 B):** 검정력이 부족하다. 부재 감지 AUROC는 이미 0.99 수준이다.
+- **표현 (트랙 C):** 사전 규칙상 음성이다. 짧은 학습 head 파일럿은 결론을 낼 수 없다.
+
+**결정:** PROCEED_PROVISIONAL. 잠정 주제는 「극소 대상을 위한 자기 신호 gate 전역–국소 SAM 2 추론」이다. 새 극소 대상 데이터에서 사전 등록 기각 실험을 해야 한다.
+
+```bash
+uv run python scripts/m6.py {prereg*|track B1|track A1|track A1z|track A1v|track A2x|track A2c|cscale|breappear|s1|head_pilot|analyze}
+```

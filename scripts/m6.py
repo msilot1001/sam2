@@ -606,6 +606,50 @@ def analyze():
                        "oracle_A1zscale": float(m.J_oracle_crop_z.mean()), "video_small_dJF_A1": rep["gate_A1"]["small_dJF"],
                        "video_small_dJF_A1z": gz}
         rep["dose"]["supported"] = bool(rep["dose"]["oracle_A1zscale"] > rep["dose"]["oracle_A1scale"] and gz > rep["gate_A1"]["small_dJF"])
+    # 5. corrections after independent review (union ceilings, per-unit oracle, within-unit presence, size, A2c)
+    sm = {r["unit"]: r["small"] for r in json.loads((OUT / "preregistration.json").read_text())["rows"]}
+    allx = {a: _runs(a) for a in ("A1", "A1z", "A1v", "A2x", "A2c") if _runs(a) is not None}
+    M = B[["set", "unit", "video", "video_idx", "JF"]].copy()
+    for a, X in allx.items():
+        M = M.merge(X[["unit", "video_idx", "JF"]].rename(columns={"JF": a}), on=["unit", "video_idx"], how="left")
+        M[a] = M[a].fillna(M.JF)
+    M["small"] = M.unit.map(sm)
+    G = M[M.set.isin(GATE_SETS)]
+    U = G.groupby(["unit", "video", "small"]).mean(numeric_only=True).reset_index()
+    U["unit_oracle"] = U[["JF", *allx]].max(axis=1) - U.JF
+    G = G.assign(best=G[["JF", *allx]].max(axis=1))
+    Uf = G.groupby(["unit", "video", "small"]).agg(JF=("JF", "mean"), best=("best", "mean")).reset_index()
+    rep["union_oracle_retro"] = {"arms": list(allx), "small_per_unit": float(U[U.small].unit_oracle.mean()),
+                                 "small_per_frame": float((Uf.best - Uf.JF)[Uf.small].mean()),
+                                 "nonsmall_per_frame": float((Uf.best - Uf.JF)[~Uf.small].mean())}
+    if cs.exists():
+        V = pd.read_csv(cs).merge(B[["unit", "video_idx", "J"]], on=["unit", "video_idx"])
+        pu = V.groupby("unit")[["J", "J_oracle_full"]].mean()
+        rep["video_vs_oracle_small"] = {"pooled_frames": [float(V.J.mean()), float(V.J_oracle_full.mean()), int(len(V))],
+                                        "per_unit_mean": [float(pu.J.mean()), float(pu.J_oracle_full.mean()), int(len(pu))],
+                                        "units_video_below_oracle_by_0.1": pu[pu.J < pu.J_oracle_full - 0.1].round(3).reset_index().to_dict("records")}
+    wu = [auroc((~g.gt_empty).astype(int).to_numpy(), g.obj_score.to_numpy()) for _, g in Bv.groupby("unit") if 0 < g.gt_empty.sum() < len(g)]
+    rep["presence_within_unit"] = {"units_with_empty_frames": len(wu), "auroc_median": float(np.median(wu)), "auroc_min": float(np.min(wu)),
+                                   "empty_frames_by_unit": Bv[Bv.gt_empty].unit.value_counts().to_dict()}
+    from scipy.stats import spearmanr
+    af = {}
+    for f in ("outputs/milestone55/manifest.json", "outputs/milestone56/manifest.json", "outputs/milestone55/manifest_segtrack.json"):
+        af.update({r["unit"]: r["area_frac"] for r in json.loads(Path(f).read_text())["rows"]})
+    rep["size_dependence"] = {}
+    for a in ("A1", "A2x"):
+        W = pd.read_csv(rd / f"trackA_{a}_per_unit.csv")
+        for name, sub in (("small_applied_all_sets", W[W.applied & W.small]), ("small_all_gate_sets", W[W.small & W.set.isin(GATE_SETS)])):
+            rho, pv = spearmanr(sub.unit.map(af), sub.dJF)
+            rep["size_dependence"][f"{a}_{name}"] = {"n": int(len(sub)), "rho": float(rho), "p": float(pv)}
+    if "A2c" in allx:
+        x = pd.read_csv(rd / "trackA_A2x_per_unit.csv").set_index("unit")
+        c = pd.read_csv(rd / "trackA_A2c_per_unit.csv").set_index("unit")
+        d = x[["set", "video", "small", "dJF"]].join(c[["dJF", "crop_frac"]], rsuffix="_A2c")
+        d["diff"] = d.dJF - d.dJF_A2c
+        g = d[d.small & d.set.isin(GATE_SETS)].reset_index()
+        rep["A2x_vs_A2c"] = {"small_gate_mean": float(g["diff"].mean()), "CI_video": _boot(g, "diff"),
+                             "units_A2x_better_0.005": int((g["diff"] > 0.005).sum()), "units_A2c_better_0.005": int((g["diff"] < -0.005).sum()),
+                             "crop_acceptance_A2x": float(x[x.applied].crop_frac.mean()), "crop_acceptance_A2c": float(c[c.applied].crop_frac.mean())}
     atomic_json(rep, rd / "m6_report.json")
     print(json.dumps(rep, indent=1, default=float)[:20000])
 

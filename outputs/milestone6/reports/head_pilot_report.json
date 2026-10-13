@@ -1,0 +1,218 @@
+{
+  "train_steps": 4196,
+  "train_minutes": 8.134148967266082,
+  "small": {
+    "units": 19,
+    "dJ": -0.0015478952419575266,
+    "CI": [
+      -0.007508743231965371,
+      0.0032953636803909015
+    ],
+    "frac_pos": 0.3684210526315789,
+    "dF": -0.0076327206549836775,
+    "J_frozen": 0.695885847010505,
+    "J_head": 0.6943379517685475
+  },
+  "ordinary": {
+    "units": 58,
+    "dJ": -0.0009016206715722332,
+    "CI": [
+      -0.003102242195008096,
+      0.0012781337972364699
+    ],
+    "dF": 0.004755735429269803
+  },
+  "per_unit_small": [
+    {
+      "set": "DAVIS_val",
+      "unit": "davis__davis/dogs-jump__obj1",
+      "video": "davis/dogs-jump",
+      "small": true,
+      "J_frozen": 0.8875,
+      "J_head": 0.8841,
+      "dJ": -0.0035,
+      "dF": -0.0011
+    },
+    {
+      "set": "DAVIS_val",
+      "unit": "davis__davis/drift-chicane__obj1",
+      "video": "davis/drift-chicane",
+      "small": true,
+      "J_frozen": 0.9151,
+      "J_head": 0.9144,
+      "dJ": -0.0006,
+      "dF": -0.0021
+    },
+    {
+      "set": "DAVIS_val",
+      "unit": "davis__davis/kite-surf__obj1",
+      "video": "davis/kite-surf",
+      "small": true,
+      "J_frozen": 0.2988,
+      "J_head": 0.3223,
+      "dJ": 0.0235,
+      "dF": 0.0012
+    },
+    {
+      "set": "DAVIS_val",
+      "unit": "davis__davis/kite-surf__obj2",
+      "video": "davis/kite-surf",
+      "small": true,
+      "J_frozen": 0.5029,
+      "J_head": 0.5053,
+      "dJ": 0.0024,
+      "dF": 0.0035
+    },
+    {
+      "set": "DAVIS_val",
+      "unit": "davis__davis/lab-coat__obj1",
+      "video": "davis/lab-coat",
+      "small": true,
+      "J_frozen": 0.6822,
+      "J_head": 0.6967,
+      "dJ": 0.0145,
+      "dF": -0.0005
+    },
+    {
+      "set": "DAVIS_val",
+      "unit": "davis__davis/lab-coat__obj2",
+      "video": "davis/lab-coat",
+      "small": true,
+      "J_frozen": 0.5314,
+      "J_head": 0.5435,
+      "dJ": 0.0121,
+      "dF": 0.0107
+    },
+    {
+      "set": "DAVIS_val",
+      "unit": "davis__davis/mbike-trick__obj1",
+      "video": "davis/mbike-trick",
+      "small": true,
+      "J_frozen": 0.82,
+      "J_head": 0.8107,
+      "dJ": -0.0094,
+      "dF": -0.0035
+    },
+    {
+      "set": "DAVIS_val",
+      "unit": "davis__davis/mbike-trick__obj2",
+      "video": "davis/mbike-trick",
+      "small": true,
+      "J_frozen": 0.8253,
+      "J_head": 0.8345,
+      "dJ": 0.0093,
+      "dF": -0.0017
+    },
+    {
+      "set": "DAVIS_val",
+      "unit": "davis__davis/paragliding-launch__obj3",
+      "video": "davis/paragliding-launch",
+      "small": true,
+      "J_frozen": 0.1527,
+      "J_head": 0.1365,
+      "dJ": -0.0162,
+      "dF": -0.0478
+    },
+    {
+      "set": "DAVIS_val",
+      "unit": "davis__davis/scooter-black__obj1",
+      "video": "davis/scooter-black",
+      "small": true,
+      "J_frozen": 0.8115,
+      "J_head": 0.8072,
+      "dJ": -0.0043,
+      "dF": 0.0021
+    },
+    {
+      "set": "DAVIS_val",
+      "unit": "davis__davis/soapbox__obj1",
+      "video": "davis/soapbox",
+      "small": true,
+      "J_frozen": 0.8665,
+      "J_head": 0.8676,
+      "dJ": 0.0011,
+      "dF": -0.0009
+    },
+    {
+      "set": "DAVIS_val",
+      "unit": "davis__davis/soapbox__obj2",
+      "video": "davis/soapbox",
+      "small": true,
+      "J_frozen": 0.8451,
+      "J_head": 0.84,
+      "dJ": -0.0051,
+      "dF": -0.0061
+    },
+    {
+      "set": "DAVIS_val",
+      "unit": "davis__davis/soapbox__obj3",
+      "video": "davis/soapbox",
+      "small": true,
+      "J_frozen": 0.8831,
+      "J_head": 0.8872,
+      "dJ": 0.0041,
+      "dF": -0.0058
+    },
+    {
+      "set": "PUMaVOS_A",
+      "unit": "pumavos__pumavos/eye_area__obj1",
+      "video": "pumavos/eye_area",
+      "small": true,
+      "J_frozen": 0.4659,
+      "J_head": 0.4573,
+      "dJ": -0.0086,
+      "dF": -0.0285
+    },
+    {
+      "set": "PUMaVOS_A",
+      "unit": "pumavos__pumavos/pimples__obj1",
+      "video": "pumavos/pimples",
+      "small": true,
+      "J_frozen": 0.1766,
+      "J_head": 0.1499,
+      "dJ": -0.0268,
+      "dF": -0.0608
+    },
+    {
+      "set": "PUMaVOS_A",
+      "unit": "pumavos__pumavos/smile__obj1",
+      "video": "pumavos/smile",
+      "small": true,
+      "J_frozen": 0.8799,
+      "J_head": 0.8722,
+      "dJ": -0.0077,
+      "dF": 0.0001
+    },
+    {
+      "set": "PUMaVOS_B",
+      "unit": "pumavos__pumavos/ice_cream__obj1",
+      "video": "pumavos/ice_cream",
+      "small": true,
+      "J_frozen": 0.9203,
+      "J_head": 0.9141,
+      "dJ": -0.0062,
+      "dF": 0.0004
+    },
+    {
+      "set": "PUMaVOS_B",
+      "unit": "pumavos__pumavos/queen_car__obj1",
+      "video": "pumavos/queen_car",
+      "small": true,
+      "J_frozen": 0.9166,
+      "J_head": 0.9135,
+      "dJ": -0.0031,
+      "dF": 0.0007
+    },
+    {
+      "set": "SegTrack",
+      "unit": "segtrack__segtrack/birdfall__obj1",
+      "video": "segtrack/birdfall",
+      "small": true,
+      "J_frozen": 0.8406,
+      "J_head": 0.8355,
+      "dJ": -0.0051,
+      "dF": -0.0048
+    }
+  ],
+  "supported": false
+}
