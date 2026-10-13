@@ -99,3 +99,19 @@ cd sam2
 ## M5-Pre: 메모리 개입의 인과 효과 검증 (탐색적, CUDA)
 
 메모리 고갈 원인 분리(spatial vs object pointer, backfill), 메모리 하나의 반사실적 효용, 후보 mask oracle 진단을 다룬다. 결과와 권고는 [docs/MILESTONE_5_PRE.md](docs/MILESTONE_5_PRE.md)에 있다. 브랜치는 `exp/m5-pre-memory-intervention`이다.
+
+## M5.5: 공간 디테일 보존 타당성 검토 (탐색적, CUDA)
+
+브랜치 `exp/m55-spatial-detail-feasibility`. 상세 보고서: [docs/MILESTONE_5_5.md](docs/MILESTONE_5_5.md).
+
+- **prompt frame J가 낮았던 원인:** 평가 오류가 아니라 SAM 2 추론 경로의 256×256 재표본화 손실이다. 추론에서는 prompt 메모리를 256 왕복을 거친 마스크로 만들지만, 학습에서는 1024 마스크로 만든다.
+- **대상 데이터:** DAVIS val 61개 객체, SegTrack v2 24개 객체(zero-shot) 전수.
+  - detail 객체(작은·얇은·여러 조각)의 J는 0.687, plain 객체는 0.915다.
+  - 256 출력 해상도가 detail 오차의 42%를 설명한다.
+- **P5, full-res prompt 메모리 (5줄 교정):** DAVIS val 전체 frame에서 J&F +0.017(detail +0.055), 악화된 객체는 없다. SegTrack에서는 효과가 0이다.
+- **학습 없는 guided 업샘플링:** 출력에만 적용하면 효과 0, 메모리에 넣으면 −0.013으로 해롭다.
+- **권고:** NEED_MORE_REAL_VIDEO_DATA. 고해상도 zero-shot 데이터(PUMaVOS 또는 LVOS v2 val)에서 재검증해야 하며, 다운로드는 사용자 승인이 필요하다.
+
+```bash
+uv run python scripts/m55.py {audit|manifest|survey|ablate|tune|proto_manifest|proto|analyze}
+```

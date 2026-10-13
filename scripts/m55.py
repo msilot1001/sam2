@@ -546,12 +546,53 @@ def ablation_report():
     return R
 
 
+
+def proto_report(split):
+    D = pd.concat([pd.read_csv(f) for f in sorted((OUT / "proto" / split).glob("*.csv"))], ignore_index=True)
+    st = pd.DataFrame(load_manifest(split)["rows"])[["unit", "detail", "thin", "small"]]
+    D = D.merge(st, on="unit")
+    D["video"] = D.unit.str.split("__").str[1]
+    D["late"] = D.video_idx > 20
+    base = D[D.arm == "official"].set_index(["unit", "video_idx"])
+    cols = ["J", "F", "JF", "F_strict", "thin_recall", "comp_retention", "J_consec_pred"]
+    rows, per_unit = [], []
+    for arm, g in D.groupby("arm"):
+        g = g.set_index(["unit", "video_idx"])
+        if list(g.index) != list(base.index) or not (g.gt_empty == base.gt_empty).all():
+            raise ValueError(f"{arm}: frames not paired with official")
+        d = g[cols] - base[cols]
+        d["video"], d["detail"], d["late"] = g.video, g.detail, g.late
+        pu = d.groupby(level="unit").agg({**{c: "mean" for c in cols}, "video": "first", "detail": "first"}).reset_index()
+        early = d[~d.late].groupby(level="unit").JF.mean()
+        late = d[d.late].groupby(level="unit").JF.mean()
+        pu["JF_frames1_20"], pu["JF_frames21_end"] = pu.unit.map(early), pu.unit.map(late)
+        pu["arm"] = arm
+        per_unit.append(pu)
+        rows.append({"arm": arm, "n_units": len(pu), "abs_JF": float(g.groupby(level="unit").JF.mean().mean()),
+                     **{f"d{c}": float(pu[c].mean()) for c in cols},
+                     "dJF_CI": _boot(pu, "JF") if arm != "official" else (0.0, 0.0),
+                     "dJF_detail": float(pu[pu.detail].JF.mean()) if pu.detail.any() else None,
+                     "dJF_plain": float(pu[~pu.detail].JF.mean()),
+                     "dJF_frames1_20": float(pu.JF_frames1_20.mean()), "dJF_frames21_end": float(pu.JF_frames21_end.mean()),
+                     "dJF_first_frame": float(d.xs(1, level="video_idx").JF.mean()),
+                     "units_up_0.01": int((pu.JF > 0.01).sum()), "units_down_0.01": int((pu.JF < -0.01).sum()),
+                     "latency_s_median": float(g.latency_s.median()), "peak_vram_GB": float(g.peak_vram_bytes.max() / 1e9)})
+    R = pd.DataFrame(rows)
+    rd = OUT / "reports"
+    atomic_csv(R, rd / f"proto_{split}_summary.csv")
+    atomic_csv(pd.concat(per_unit), rd / f"proto_{split}_per_unit.csv")
+    return R
+
+
 def analyze():
     for split in ("val", "segtrack"):
         if (OUT / "survey" / split).exists():
             print(json.dumps(survey_report(split), indent=1, default=float)[:6000])
     if (OUT / "ablate").exists():
         print(ablation_report().to_string())
+    for split in ("val", "segtrack"):
+        if (OUT / "proto" / split).exists():
+            print(proto_report(split).to_string())
 
 
 # ----------------------------------------------------------------------------- 7. prototype: guided upsampling
