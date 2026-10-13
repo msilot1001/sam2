@@ -147,6 +147,22 @@ PREREG_R4 = {
 }
 
 
+PREREG_R5 = {
+    "created_after": "round 4 (all tracks failed their gates). Frozen before any A2c output.",
+    "arm": "A2c = closest prior art's acceptance rule (Rozumnyi 2025, CTU thesis, parallel-window variant) inside the "
+           "same framework as A2x: crop output accepted iff (global mask empty or IoU(crop, global) > 0.5) and "
+           "crop-mask box area / crop area <= 0.1; else the B1 mask; next centre from the fused output. Same A1 scale.",
+    "question": "is A2's self-gate (crop obj score > 0, not touching an interior crop edge) distinguishable from the "
+                "agreement gate? Hypothesis: on targets where B1 is poor, agreement rejects useful crops (A2x > A2c).",
+    "report": "small-unit dJF of A2c vs A2x (paired, video CI) and per unit; units with B1 JF < 0.8 listed separately. "
+              "Exploratory comparison; no gate, C stays closed.",
+}
+
+
+def prereg_r5():
+    m55._freeze(OUT / "preregistration_r5.json", {**PREREG_R5, "rows": []})
+
+
 def prereg_r4():
     m55._freeze(OUT / "preregistration_r4.json", {**PREREG_R4, "rows": []})
 
@@ -257,7 +273,7 @@ def run_unit(pred, heads, s, u, arm, n=None, side=None):
     n, hw = n or len(u.frames), gt(u, 0).shape
     target = 0.5 if arm == "A1z" else vcam.TARGET
     side = side or vcam.crop_side(gt(u, 0), target)
-    if arm in ("A2", "A2x"):
+    if arm in ("A2", "A2x", "A2c"):
         g = OUT / "runs/B1" / f"{stem}"
         gm = np.unpackbits(np.load(f"{g}.npz")["B1"])[:(len(u.frames) - 1) * hw[0] * hw[1]].reshape(-1, *hw).astype(bool)
         gs = pd.read_csv(f"{g}.csv").set_index("video_idx").obj_score
@@ -292,7 +308,12 @@ def run_unit(pred, heads, s, u, arm, n=None, side=None):
             if arm in ("A1", "A1z", "A1v"):
                 out, src = crop_out, "crop"
             else:
-                ok = score > 0 and m.any() and not r["crop_touch"]
+                if arm == "A2c":
+                    b = vcam.bbox(m)
+                    small_box = b is not None and (b[1] - b[0]) * (b[3] - b[2]) / side ** 2 <= 0.1
+                    ok = m.any() and small_box and (not gm[t - 1].any() or j_measure(crop_out, gm[t - 1]) > 0.5)
+                else:
+                    ok = score > 0 and m.any() and not r["crop_touch"]
                 out, src = (crop_out, "crop") if ok else (gm[t - 1], "global")
                 r["global_obj_score"] = float(gs[t])
             r["source"] = src
@@ -493,7 +514,7 @@ def analyze():
                                      lat_median=("latency_s", "median"), vram_GB=("peak_vram_bytes", lambda v: v.max() / 1e9)).reset_index().to_dict("records")
     # 1. Track A
     Ep = []
-    for arm in ("A1", "A2", "A1z", "A1v", "A2x"):
+    for arm in ("A1", "A2", "A1z", "A1v", "A2x", "A2c"):
         if _runs(arm) is None:
             continue
         W, X = compare(arm, B)

@@ -1,0 +1,8 @@
+{
+  "created": "2026-10-13 12:59:53",
+  "created_after": "round 4 (all tracks failed their gates). Frozen before any A2c output.",
+  "arm": "A2c = closest prior art's acceptance rule (Rozumnyi 2025, CTU thesis, parallel-window variant) inside the same framework as A2x: crop output accepted iff (global mask empty or IoU(crop, global) > 0.5) and crop-mask box area / crop area <= 0.1; else the B1 mask; next centre from the fused output. Same A1 scale.",
+  "question": "is A2's self-gate (crop obj score > 0, not touching an interior crop edge) distinguishable from the agreement gate? Hypothesis: on targets where B1 is poor, agreement rejects useful crops (A2x > A2c).",
+  "report": "small-unit dJF of A2c vs A2x (paired, video CI) and per unit; units with B1 JF < 0.8 listed separately. Exploratory comparison; no gate, C stays closed.",
+  "rows": []
+}

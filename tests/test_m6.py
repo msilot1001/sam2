@@ -127,3 +127,12 @@ def test_untrained_head_is_identity():
     lg = torch.randn(1, 1, 256, 256)
     out = h(lg, torch.randn(1, 32, 256, 256), torch.randn(1, 64, 128, 128), torch.rand(1, 3, 256, 256))
     assert torch.equal(out, lg)
+
+
+def test_confirmation_never_run_in_m6():
+    p = ROOT / "outputs/milestone56/manifest.json"
+    if not p.exists():
+        pytest.skip("no manifest")
+    C = {r["unit"].replace("/", "_") for r in json.loads(p.read_text())["rows"] if r["split"] == "C_confirmation"}
+    done = {f.stem for f in (ROOT / "outputs/milestone6/runs").glob("*/*.csv")}
+    assert not (C & done)
