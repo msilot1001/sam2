@@ -35,6 +35,14 @@ def frames():
         for c in M:
             Y[c] = Y[c].fillna(pd.Series(B1[c].to_numpy(), index=Y.index))
         parts.append(Y.assign(arm=arm))
+    A3 = pd.concat([pd.read_csv(f) for f in sorted(glob.glob(str(OUT / "trackA/A3/*.csv")))])[["unit", "video_idx", *M]]
+    Y = B1.drop(columns=M).merge(A3, on=["unit", "video_idx"], how="left")
+    for c in M:
+        Y[c] = Y[c].fillna(pd.Series(B1[c].to_numpy(), index=Y.index))
+    parts.append(Y.assign(arm="A3"))
+    fl = sorted(glob.glob(str(OUT / "flip2/*.csv")))
+    if fl:
+        parts.append(pd.concat([pd.read_csv(f) for f in fl])[["set", "unit", "video", "video_idx", *M]].assign(arm="F2"))
     hv = sorted(glob.glob(str(OUT / "trackB/video/*.csv")))
     if hv:
         H = pd.concat([pd.read_csv(f) for f in hv])
@@ -56,7 +64,7 @@ def main():
     W.columns = ["_".join(c).strip("_") for c in W.columns]
     W["area_frac"] = W.unit.map(af)
     W["size"] = np.where(W.area_frac < 0.001, "tiny<0.1%", np.where(W.area_frac < 0.01, "small0.1-1%", "ordinary"))
-    arms = [a for a in ("B0", "A2x", "A2c", "HEAD") if f"JF_{a}" in W]
+    arms = [a for a in ("B0", "A2x", "A2c", "A3", "F2", "HEAD") if f"JF_{a}" in W]
     for a in arms:
         for c in M + ["JF21"]:
             W[f"d{c}_{a}"] = W[f"{c}_{a}"] - W[f"{c}_B1"]
@@ -68,12 +76,20 @@ def main():
         rep[gname] = {"units": int(len(g)), "videos": int(g.video.nunique()), "JF_B1": float(g.JF_B1.mean())}
         for a in arms:
             sub = g.dropna(subset=[f"dJF_{a}"])
+            if sub.empty:
+                continue
             rep[gname][a] = {"units": int(len(sub)), "dJF": float(sub[f"dJF_{a}"].mean()), "CI": m6._boot(sub, f"dJF_{a}"),
                              "dJ": float(sub[f"dJ_{a}"].mean()), "dF": float(sub[f"dF_{a}"].mean()),
                              "dF_strict": float(sub[f"dF_strict_{a}"].mean()), "dJF21": float(sub[f"dJF21_{a}"].mean()),
                              "up_0.01": int((sub[f"dJF_{a}"] > 0.01).sum()), "down_0.01": int((sub[f"dJF_{a}"] < -0.01).sum())}
             for sz, h in sub.groupby("size"):
                 rep[gname][a][f"size:{sz}"] = {"units": int(len(h)), "dJF": float(h[f"dJF_{a}"].mean())}
+    g = W[W.set.isin(m6.GATE_SETS)]
+    for a, b in (("A2x", "F2"), ("A3", "A2x"), ("A2x", "A2c")):
+        if f"JF_{a}" in g and f"JF_{b}" in g:
+            for name, h in (("small", g[g["size"] != "ordinary"]), ("all", g)):
+                h = h.dropna(subset=[f"JF_{a}", f"JF_{b}"]).assign(diff=lambda d: d[f"JF_{a}"] - d[f"JF_{b}"])
+                rep[f"paired_{a}_minus_{b}_{name}"] = {"units": int(len(h)), "mean": float(h["diff"].mean()), "CI": m6._boot(h, "diff")}
     atomic_json(rep, OUT / "comparison_report.json")
     print(json.dumps(rep, indent=1, default=float)[:6000])
 

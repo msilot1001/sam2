@@ -752,6 +752,43 @@ def flip2(sets="DAVIS_val,PUMaVOS_B"):
     status(completed=f"F2 flip control {sets}")
 
 
+PREREG_R4 = {
+    "created_after": "round 3: F2 (cost-matched flip ensemble) +0.001 overall; A2x - F2 +0.018 small [+0.009, +0.026]; A3 - A2x "
+                     "+0.0022 [+0.0002, +0.0054]. Frozen before any round-4 output.",
+    "question": "do A2x and A3 replicate on more independent videos? DAVIS 2017 *train* units where the A1 rule crops "
+                "(43 objects, 23 videos): never used to design A2x/A3 (only to fit the rejected Track-D calibrator, whose "
+                "B1/A1 logs are reused as the B1 reference). Caveat: DAVIS train may overlap SAM 2's own training data.",
+    "arms": "A2d (= A2x) and A3 via run_dual, unchanged code/parameters",
+    "report": "unit-mean dJF vs B1 for all 43 objects and the small (<1%) subset; video-clustered CI; A3 - A2d paired",
+    "replicates_if": "A2d small-subset dJF > 0 with video-CI lower bound > 0 and no more than 10% of objects below -0.01; "
+                     "A3 - A2d >= 0 (CI reported). Not a confirmation set; C stays closed.",
+}
+
+
+def prereg_r4():
+    m55._freeze(OUT / "preregistration_r4.json", {**PREREG_R4, "rows": []})
+
+
+def replicate(arms="A2d,A3"):
+    from rfeas.units import davis_units
+    pred = m55.build_predictor()
+    controlled.install(pred, None, {})
+    for arm in arms.split(","):
+        d = OUT / "replication" / arm
+        d.mkdir(parents=True, exist_ok=True)
+        for u in davis_units("train")[0]:
+            if vcam.crop_side(m6.gt(u, 0)) is None:
+                continue
+            stem = u.name.replace("/", "_")
+            if (d / f"{stem}.csv").exists():
+                continue
+            torch.cuda.reset_peak_memory_stats()
+            df, masks = run_dual(pred, "DAVIS_train", u, arm)
+            atomic_csv(df, d / f"{stem}.csv")
+            print(arm, u.name, round(df.JF.mean(), 4), flush=True)
+    status(completed=f"replication {arms}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("what")

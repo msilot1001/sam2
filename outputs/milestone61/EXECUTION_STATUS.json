@@ -1,20 +1,22 @@
 {
-  "updated_kst": "2026-10-14 00:48",
+  "updated_kst": "2026-10-14 02:23",
   "deadline_kst": "2026-10-14 08:00",
   "gpu_hard_stop_kst": "06:40",
   "branch": "exp/m61-overnight-deep-research",
   "base_commit": "fb19a21",
   "completed": [
-    "trackB head_video DAVIS_val+PUMaVOS_B: dJF -0.0035 [-0.005,-0.0018], 2 up / 8 down -> REJECTED",
-    "optional head_video PUMaVOS_A,SegTrack stopped after 1 unit to prioritise A3 (exit 143, intentional)"
+    "A2d reproduces logged A2x on 21/21 units (max |dJF| 0.0)",
+    "A3 local->global write-back: +0.0022 [+0.0003,+0.006] vs A2x small (15), 0 units < -0.01; G itself +0.009 vs B1 small; oracle gain +0.0002 -> below prereg bar",
+    "A3s symmetric: -0.036 vs A2x small (lab-coat obj1 -0.59) -> REJECTED",
+    "F2 flip control DAVIS_val,PUMaVOS_B"
   ],
   "running": [
-    "dual A2d,A3,A3s (GPU)"
+    "F2 flip control (GPU)"
   ],
   "failed": [],
-  "strongest_candidate": "A2x incumbent (no challenger has beaten it yet)",
-  "gpu_used_min": 150,
-  "next_action": "analyze A3/A3s vs A2x; decide",
+  "strongest_candidate": "A2x (+ optional A3 one-way write-back, +0.002)",
+  "gpu_used_min": 205,
+  "next_action": "F2 analysis -> final decision docs -> independent review",
   "blocking": [],
   "pumavos_C": "untouched"
 }
