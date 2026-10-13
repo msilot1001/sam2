@@ -1,0 +1,13 @@
+{
+  "created": "2026-10-13 14:32:09",
+  "created_after": "head_pc failed (train J 0.809 -> 0.814 after 400 steps); diagnostic of the optimization, not of the task",
+  "setup": "the same 32 DAVIS-train frames (75 objects), frozen SAM 2 outputs cached once; batch = all objects of one frame",
+  "variants": {
+    "V1": "HeadV2 as pre-registered, AdamW 1e-3 constant, 3000 steps",
+    "V2": "V1 + fixed feature standardization (s0 / 0.084, s1 / 0.177; constants measured on one frame)",
+    "V3": "V2 with lr 3e-4"
+  },
+  "pass": "train J(head) - J(frozen) >= +0.05 on the 75 objects (same rule as head_pc); 20 min wall cap in total",
+  "next": "if a variant passes: main training with that variant (30 min) and the round-1 evaluation protocol unchanged; else Track B = technically inconclusive",
+  "rows": []
+}

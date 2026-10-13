@@ -509,7 +509,7 @@ def head_pc2():
 
 def head_train():
     torch.manual_seed(0)
-    head = HeadV2().cuda()
+    head = HeadV2N().cuda()                                  # V2: winner of the pre-registered pc2 diagnostic
     log = _train(head, _samples(), minutes=30, tag="train")
     (OUT / "trackB").mkdir(parents=True, exist_ok=True)
     torch.save(head.state_dict(), OUT / "trackB" / "head_v2.pt")
@@ -518,7 +518,7 @@ def head_train():
 
 
 def _load_head():
-    h = HeadV2().cuda()
+    h = HeadV2N().cuda()
     h.load_state_dict(torch.load(OUT / "trackB" / "head_v2.pt"))
     return h.eval()
 
