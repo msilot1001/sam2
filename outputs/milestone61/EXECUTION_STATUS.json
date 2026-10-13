@@ -1,23 +1,20 @@
 {
-  "updated_kst": "2026-10-14 00:21",
+  "updated_kst": "2026-10-14 00:48",
   "deadline_kst": "2026-10-14 08:00",
   "gpu_hard_stop_kst": "06:40",
   "branch": "exp/m61-overnight-deep-research",
   "base_commit": "fb19a21",
   "completed": [
-    "trackD gates: calibrated - self = -0.0016 [-0.005,0.0] -> NOT successful; self gate captures ~89% of A2o selection oracle (+0.0193 of +0.0216)",
-    "trackB head_pc FAILED (J 0.809->0.814); optimization diagnostic pc2 pre-registered",
-    "trackB pc2 [('V1', True), ('V2', True), ('V3', True)]",
-    "trackB head_train steps=5990",
-    "trackB head_image"
+    "trackB head_video DAVIS_val+PUMaVOS_B: dJF -0.0035 [-0.005,-0.0018], 2 up / 8 down -> REJECTED",
+    "optional head_video PUMaVOS_A,SegTrack stopped after 1 unit to prioritise A3 (exit 143, intentional)"
   ],
   "running": [
-    "head_pc2 (GPU)"
+    "dual A2d,A3,A3s (GPU)"
   ],
   "failed": [],
   "strongest_candidate": "A2x incumbent (no challenger has beaten it yet)",
-  "gpu_used_min": 55,
-  "next_action": "if pc2 passes: head_train v2 + image + video eval; else Track B inconclusive -> finalize with incumbent",
+  "gpu_used_min": 150,
+  "next_action": "analyze A3/A3s vs A2x; decide",
   "blocking": [],
   "pumavos_C": "untouched"
 }

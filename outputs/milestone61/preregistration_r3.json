@@ -1,0 +1,11 @@
+{
+  "created": "2026-10-13 16:23:03",
+  "created_after": "round 2: A3 +0.0022 [+0.0003, +0.006] vs A2x on small units (below its +0.01 bar); no challenger has beaten A2x. Frozen before any F2 output.",
+  "question": "is A2x's gain specific to its global-local mechanism, or would any 2x-compute ensemble give it? F2 is the cost-matched generic control the incumbent must beat.",
+  "F2": "two independent full-frame P5 states: original video and horizontally flipped video (lazy flip of the official frame tensor, flipped prompt); output = mean of the two sigmoid probability maps (flipped one flipped back exactly) > 0.5. Output-only, no memory exchange. Applied to every unit of DAVIS_val + PUMaVOS_B (67).",
+  "decision_rules": {
+    "incumbent_specific": "A2x small-unit dJF (gate set, 15) exceeds F2's by >= 0.005 -> the targeted mechanism matters; else A2x's gain is not specific",
+    "F2_as_challenger": "F2 overall dJF >= A2x overall + 0.003 with video CI of the paired difference > 0 (F2 is not novel; it would only change the baseline)"
+  },
+  "rows": []
+}

@@ -59,3 +59,19 @@ def test_dual_disabled_reproduces_logged_A2x_and_is_causal():
     b, mb = m.run_dual(pred, "DAVIS_val", u, "A3", n=5)
     c, mc = m.run_dual(pred, "DAVIS_val", u, "A3", n=8)
     assert all(np.array_equal(x, y) for x, y in zip(mb, mc[:4]))                 # no future dependence
+
+
+@pytest.mark.realdata
+def test_flip_control_original_branch_equals_B1():
+    import pandas as pd
+    if not torch.cuda.is_available() or not (ROOT / "outputs/milestone6/runs/B1").exists():
+        pytest.skip("no CUDA / M6 runs")
+    from memint import controlled
+    m = load()
+    pred = m.m55.build_predictor()
+    controlled.install(pred, None, {})
+    u = m.m6._UNITS()["davis__davis/kite-surf__obj2"]
+    ref = pd.read_csv(ROOT / "outputs/milestone6/runs/B1/davis__davis_kite-surf__obj2.csv")
+    a, _ = m.run_flip(pred, "DAVIS_val", u, n=6)
+    assert a.JF_orig.round(10).tolist() == ref.JF.round(10).tolist()[:5]           # original branch == B1
+    assert (a.JF_flip > 0).all()                                                    # flipped branch tracks too

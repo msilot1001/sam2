@@ -685,6 +685,73 @@ def dual(arms="A2d,A3,A3s"):
     status(completed=f"trackA dual {arms}")
 
 
+# ----------------------------------------------------------------------------- round 3: cost-matched generic control
+PREREG_R3 = {
+    "created_after": "round 2: A3 +0.0022 [+0.0003, +0.006] vs A2x on small units (below its +0.01 bar); no challenger "
+                     "has beaten A2x. Frozen before any F2 output.",
+    "question": "is A2x's gain specific to its global-local mechanism, or would any 2x-compute ensemble give it? "
+                "F2 is the cost-matched generic control the incumbent must beat.",
+    "F2": "two independent full-frame P5 states: original video and horizontally flipped video (lazy flip of the official "
+          "frame tensor, flipped prompt); output = mean of the two sigmoid probability maps (flipped one flipped back "
+          "exactly) > 0.5. Output-only, no memory exchange. Applied to every unit of DAVIS_val + PUMaVOS_B (67).",
+    "decision_rules": {"incumbent_specific": "A2x small-unit dJF (gate set, 15) exceeds F2's by >= 0.005 -> the targeted "
+                                             "mechanism matters; else A2x's gain is not specific",
+                       "F2_as_challenger": "F2 overall dJF >= A2x overall + 0.003 with video CI of the paired difference "
+                                           "> 0 (F2 is not novel; it would only change the baseline)"},
+}
+
+
+def prereg_r3():
+    m55._freeze(OUT / "preregistration_r3.json", {**PREREG_R3, "rows": []})
+
+
+class LazyFlip(vcam.LazyCropFrames):
+    def __getitem__(self, t):
+        return torch.flip(super().__getitem__(t), dims=[-1])
+
+
+def run_flip(pred, s, u, n=None):
+    n, hw = n or len(u.frames), m6.gt(u, 0).shape
+    st, od = m56.start(pred, u, p5=True)
+    fr = LazyFlip(m6.paths(u))
+    fr.box = (0, hw[0], 0, hw[1])
+    with vcam.lazy_loader(fr, hw):
+        sf, odf = m56.start_dir(pred, "lazy", m6.gt(u, 0)[:, ::-1].copy(), p5=True)
+    rows, masks = [], []
+    for t in range(1, n):
+        t0 = time.perf_counter()
+        o1, m1, p1, s1 = engine.predict(pred, st, od, t)
+        od["non_cond_frame_outputs"][t] = o1
+        o2, m2, p2, s2 = engine.predict(pred, sf, odf, t)
+        odf["non_cond_frame_outputs"][t] = o2
+        out = (p1 + p2[:, ::-1]) / 2 > 0.5
+        torch.cuda.synchronize()
+        g = m6.gt(u, t)
+        rows.append({"set": s, "unit": u.name, "video": u.video, "arm": "F2", "video_idx": t, "latency_s": time.perf_counter() - t0,
+                     "gt_empty": not g.any(), **m55.jf(out, g), "JF_orig": m55.jf(m1, g)["JF"], "JF_flip": m55.jf(m2[:, ::-1], g)["JF"]})
+        masks.append(out)
+    peak = torch.cuda.max_memory_allocated()
+    pred.reset_state(st)
+    pred.reset_state(sf)
+    return pd.DataFrame(rows).assign(peak_vram_bytes=peak), masks
+
+
+def flip2(sets="DAVIS_val,PUMaVOS_B"):
+    pred = m55.build_predictor()
+    controlled.install(pred, None, {})
+    d = OUT / "flip2"
+    d.mkdir(parents=True, exist_ok=True)
+    for s, u in m6.units(tuple(sets.split(","))):
+        stem = u.name.replace("/", "_")
+        if (d / f"{stem}.csv").exists():
+            continue
+        torch.cuda.reset_peak_memory_stats()
+        df, masks = run_flip(pred, s, u)
+        atomic_csv(df, d / f"{stem}.csv")
+        print(u.name, round(df.JF.mean(), 4), round(df.JF_orig.mean(), 4), flush=True)
+    status(completed=f"F2 flip control {sets}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("what")
