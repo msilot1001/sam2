@@ -33,26 +33,10 @@ def thin_part(m: np.ndarray, r: int = 2) -> np.ndarray:
 
 
 def components(m: np.ndarray) -> tuple[np.ndarray, int]:
-    """8-connected component labels (0 = background), labels 1..n in raster order of first pixel."""
-    m = m.astype(bool)
-    if not m.any():
-        return np.zeros(m.shape, np.int64), 0
-    H, W = m.shape
-    lab = torch.where(torch.from_numpy(m), torch.arange(1, H * W + 1, dtype=torch.float64).reshape(H, W), 0.)
-    fg = torch.from_numpy(m)
-    while True:                           # propagate the max id inside each component until stable
-        nxt = F.max_pool2d(lab[None, None], 3, 1, 1)[0, 0] * fg
-        for _ in range(16):
-            nxt = F.max_pool2d(nxt[None, None], 3, 1, 1)[0, 0] * fg
-        if torch.equal(nxt, lab):
-            break
-        lab = nxt
-    ids, inv = np.unique(lab.numpy().astype(np.int64), return_inverse=True)
-    inv = inv.reshape(H, W)
-    # relabel to 1..n (0 stays 0 because ids[0] == 0 when background exists)
-    if ids[0] != 0:
-        inv = inv + 1
-    return inv, int(len(ids) - (1 if ids[0] == 0 else 0))
+    """8-connected component labels (0 = background, 1..n)."""
+    from scipy import ndimage
+    lab, n = ndimage.label(m.astype(bool), structure=np.ones((3, 3), bool))
+    return lab.astype(np.int64), int(n)
 
 
 def component_retention(pred: np.ndarray, gt: np.ndarray, min_area: int = 20, cover: float = 0.5) -> float:

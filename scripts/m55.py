@@ -410,21 +410,297 @@ def ablate():
         print(name, " ".join(f"{k[:3]}={v:.3f}" for k, v in D.items()), flush=True)
 
 
+def _boot(df, col, group="video", n=2000):
+    from rfeas.risk import cluster_bootstrap
+    return cluster_bootstrap(df, group, lambda d: float(d[col].mean()), n=n)
+
+
+def classify(r, med_area) -> str:
+    """Pre-registered failure classes (CLASS_RULES), first match wins. Uses retrospective GT: diagnostic only."""
+    if r.gt_area < 0.25 * med_area or r.other_obj_frac >= 0.30:
+        return "F_occlusion_identity"
+    if r.J_ceil256 < 0.5:
+        return "D_output_resolution"
+    if r.J_image_oracle < 0.5:
+        return "BC_encoder_decoder"
+    if r.J_image_oracle >= r.J + 0.2:
+        return "E_memory_propagation"
+    return "unresolved"
+
+
+def load_survey(split):
+    m = {r["unit"]: r for r in load_manifest(split)["rows"] if r["split"] == split}
+    D = pd.concat([pd.read_csv(f) for f in sorted((OUT / "survey" / split).glob("*.csv"))], ignore_index=True)
+    st = pd.DataFrame(m.values())[["unit", "area_frac", "thin_frac", "n_comp20", "small", "thin", "multi", "detail"]]
+    D = D.merge(st, on="unit")
+    D["video"] = D.unit.str.split("__").str[1]
+    return D, len(m)
+
+
+def survey_report(split):
+    D, n_manifest = load_survey(split)
+    vis = D[~D.gt_empty].copy()
+    med = vis.groupby("unit").gt_area.median()
+    vis["med_area"] = vis.unit.map(med)
+    U = vis.groupby(["unit", "video"]).agg(J=("J", "mean"), F=("F", "mean"), JF=("JF", "mean"), F_strict=("F_strict", "mean"),
+                                           J_ceil256=("J_ceil256", "mean"), Fs_ceil256=("F_strict_ceil256", "mean"),
+                                           J_oracle=("J_image_oracle", "mean"), thin_recall=("thin_recall", "mean"),
+                                           thin_recall_ceil=("thin_recall_ceil256", "mean"), comp_ret=("comp_retention", "mean"),
+                                           comp_ret_ceil=("comp_retention_ceil256", "mean"), detail=("detail", "first"),
+                                           small=("small", "first"), thin=("thin", "first"), multi=("multi", "first"),
+                                           frames=("J", "size")).reset_index()
+    U["headroom_ceil_minus_J"] = U.J_ceil256 - U.J
+    rep = {"split": split, "units_done": int(D.unit.nunique()), "units_manifest": n_manifest, "frames_visible": len(vis),
+           "frames_gt_empty": int(D.gt_empty.sum())}
+    for name, sub in (("all", U), ("detail", U[U.detail]), ("plain", U[~U.detail]), ("thin", U[U.thin]), ("small", U[U.small])):
+        if len(sub):
+            rep[f"units_{name}"] = {"n": len(sub), **{c: float(sub[c].mean()) for c in
+                                    ["J", "F", "F_strict", "JF", "J_ceil256", "Fs_ceil256", "J_oracle", "thin_recall",
+                                     "thin_recall_ceil", "comp_ret", "comp_ret_ceil", "headroom_ceil_minus_J"]}}
+    if U.detail.any() and (~U.detail).any():
+        rep["detail_minus_plain_J"] = float(U[U.detail].J.mean() - U[~U.detail].J.mean())
+        rep["detail_minus_plain_F_strict"] = float(U[U.detail].F_strict.mean() - U[~U.detail].F_strict.mean())
+    # error share explained by the 256 output resolution: (1 - J_ceil) / (1 - J), pooled over frames
+    for name, sub in (("all", vis), ("detail", vis[vis.detail]), ("plain", vis[~vis.detail])):
+        if len(sub):
+            rep[f"error_share_resolution_{name}"] = float((1 - sub.J_ceil256).sum() / max((1 - sub.J).sum(), 1e-9))
+    # small-object IoU by GT area fraction of the frame
+    bins = pd.cut(vis.gt_area, [0, 500, 2000, 8000, 32000, 10**9], labels=["<500px", "500-2k", "2k-8k", "8k-32k", ">32k"])
+    rep["J_by_gt_area_px"] = vis.groupby(bins, observed=True).agg(frames=("J", "size"), J=("J", "mean"), J_ceil256=("J_ceil256", "mean"),
+                                                                 F_strict=("F_strict", "mean")).reset_index().astype({"gt_area": str}).to_dict("records")
+    # failures
+    fail = vis[vis.J < FAIL_J].copy()
+    fail["cls"] = [classify(r, r.med_area) for r in fail.itertuples()]
+    rep["failure_frames"] = len(fail)
+    rep["failure_units"] = int(fail.unit.nunique())
+    rep["failure_classes"] = {c: {"frames": int((fail.cls == c).sum()), "units": int(fail[fail.cls == c].unit.nunique())}
+                              for c, _ in CLASS_RULES}
+    rep["failure_by_unit"] = fail.groupby(["unit", "cls"]).size().unstack(fill_value=0).reset_index().to_dict("records")
+    # temporal: persistence and boundary stability
+    pers = []
+    for u, g in vis.sort_values("video_idx").groupby("unit"):
+        f = (g.J < FAIL_J).to_numpy()
+        if f[:-1].sum():
+            pers.append(f[1:][f[:-1]].mean())
+    rep["P_fail_next_given_fail"] = float(np.mean(pers)) if pers else None
+    cons = D.dropna(subset=["Fs_consec_pred"])
+    rep["boundary_consistency"] = {"Fs_consec_pred": float(cons.Fs_consec_pred.mean()), "Fs_consec_gt": float(cons.Fs_consec_gt.mean()),
+                                   "detail_pred": float(cons[cons.detail].Fs_consec_pred.mean()) if cons.detail.any() else None,
+                                   "detail_gt": float(cons[cons.detail].Fs_consec_gt.mean()) if cons.detail.any() else None}
+    early_late = []
+    for u, g in vis.sort_values("video_idx").groupby("unit"):
+        if len(g) >= 20:
+            h = (g.J_ceil256 - g.J).to_numpy()
+            early_late.append({"unit": u, "gap_first10": float(h[:10].mean()), "gap_last10": float(h[-10:].mean())})
+    EL = pd.DataFrame(early_late)
+    rep["ceiling_gap_first10_vs_last10"] = {"first10": float(EL.gap_first10.mean()), "last10": float(EL.gap_last10.mean()),
+                                           "units_gap_grew_gt_0.05": int(((EL.gap_last10 - EL.gap_first10) > 0.05).sum()), "n": len(EL)}
+    rep["latency_s_per_frame_median"] = float(D.latency_s.median())
+    rep["peak_vram_GB"] = float(D.peak_vram_bytes.max() / 1e9)
+    rd = OUT / "reports"
+    rd.mkdir(parents=True, exist_ok=True)
+    atomic_csv(U, rd / f"survey_{split}_units.csv")
+    atomic_csv(fail[["unit", "video_idx", "J", "J_ceil256", "J_image_oracle", "gt_area", "med_area", "other_obj_frac", "cls"]],
+               rd / f"survey_{split}_failures.csv")
+    atomic_json(rep, rd / f"survey_{split}_report.json")
+    return rep
+
+
+def ablation_report():
+    D = pd.concat([pd.read_csv(f) for f in sorted((OUT / "ablate").glob("*.csv"))], ignore_index=True)
+    st = pd.DataFrame(load_manifest()["rows"])[["unit", "detail", "thin", "small"]]
+    D = D.merge(st, on="unit")
+    D["video"] = D.unit.str.split("__").str[1]
+    base = D[D.variant == "P0_official"].set_index(["unit", "video_idx"])
+    rows, unit_rows = [], []
+    for var, g in D.groupby("variant"):
+        g = g.set_index(["unit", "video_idx"])
+        if list(g.index) != list(base.index) or not (g.gt_empty == base.gt_empty).all():
+            raise ValueError(f"{var}: frames not paired with P0")
+        d = g[["J", "F", "JF", "F_strict", "thin_recall", "comp_retention"]] - base[["J", "F", "JF", "F_strict", "thin_recall", "comp_retention"]]
+        d["video"], d["detail"] = g.video, g.detail
+        first = d.xs(1, level="video_idx")
+        per_unit = d.groupby(level="unit").agg({"J": "mean", "F": "mean", "JF": "mean", "F_strict": "mean", "thin_recall": "mean",
+                                                "comp_retention": "mean", "video": "first", "detail": "first"}).reset_index()
+        per_unit["variant"] = var
+        unit_rows.append(per_unit)
+        init = g.groupby(level="unit")[["J_prompt_1024", "J_prompt_output", "J_prompt_memenc_input", "thin_recall_memenc_input"]].first()
+        r = {"variant": var, "n_units": len(per_unit),
+             "J_prompt_1024": float(init.J_prompt_1024.mean()), "J_prompt_output": float(init.J_prompt_output.mean()),
+             "J_prompt_memenc_input": float(init.J_prompt_memenc_input.mean()),
+             "thin_recall_memenc_input": float(init.thin_recall_memenc_input.mean()),
+             "dJ_first_frame": float(first.J.mean()), "dJF_20": float(per_unit.JF.mean()), "dJ_20": float(per_unit.J.mean()),
+             "dF_20": float(per_unit.F.mean()), "dF_strict_20": float(per_unit.F_strict.mean()),
+             "dthin_recall_20": float(per_unit.thin_recall.mean()), "dcomp_ret_20": float(per_unit.comp_retention.mean()),
+             "dJF_20_detail": float(per_unit[per_unit.detail].JF.mean()), "dJF_20_plain": float(per_unit[~per_unit.detail].JF.mean()),
+             "units_up_0.01": int((per_unit.JF > 0.01).sum()), "units_down_0.01": int((per_unit.JF < -0.01).sum()),
+             "dJF_20_CI": _boot(per_unit, "JF") if var != "P0_official" else (0.0, 0.0),
+             "wall_s_per_unit": float(g.groupby(level="unit").wall_s.first().mean()),
+             "latency_s_median": float(g.latency_s.median()), "peak_vram_GB": float(g.peak_vram_bytes.max() / 1e9)}
+        rows.append(r)
+    R = pd.DataFrame(rows)
+    rd = OUT / "reports"
+    rd.mkdir(parents=True, exist_ok=True)
+    atomic_csv(R, rd / "ablation_summary.csv")
+    atomic_csv(pd.concat(unit_rows), rd / "ablation_per_unit.csv")
+    return R
+
+
 def analyze():
-    raise SystemExit("analyze: added after the survey/ablation runs")
+    for split in ("val", "segtrack"):
+        if (OUT / "survey" / split).exists():
+            print(json.dumps(survey_report(split), indent=1, default=float)[:6000])
+    if (OUT / "ablate").exists():
+        print(ablation_report().to_string())
+
+
+# ----------------------------------------------------------------------------- 7. prototype: guided upsampling
+TUNE_GRID = {"r": [1, 2, 4, 8], "eps": [1e-4, 1e-3, 1e-2, 1e-1]}
+TUNE_FRAMES = 20
+N_TUNE_PER_STRATUM = 12
+
+
+def tune_units():
+    """Deterministic DAVIS-TRAIN subset (never val/SegTrack): first 12 detail + 12 plain units by a fixed hash."""
+    rows = [r for r in load_manifest()["rows"] if r["split"] == "train"]
+    key = lambda r: stable_hash(f"m55-tune|{r['unit']}")
+    return [r["unit"] for r in sorted([r for r in rows if r["detail"]], key=key)[:N_TUNE_PER_STRATUM]] + \
+           [r["unit"] for r in sorted([r for r in rows if not r["detail"]], key=key)[:N_TUNE_PER_STRATUM]]
+
+
+def tune():
+    """Pick (r, eps) for the guided output on DAVIS train only; output arm (memory untouched) so one native run
+    per unit suffices. Writes reports/proto_tune.json; the chosen values are then frozen in manifest_proto.json."""
+    from spatial import proto
+    pred = build_predictor()
+    us = {u.name: u for u in davis_units("train")[0]}
+    store = {}
+    rows = []
+    for name in tune_units():
+        u = us[name]
+        state, od = engine.start(pred, frame_dir(u), gt_of(u, u.frames[0]))
+        jpgs = sorted(frame_dir(u).glob("*.jpg"))
+        last = min(TUNE_FRAMES, len(u.frames) - 1)
+        with torch.inference_mode():
+            for t in range(1, last + 1):
+                out, pm = pred._run_single_frame_inference(
+                    inference_state=state, output_dict=od, frame_idx=t, batch_size=1, is_init_cond_frame=False,
+                    point_inputs=None, mask_inputs=None, reverse=False, run_mem_encoder=True)
+                od["non_cond_frame_outputs"][t] = out
+                g, guide = gt_of(u, u.frames[t]), proto.grey(jpgs[t], "cuda")
+                for r in TUNE_GRID["r"]:
+                    for eps in TUNE_GRID["eps"]:
+                        q = proto.refined_prob(pm.to("cuda"), guide, r, eps)[0, 0] > 0.5
+                        rows.append({"unit": name, "video_idx": t, "r": r, "eps": eps, **jf(q.cpu().numpy(), g)})
+                _, vr = pred._get_orig_video_res_output(state, pm)
+                rows.append({"unit": name, "video_idx": t, "r": 0, "eps": 0.0, **jf((vr[0, 0] > 0).cpu().numpy(), g)})
+        pred.reset_state(state)
+        print(name, flush=True)
+    D = pd.DataFrame(rows)
+    U = D.groupby(["r", "eps", "unit"]).JF.mean().groupby(level=["r", "eps"]).mean().reset_index()
+    best = U[U.r > 0].sort_values("JF", ascending=False).iloc[0]
+    rep = {"units": tune_units(), "grid": U.to_dict("records"), "official_JF": float(U[U.r == 0].JF.iloc[0]),
+           "chosen": {"r": int(best.r), "eps": float(best.eps), "JF": float(best.JF)}}
+    (OUT / "reports").mkdir(parents=True, exist_ok=True)
+    atomic_csv(D, OUT / "reports" / "proto_tune_frames.csv")
+    atomic_json(rep, OUT / "reports" / "proto_tune.json")
+    print(json.dumps(rep["chosen"]), "official", rep["official_JF"])
+
+
+
+def proto_manifest(simple_variant: str):
+    """Freeze the prototype comparison BEFORE running it: chosen (r, eps) from DAVIS-train tuning, the simple
+    correction (selected from the val 20-frame ablation -- disclosed), arms, units, metrics."""
+    t = json.loads((OUT / "reports" / "proto_tune.json").read_text())
+    _freeze(OUT / "manifest_proto.json", {
+        "rows": [{"unit": r["unit"], "split": r["split"]} for sp in ("val", "segtrack") for r in load_manifest(sp)["rows"]
+                 if r["split"] == sp],
+        "guided": {"r": t["chosen"]["r"], "eps": t["chosen"]["eps"], "selected_on": "DAVIS train subset (tune_units), output arm"},
+        "simple_correction": {"variant": simple_variant, "kwargs": ABLATIONS[simple_variant],
+                              "selected_on": "DAVIS val 20-frame ablation (same units as primary eval: disclosed leak; "
+                                             "SegTrack is untouched)"},
+        "arms": ["official", "simple", "guided_out", "guided_mem", "simple_guided_mem"],
+        "arm_notes": {"simple_guided_mem": "combination (two factors) -- reported separately, not a single-factor test"},
+        "frames": "all frames of each unit"})
+
+
+def proto_run(split):
+    from spatial import proto
+    m = json.loads((OUT / "manifest_proto.json").read_text())
+    r, eps = m["guided"]["r"], m["guided"]["eps"]
+    simple_kw = m["simple_correction"]["kwargs"]
+    pred = build_predictor()
+    us = {u.name: u for u in units_of(split)}
+    d = OUT / "proto" / split
+    d.mkdir(parents=True, exist_ok=True)
+    for name in [x["unit"] for x in m["rows"] if x["split"] == split]:
+        f = d / f"{name.replace('/', '_')}.csv"
+        if f.exists():
+            continue
+        u = us[name]
+        n = len(u.frames)
+        gt0 = gt_of(u, u.frames[0])
+        jpgs = sorted(frame_dir(u).glob("*.jpg"))
+        masks, lat, vram = {a: {} for a in m["arms"]}, {a: {} for a in m["arms"]}, {}
+        for arm in ("official", "guided_mem", "simple", "simple_guided_mem"):
+            torch.cuda.reset_peak_memory_stats()
+            if arm.startswith("simple"):
+                state, od = start_variant(pred, frame_dir(u), gt0, **simple_kw)
+                pred.use_mask_input_as_output_without_sam = True
+            else:
+                state, od = engine.start(pred, frame_dir(u), gt0)
+            for t in range(1, n):
+                torch.cuda.synchronize()
+                t0 = time.perf_counter()
+                if arm == "simple":
+                    out, mk, _, _ = engine.predict(pred, state, od, t)
+                else:
+                    out, mk, off = proto.predict(pred, state, od, t, proto.grey(jpgs[t], "cuda"), r, eps,
+                                                 feed_memory=arm.endswith("guided_mem"))
+                od["non_cond_frame_outputs"][t] = out
+                torch.cuda.synchronize()
+                lat[arm][t] = time.perf_counter() - t0
+                if arm == "official":
+                    masks["official"][t], masks["guided_out"][t] = off, mk
+                    lat["guided_out"][t] = lat[arm][t]
+                else:
+                    masks[arm][t] = mk
+            vram[arm] = torch.cuda.max_memory_allocated()
+            pred.reset_state(state)
+        vram["guided_out"] = vram["official"]
+        rows = []
+        for arm in m["arms"]:
+            prev = None
+            for t in range(1, n):
+                g, pr = gt_of(u, u.frames[t]), masks[arm][t]
+                rows.append({"unit": name, "arm": arm, "video_idx": t, **jf(pr, g), "gt_empty": not g.any(),
+                             "gt_area": int(g.sum()), "pred_area": int(pr.sum()),
+                             "thin_recall": detail.thin_recall(pr, g), "comp_retention": detail.component_retention(pr, g),
+                             "Fs_consec_pred": f_measure(pr, prev, 2) if prev is not None else np.nan,
+                             "J_consec_pred": j_measure(pr, prev) if prev is not None else np.nan,
+                             "latency_s": lat[arm][t], "peak_vram_bytes": vram[arm]})
+                prev = pr
+        atomic_csv(pd.DataFrame(rows), f)
+        S = pd.DataFrame(rows).groupby("arm").JF.mean()
+        print(name, " ".join(f"{k}={v:.4f}" for k, v in S.items()), flush=True)
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("what", choices=["audit", "manifest", "survey", "ablate", "analyze"])
+    ap.add_argument("what", choices=["audit", "manifest", "survey", "ablate", "analyze", "tune", "proto", "proto_manifest"])
     ap.add_argument("--split", default="val")
+    ap.add_argument("--simple", default="P5_fullres_prompt_memory")
     a = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     if a.what == "survey":
         return survey(a.split)
     if a.what == "manifest":
         return manifest(a.split if a.split == "segtrack" else None)
-    {"audit": audit, "ablate": ablate, "analyze": analyze}[a.what]()
+    if a.what == "proto":
+        return proto_run(a.split)
+    if a.what == "proto_manifest":
+        return proto_manifest(a.simple)
+    {"audit": audit, "ablate": ablate, "analyze": analyze, "tune": tune}[a.what]()
 
 
 if __name__ == "__main__":

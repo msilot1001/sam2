@@ -151,3 +151,37 @@ def test_native_equivalence_and_prompt_fidelity(pred):
     got, _ = engine.rollout(pred, s, od, 1, 5)
     pred.reset_state(s)
     assert any(not np.array_equal(got[t], ref[t]) for t in ref)         # the factor actually changes memory
+
+
+def test_guided_filter_identity_and_causality():
+    from spatial import proto
+    I = torch.rand(1, 1, 30, 40)
+    p = (torch.rand(1, 1, 30, 40) > 0.5).float()
+    assert torch.isfinite(proto.guided_filter(I, p, 2, 1e-3)).all()
+    flat = torch.full((1, 1, 30, 40), 0.3)
+    assert torch.allclose(proto.guided_filter(I, flat, 3, 1e-3), flat, atol=1e-5)       # constant input preserved
+    import inspect
+    src = inspect.getsource(proto.predict)
+    assert "frame_idx + 1" not in src and "gt" not in src.lower().replace("guide", "")
+
+
+@pytest.mark.realdata
+def test_prototype_official_branch_is_native(pred):
+    from memint import engine
+    from rfeas.units import davis_units, davis_frame_dir, davis_gt
+    from spatial import proto
+    u = next(x for x in davis_units("val")[0] if x.video == "davis/kite-surf" and x.obj_id == 1)
+    gt0, jp = davis_gt(u, u.frames[0]), sorted(davis_frame_dir(u).glob("*.jpg"))
+    s, od = engine.start(pred, davis_frame_dir(u), gt0)
+    ref, _ = engine.rollout(pred, s, od, 1, 4)
+    pred.reset_state(s)
+    for feed in (False, True):
+        s, od = engine.start(pred, davis_frame_dir(u), gt0)
+        offs = {}
+        for t in range(1, 5):
+            out, mk, off = proto.predict(pred, s, od, t, proto.grey(jp[t], "cuda"), 2, 1e-2, feed)
+            od["non_cond_frame_outputs"][t] = out
+            offs[t] = off
+        pred.reset_state(s)
+        same = all(np.array_equal(offs[t], ref[t]) for t in ref)
+        assert same if not feed else (np.array_equal(offs[1], ref[1]) and not same)   # memory arm alters only later frames

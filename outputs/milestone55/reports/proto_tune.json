@@ -1,0 +1,121 @@
+{
+  "units": [
+    "davis__davis/schoolgirls__obj2",
+    "davis__davis/dog-gooses__obj3",
+    "davis__davis/dog-gooses__obj4",
+    "davis__davis/motorbike__obj3",
+    "davis__davis/scooter-board__obj1",
+    "davis__davis/paragliding__obj1",
+    "davis__davis/scooter-board__obj2",
+    "davis__davis/longboard__obj3",
+    "davis__davis/motocross-bumps__obj2",
+    "davis__davis/dogs-scale__obj1",
+    "davis__davis/skate-park__obj2",
+    "davis__davis/longboard__obj2",
+    "davis__davis/schoolgirls__obj5",
+    "davis__davis/bear__obj1",
+    "davis__davis/flamingo__obj1",
+    "davis__davis/dancing__obj3",
+    "davis__davis/tractor-sand__obj1",
+    "davis__davis/lindy-hop__obj1",
+    "davis__davis/boxing-fisheye__obj3",
+    "davis__davis/bus__obj1",
+    "davis__davis/crossing__obj1",
+    "davis__davis/crossing__obj3",
+    "davis__davis/lady-running__obj1",
+    "davis__davis/lindy-hop__obj6"
+  ],
+  "grid": [
+    {
+      "r": 0,
+      "eps": 0.0,
+      "JF": 0.9247156835953988
+    },
+    {
+      "r": 1,
+      "eps": 0.0001,
+      "JF": 0.9252533483288329
+    },
+    {
+      "r": 1,
+      "eps": 0.001,
+      "JF": 0.925057235748265
+    },
+    {
+      "r": 1,
+      "eps": 0.01,
+      "JF": 0.9241548804902401
+    },
+    {
+      "r": 1,
+      "eps": 0.1,
+      "JF": 0.9227333661865936
+    },
+    {
+      "r": 2,
+      "eps": 0.0001,
+      "JF": 0.924366464907239
+    },
+    {
+      "r": 2,
+      "eps": 0.001,
+      "JF": 0.9240328946370928
+    },
+    {
+      "r": 2,
+      "eps": 0.01,
+      "JF": 0.9222280205186687
+    },
+    {
+      "r": 2,
+      "eps": 0.1,
+      "JF": 0.9190914505506623
+    },
+    {
+      "r": 4,
+      "eps": 0.0001,
+      "JF": 0.9172611958346333
+    },
+    {
+      "r": 4,
+      "eps": 0.001,
+      "JF": 0.9164057286588844
+    },
+    {
+      "r": 4,
+      "eps": 0.01,
+      "JF": 0.9127154825963747
+    },
+    {
+      "r": 4,
+      "eps": 0.1,
+      "JF": 0.9037900576663112
+    },
+    {
+      "r": 8,
+      "eps": 0.0001,
+      "JF": 0.8763186315300545
+    },
+    {
+      "r": 8,
+      "eps": 0.001,
+      "JF": 0.8734367387218058
+    },
+    {
+      "r": 8,
+      "eps": 0.01,
+      "JF": 0.861785912015419
+    },
+    {
+      "r": 8,
+      "eps": 0.1,
+      "JF": 0.8331496634663944
+    }
+  ],
+  "official_JF": 0.9247156835953988,
+  "chosen": {
+    "r": 1,
+    "eps": 0.0001,
+    "JF": 0.9252533483288329
+  }
+}

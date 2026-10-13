@@ -1,0 +1,368 @@
+{
+  "created": "2026-10-13 04:21:27",
+  "rows": [
+    {
+      "unit": "davis__davis/bike-packing__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/bike-packing__obj2",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/blackswan__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/bmx-trees__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/bmx-trees__obj2",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/breakdance__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/camel__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/car-roundabout__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/car-shadow__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/cows__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/dance-twirl__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/dog__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/dogs-jump__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/dogs-jump__obj2",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/dogs-jump__obj3",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/drift-chicane__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/drift-straight__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/goat__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/gold-fish__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/gold-fish__obj2",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/gold-fish__obj3",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/gold-fish__obj4",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/gold-fish__obj5",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/horsejump-high__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/horsejump-high__obj2",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/india__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/india__obj2",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/india__obj3",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/judo__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/judo__obj2",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/kite-surf__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/kite-surf__obj2",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/kite-surf__obj3",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/lab-coat__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/lab-coat__obj2",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/lab-coat__obj3",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/lab-coat__obj4",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/lab-coat__obj5",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/libby__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/loading__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/loading__obj2",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/loading__obj3",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/mbike-trick__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/mbike-trick__obj2",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/motocross-jump__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/motocross-jump__obj2",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/paragliding-launch__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/paragliding-launch__obj2",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/paragliding-launch__obj3",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/parkour__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/pigs__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/pigs__obj2",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/pigs__obj3",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/scooter-black__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/scooter-black__obj2",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/shooting__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/shooting__obj2",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/shooting__obj3",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/soapbox__obj1",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/soapbox__obj2",
+      "split": "val"
+    },
+    {
+      "unit": "davis__davis/soapbox__obj3",
+      "split": "val"
+    },
+    {
+      "unit": "segtrack__segtrack/bird_of_paradise__obj1",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/birdfall__obj1",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/bmx__obj1",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/bmx__obj2",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/cheetah__obj1",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/cheetah__obj2",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/drift__obj1",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/drift__obj2",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/frog__obj1",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/girl__obj1",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/hummingbird__obj1",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/hummingbird__obj2",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/monkey__obj1",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/monkeydog__obj1",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/monkeydog__obj2",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/parachute__obj1",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/penguin__obj1",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/penguin__obj2",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/penguin__obj3",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/penguin__obj4",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/penguin__obj5",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/penguin__obj6",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/soldier__obj1",
+      "split": "segtrack"
+    },
+    {
+      "unit": "segtrack__segtrack/worm__obj1",
+      "split": "segtrack"
+    }
+  ],
+  "guided": {
+    "r": 1,
+    "eps": 0.0001,
+    "selected_on": "DAVIS train subset (tune_units), output arm"
+  },
+  "simple_correction": {
+    "variant": "P5_fullres_prompt_memory",
+    "kwargs": {
+      "fullres_mem": true
+    },
+    "selected_on": "DAVIS val 20-frame ablation (same units as primary eval: disclosed leak; SegTrack is untouched)"
+  },
+  "arms": [
+    "official",
+    "simple",
+    "guided_out",
+    "guided_mem",
+    "simple_guided_mem"
+  ],
+  "arm_notes": {
+    "simple_guided_mem": "combination (two factors) -- reported separately, not a single-factor test"
+  },
+  "frames": "all frames of each unit"
+}
