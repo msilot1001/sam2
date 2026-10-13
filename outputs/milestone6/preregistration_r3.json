@@ -1,0 +1,8 @@
+{
+  "created": "2026-10-13 12:42:33",
+  "created_after": "round 2 (A1z harmful, H3 refuted, A2x no regressions but < gate). Frozen before computing it.",
+  "candidate": "S1 self-assessed scale selection (training-free, causal): run arms {B1, A1, A1z} (fixed scales: full frame, 4x and 2x prompt box) in parallel for frames 1..K, K=5; output B1 on frames 1..K; at frame K pick the arm with the highest mean SAM 2 predicted IoU (iou_pred, max over 3 candidates) over frames 1..K, ties -> B1; output that arm from K+1 on and drop the others. Units where an arm applies no crop use B1 for it. Replayed exactly from the logged, deterministic, independent arm runs (one-time switch, no state mixing).",
+  "gate": "round-1 gate_A unchanged (small dJF >= +0.03, < 20% small units < -0.01, non-small mean >= -0.005) on DAVIS_val + PUMaVOS_B; this is the 4th look at the development data -> any pass stays provisional until C",
+  "ceiling": "RETROSPECTIVE per-unit oracle over the same pool (best whole-sequence JF) reported as an upper bound only",
+  "rows": []
+}

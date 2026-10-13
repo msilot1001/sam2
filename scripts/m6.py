@@ -112,6 +112,24 @@ PREREG_R2 = {
 }
 
 
+PREREG_R3 = {
+    "created_after": "round 2 (A1z harmful, H3 refuted, A2x no regressions but < gate). Frozen before computing it.",
+    "candidate": "S1 self-assessed scale selection (training-free, causal): run arms {B1, A1, A1z} (fixed scales: full "
+                 "frame, 4x and 2x prompt box) in parallel for frames 1..K, K=5; output B1 on frames 1..K; at frame K pick "
+                 "the arm with the highest mean SAM 2 predicted IoU (iou_pred, max over 3 candidates) over frames 1..K, "
+                 "ties -> B1; output that arm from K+1 on and drop the others. Units where an arm applies no crop use B1 "
+                 "for it. Replayed exactly from the logged, deterministic, independent arm runs (one-time switch, no state "
+                 "mixing).",
+    "gate": "round-1 gate_A unchanged (small dJF >= +0.03, < 20% small units < -0.01, non-small mean >= -0.005) on "
+            "DAVIS_val + PUMaVOS_B; this is the 4th look at the development data -> any pass stays provisional until C",
+    "ceiling": "RETROSPECTIVE per-unit oracle over the same pool (best whole-sequence JF) reported as an upper bound only",
+}
+
+
+def prereg_r3():
+    m55._freeze(OUT / "preregistration_r3.json", {**PREREG_R3, "rows": []})
+
+
 def prereg_r2():
     m55._freeze(OUT / "preregistration_r2.json", {**PREREG_R2, "rows": []})
 
@@ -506,6 +524,7 @@ def analyze():
     rep["identity_frames_other_obj_ge_0.3"] = Bv.groupby("set").other_obj_frac.apply(lambda v: int((v >= 0.3).sum())).to_dict()
     # 3. Track C
     cs = rd / "cscale_frames.csv"
+    Cc = None
     if cs.exists():
         C = pd.read_csv(cs)
         Cc = C.dropna(subset=["J_oracle_crop"])
@@ -522,8 +541,73 @@ def analyze():
         rep["trackC"]["input_scale_fixable"] = rep["trackC"]["gain_mean"] >= 0.05 and rep["trackC"]["frac_units_gain_pos"] >= 0.6
         rep["trackC"]["decoder_output_bottleneck"] = rep["trackC"]["ceil256_full_lt_0.8_frame_frac"] >= 0.25
         rep["trackC_per_unit"] = U.round(3).to_dict("records")
+    # 4. round 2 mechanism rules
+    if _runs("A1") is not None and _runs("A1v") is not None:
+        a, v = compare("A1", B)[0], compare("A1v", B)[0]
+        d = a[["set", "unit", "video", "small", "JF_X"]].merge(v[["unit", "JF_X"]], on="unit", suffixes=("_A1", "_A1v"))
+        d = d[d.set.isin(GATE_SETS) & d.small]
+        d["diff"] = d.JF_X_A1 - d.JF_X_A1v
+        ci = _boot(d, "diff")
+        rep["H3_fixed_minus_variable"] = {"small_units": int(len(d)), "mean": float(d["diff"].mean()), "CI_video": ci,
+                                          "supported": bool(d["diff"].mean() >= 0.01 and ci[0] > 0),
+                                          "refuted": bool(d["diff"].mean() <= 0)}
+    z = rd / "cscale_frames_z.csv"
+    if z.exists() and cs.exists() and _runs("A1z") is not None:
+        Z = pd.read_csv(z).dropna(subset=["J_oracle_crop"])
+        m = Cc.merge(Z[["unit", "video_idx", "J_oracle_crop", "J_ceil_crop"]], on=["unit", "video_idx"], suffixes=("", "_z"))
+        gz = rep["gate_A1z"]["small_dJF"]
+        rep["dose"] = {"frames_both": int(len(m)), "oracle_full": float(m.J_oracle_full.mean()), "oracle_A1scale": float(m.J_oracle_crop.mean()),
+                       "oracle_A1zscale": float(m.J_oracle_crop_z.mean()), "video_small_dJF_A1": rep["gate_A1"]["small_dJF"],
+                       "video_small_dJF_A1z": gz}
+        rep["dose"]["supported"] = bool(rep["dose"]["oracle_A1zscale"] > rep["dose"]["oracle_A1scale"] and gz > rep["gate_A1"]["small_dJF"])
     atomic_json(rep, rd / "m6_report.json")
     print(json.dumps(rep, indent=1, default=float)[:20000])
+
+
+# ----------------------------------------------------------------------------- round 3: self-assessed scale selection
+POOL, K = ("B1", "A1", "A1z"), 5
+
+
+def select_scale(iou: dict, k: int = K) -> str:
+    """iou: arm -> per-frame iou_pred array (frames 1..). Highest mean over the first k frames; ties -> first in POOL."""
+    best, arm = -np.inf, POOL[0]
+    for a in POOL:
+        if a in iou:
+            v = float(np.mean(iou[a][:k]))
+            if v > best + 1e-12:
+                best, arm = v, a
+    return arm
+
+
+def s1():
+    B = _runs("B1")
+    arms = {a: _runs(a) for a in POOL}
+    small = {r["unit"]: r["small"] for r in json.loads((OUT / "preregistration.json").read_text())["rows"]}
+    rows = []
+    for (s, u, v), b in B.groupby(["set", "unit", "video"]):
+        per = {"B1": b.sort_values("video_idx")}
+        for a in POOL[1:]:
+            x = arms[a][arms[a].unit == u]
+            if len(x):
+                per[a] = x.sort_values("video_idx")
+        pick = select_scale({a: d.iou_pred.to_numpy() for a, d in per.items()})
+        jf = np.concatenate([per["B1"].JF.to_numpy()[:K], per[pick].JF.to_numpy()[K:]])
+        rows.append({"set": s, "unit": u, "video": v, "small": small[u], "pick": pick, "JF_B1": per["B1"].JF.mean(),
+                     "JF_S1": jf.mean(), **{f"JF_{a}": d.JF.mean() for a, d in per.items()},
+                     **{f"iouK_{a}": d.iou_pred.to_numpy()[:K].mean() for a, d in per.items()}})
+    W = pd.DataFrame(rows)
+    W["dJF"] = W.JF_S1 - W.JF_B1
+    W["applied"] = W.pick != "B1"
+    W["JF_oracle"] = W[[c for c in W if c.startswith("JF_") and c not in ("JF_S1",)]].max(axis=1)
+    W["dJF_oracle"] = W.JF_oracle - W.JF_B1
+    atomic_csv(W, OUT / "reports" / "S1_per_unit.csv")
+    rep = {"gate_S1": gate(W), "picks": W.pick.value_counts().to_dict(),
+           "by_set": {k: {"dJF": float(g.dJF.mean()), "CI": _boot(g, "dJF"), "picks": g.pick.value_counts().to_dict()} for k, g in W.groupby("set")},
+           "oracle_retro": {k: {"small": float(g[g.small].dJF_oracle.mean()) if g.small.any() else None,
+                                "all": float(g.dJF_oracle.mean())} for k, g in W.groupby("set")},
+           "changed_units": W[W.applied].round(4).to_dict("records")}
+    atomic_json(rep, OUT / "reports" / "S1_report.json")
+    print(json.dumps(rep, indent=1, default=float))
 
 
 def _overlay(img, g, pr):

@@ -110,3 +110,12 @@ def test_zoom_target_rule():
     g[:, :] = False
     g[0:300, 0:10] = True
     assert vcam.crop_side(g, 0.5) is None
+
+
+def test_select_scale_causal_and_ties():
+    m6 = load()
+    iou = {"B1": np.array([.8] * 5 + [0.0] * 50), "A1": np.array([.8] * 5 + [1.0] * 50), "A1z": np.array([.7] * 55)}
+    assert m6.select_scale(iou) == "B1"                                  # tie -> B1; later frames ignored
+    iou["A1"][:5] = .81
+    assert m6.select_scale(iou) == "A1"
+    assert m6.select_scale({"B1": np.array([.5] * 5)}) == "B1"
