@@ -275,12 +275,153 @@ def part_b():
         print(f"{name}: {len(records)} records", flush=True)
 
 
+MEANINGFUL = 0.01   # |delta J| threshold for "helpful"/"harmful" (fixed before Part B results were read)
+
+
+def analyze():
+    from rfeas.risk import auroc, cluster_bootstrap
+    recs = []
+    for f in sorted((OUT / "partB").glob("*.json")):
+        d = json.loads(f.read_text())
+        if d.get("status") == "complete":
+            recs += d["records"]
+    R = pd.DataFrame(recs)
+    imm = R[~R.intervention.str.startswith("ROLL|")].copy()
+    base = imm[imm.intervention == "B0_native"].set_index(["unit", "frame_idx"])[["J", "JF", "obj_score", "pred_px"]]
+    iv = imm[imm.intervention != "B0_native"].join(base, on=["unit", "frame_idx"], rsuffix="_native")
+    iv["family"] = iv.intervention.str.split("|").str[0]
+    iv["slot_frame"] = iv.intervention.str.split("|").str[1].astype(int)
+    iv["slot_age"] = iv.frame_idx - iv.slot_frame
+    iv["dJ"], iv["dJF"] = iv.J - iv.J_native, iv.JF - iv.JF_native
+    iv["d_obj"] = iv.obj_score - iv.obj_score_native
+    iv["effect"] = np.select([iv.dJ > MEANINGFUL, iv.dJ < -MEANINGFUL], ["helpful", "harmful"], "neutral")
+    frames = base.reset_index()
+    opp = imm.groupby(["unit", "frame_idx"]).intervention.nunique()
+    rows = []
+    for (grp, fam), g in iv.groupby(["group", "family"]):
+        rows.append({"group": grp, "family": fam, "interventions": len(g), "frames": g.groupby(["unit", "frame_idx"]).ngroups,
+                     "units": g.unit.nunique(), "helpful": int((g.effect == "helpful").sum()),
+                     "harmful": int((g.effect == "harmful").sum()), "neutral": int((g.effect == "neutral").sum()),
+                     "mask_changed_frac": float((g.mask_changed_px > 0).mean()),
+                     "mean_dJ": g.dJ.mean(), "mean_abs_dJ": g.dJ.abs().mean(), "max_dJ": g.dJ.max(), "min_dJ": g.dJ.min(),
+                     "mean_dJ_ci_units": cluster_bootstrap(g, "unit", lambda x: x.dJ.mean(), n=2000)})
+    fam = pd.DataFrame(rows)
+    # oracle upper bound (retrospective GT; NOT deployable)
+    orc = iv.groupby(["group", "unit", "frame_idx"]).dJ.max().reset_index()
+    oracle = orc.groupby("group").agg(frames=("dJ", "size"), mean_best_dJ=("dJ", "mean"),
+                                      frames_best_gt_0_01=("dJ", lambda s: int((s > MEANINGFUL).sum()))).reset_index()
+    # rollouts
+    ro = R[R.intervention.str.startswith("ROLL|")].copy()
+    ro["variant"] = ro.intervention.str[5:]
+    nat = ro[ro.variant == "B0_native"].set_index(["unit", "frame_idx", "rollout_t"])[["J", "JF"]]
+    ro = ro[ro.variant != "B0_native"].join(nat, on=["unit", "frame_idx", "rollout_t"], rsuffix="_nat")
+    roll = []
+    for (grp, v), g in ro.groupby(["group", "variant"]):
+        per = g.groupby(["unit", "frame_idx"]).apply(lambda x: pd.Series({
+            "imm_dJ": float(x[x.rollout_t == 0].J.iloc[0] - x[x.rollout_t == 0].J_nat.iloc[0]),
+            "d_JF_1_5": float((x[x.rollout_t.between(1, 5)].JF - x[x.rollout_t.between(1, 5)].JF_nat).mean()),
+            "d_JF_1_10": float((x[x.rollout_t >= 1].JF - x[x.rollout_t >= 1].JF_nat).mean()),
+            "d_minJ_10": float(x[x.rollout_t >= 1].J.min() - x[x.rollout_t >= 1].J_nat.min()),
+            "fail_iv": int((x[x.rollout_t >= 1].J < 0.5).sum()), "fail_nat": int((x[x.rollout_t >= 1].J_nat < 0.5).sum())}),
+            include_groups=False)
+        roll.append({"group": grp, "variant": v, "frames": len(per), "mean_imm_dJ": per.imm_dJ.mean(),
+                     "mean_dJF_1_5": per.d_JF_1_5.mean(), "mean_dJF_1_10": per.d_JF_1_10.mean(),
+                     "rollouts_dJF10_gt_0.01": int((per.d_JF_1_10 > MEANINGFUL).sum()),
+                     "rollouts_dJF10_lt_-0.01": int((per.d_JF_1_10 < -MEANINGFUL).sum()),
+                     "fail_frames_iv": int(per.fail_iv.sum()), "fail_frames_native": int(per.fail_nat.sum()),
+                     "corr_imm_vs_rollout": float(per.imm_dJ.corr(per.d_JF_1_10)) if per.imm_dJ.std() > 0 else np.nan})
+    roll = pd.DataFrame(roll)
+    # Part C gate + simple causal predictors of LOO / replacement utility (labels from GT, features causal)
+    pc = {}
+    lab = iv[iv.family.isin(["B1_loo", "B4_recency", "B3_random", "B2_oldest"])]
+    n_meaningful = int((lab.effect != "neutral").sum())
+    pc["meaningful_interventions"] = n_meaningful
+    pc["units_with_meaningful"] = int(lab[lab.effect != "neutral"].unit.nunique())
+    pc["proceed"] = bool(n_meaningful >= 30 and pc["units_with_meaningful"] >= 4)
+    if pc["proceed"]:
+        loo = iv[iv.family == "B1_loo"].copy()
+        loo["harm_if_removed"] = (loo.dJ < -MEANINGFUL).astype(int)     # memory was useful
+        loo["help_if_removed"] = (loo.dJ > MEANINGFUL).astype(int)      # memory was harmful
+        feats = {"recency (newer = more useful)": -loo.slot_age, "slot age": loo.slot_age,
+                 "native mask area (log)": np.log1p(loo.pred_px_native)}
+        pc["loo_useful_auroc"] = {k: auroc(loo.harm_if_removed, v) for k, v in feats.items()}
+        pc["loo_harmful_auroc"] = {k: auroc(loo.help_if_removed, v) for k, v in feats.items()}
+        pc["loo_useful_by_age"] = loo.groupby("slot_age").agg(n=("dJ", "size"), useful=("harm_if_removed", "mean"),
+                                                             harmful=("help_if_removed", "mean"), mean_dJ=("dJ", "mean")).reset_index().to_dict("records")
+    (OUT / "reports").mkdir(parents=True, exist_ok=True)
+    iv.to_csv(OUT / "reports" / "partB_interventions.csv", index=False)
+    ro.to_csv(OUT / "reports" / "partB_rollouts.csv", index=False)
+    fam.to_csv(OUT / "reports" / "partB_families.csv", index=False)
+    roll.to_csv(OUT / "reports" / "partB_rollout_summary.csv", index=False)
+    atomic_json({"threshold_dJ": MEANINGFUL, "frames": len(frames), "units": frames.unit.nunique(),
+                 "interventions_per_frame": opp.describe().to_dict(), "families": fam.to_dict("records"),
+                 "oracle_upper_bound_NOT_DEPLOYABLE": oracle.to_dict("records"), "rollouts": roll.to_dict("records"),
+                 "partC": pc}, OUT / "reports" / "partB_report.json")
+    pd.set_option("display.width", 250)
+    pd.set_option("display.max_columns", 30)
+    print(fam.round(4).to_string(index=False))
+    print(oracle.round(4).to_string(index=False))
+    print(roll.round(4).to_string(index=False))
+    print(json.dumps(pc, indent=1, default=float))
+
+
+def candidates():
+    """DIAGNOSTIC (retrospective GT, NOT deployable): on the Part-B units' native runs, compare the mask
+    SAM 2 chose with its other multimask candidates. Large gaps at failure frames would point to
+    candidate selection / identity rather than memory content."""
+    pred = build_predictor()
+    idx, dsets = units_index()
+    units = sorted({r["unit"] for r in json.loads((OUT / "manifest.json").read_text())["rows"]})
+    store = {}
+    orig = pred._forward_sam_heads
+
+    def heads(*a, **k):
+        out = orig(*a, **k)
+        store["multi"], store["ious"] = out[1].detach(), out[2].detach().float().cpu().numpy().ravel()
+        return out
+    pred._forward_sam_heads = heads
+    rows = []
+    controlled.install(pred, None, {})
+    for name in units:
+        u = idx[name]
+        vdir, prompt, gt_of = prepare(u, dsets)
+        state, od = engine.start(pred, vdir, prompt)
+        for t in range(1, len(u.frames)):
+            out, m, _, score = engine.predict(pred, state, od, t)
+            od["non_cond_frame_outputs"][t] = out
+            with torch.inference_mode():
+                _, vr = pred._get_orig_video_res_output(state, store["multi"])
+            cands = (vr[0] > 0).cpu().numpy()
+            gt = gt_of(u.frames[t])
+            js = [j_measure(c, gt) for c in cands]
+            rows.append({"unit": name, "video_idx": t, "J_chosen": j_measure(m, gt), "J_best_candidate": max(js),
+                         "n_candidates": len(js), "pred_ious": store["ious"].tolist(), "obj_score": score,
+                         "gt_empty": not gt.any()})
+        pred.reset_state(state)
+    controlled.uninstall(pred)
+    del pred._forward_sam_heads
+    D = pd.DataFrame(rows)
+    D["gap"] = D.J_best_candidate - D.J_chosen
+    vis = D[~D.gt_empty]
+    fail = vis[vis.J_chosen < 0.5]
+    summ = {"frames": len(vis), "failure_frames": len(fail), "failure_units": int(fail.unit.nunique()),
+            "failure_frames_with_candidate_J_ge_0.5": int((fail.J_best_candidate >= 0.5).sum()),
+            "mean_gap_failure": float(fail.gap.mean()) if len(fail) else None,
+            "mean_gap_all": float(vis.gap.mean()),
+            "by_unit": fail.groupby("unit").agg(frames=("gap", "size"), mean_J=("J_chosen", "mean"),
+                                                mean_best=("J_best_candidate", "mean")).reset_index().to_dict("records")}
+    (OUT / "reports").mkdir(parents=True, exist_ok=True)
+    D.to_csv(OUT / "reports" / "candidate_oracle_frames.csv", index=False)
+    atomic_json(summ, OUT / "reports" / "candidate_oracle_report.json")
+    print(json.dumps(summ, indent=1, default=float))
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("what", choices=["partA", "manifest", "partB"])
+    ap.add_argument("what", choices=["partA", "manifest", "partB", "analyze", "candidates"])
     a = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
-    {"partA": part_a, "manifest": manifest, "partB": part_b}[a.what]()
+    {"partA": part_a, "manifest": manifest, "partB": part_b, "analyze": analyze, "candidates": candidates}[a.what]()
 
 
 if __name__ == "__main__":

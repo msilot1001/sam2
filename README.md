@@ -95,3 +95,7 @@ cd sam2
 최신 계획서를 먼저 읽고 그 범위에 맞춰 작업한다. 구현을 시작할 때는 [공식 SAM 2 저장소](https://github.com/facebookresearch/sam2)의 SAM 2.1 설치·체크포인트 지침과 [Virtual KITTI 2 자료](https://europe.naverlabs.com/research/computer-vision/proxy-virtual-worlds-vkitti-2/)를 확인해 별도로 준비한다. 모델 코드·가중치·데이터는 이 저장소에 복사하지 않는다.
 
 첫 구현 과제는 공식 기준선 재현, 네 선택 정책을 같은 조건에서 실행하는 파이프라인, 누락 패턴 생성과 평가다. 현재 프레임의 예측이 끝난 후에만 그 프레임을 메모리 후보에 넣고, 이후 프레임의 정답 마스크나 대상 차량의 GT 자세를 메모리 선택 입력에 사용하지 않는다. `extrinsic.txt`의 카메라 자세와 대상 차량의 `pose.txt`를 혼동하지 않는다. 세부 정책과 미확정 사항은 최신 계획서 5~13절을 따른다.
+
+## M5-Pre: 메모리 개입의 인과 효과 검증 (탐색적, CUDA)
+
+메모리 고갈 원인 분리(spatial vs object pointer, backfill), 메모리 하나의 반사실적 효용, 후보 mask oracle 진단을 다룬다. 결과와 권고는 [docs/MILESTONE_5_PRE.md](docs/MILESTONE_5_PRE.md)에 있다. 브랜치는 `exp/m5-pre-memory-intervention`이다.
