@@ -90,6 +90,32 @@ PREREG = {
 }
 
 
+PREREG_R2 = {
+    "created_after": "round 1 (A1 failed gate_A: small dJF +0.017 < 0.03; A2 trigger not met; B3 trigger not met; "
+                     "Track C rules not met). Round 2 tests mechanisms, frozen before any round-2 output.",
+    "arms": {
+        "A1z": "A1 with zoom target 0.5 (crop side = 2 x prompt box side, same clamp >= min(H,W)/4; no crop if >= min(H,W)). "
+               "Dose test of the input-scale mechanism.",
+        "A1v": "A1 with variable scale: crop side recomputed every frame from the previous OUTPUT box with A1's rule "
+               "(target 0.25, clamp [min(H,W)/4, min(H,W)]); kept if output empty. Memory then mixes scales. "
+               "Tests H3 (fixed-scale memory consistency matters).",
+        "A2x": "A2 exactly as pre-registered in round 1, run as POST-HOC EXPLORATORY (its trigger was not met): "
+               "measures whether the global fallback removes A1's crop-escape regressions. Cannot pass a gate.",
+    },
+    "gate": "A1z and A1v are judged by the round-1 gate_A unchanged; with 3 looks at the same development data any "
+            "pass is provisional and still requires the PUMaVOS C confirmation",
+    "H3_rule": "fixed-scale consistency supported if A1 - A1v small-unit dJF >= +0.01 with video-CI lower bound > 0; "
+               "refuted if A1v >= A1",
+    "dose_rule": "input-scale mechanism supported if image-oracle gain at the A1z scale > gain at the A1 scale on the "
+                 "same frames and A1z small dJF > A1 small dJF",
+    "C_dose": "Track C diagnostic repeated with the A1z crop side (cscale_frames_z.csv)",
+}
+
+
+def prereg_r2():
+    m55._freeze(OUT / "preregistration_r2.json", {**PREREG_R2, "rows": []})
+
+
 def prereg():
     small = _small()
     rows = [{"unit": u.name, "set": s, "small": u.name in small, "crop_side": vcam.crop_side(gt(u, 0))} for s, u in units()]
@@ -172,7 +198,7 @@ def track(arm):
         stem = u.name.replace("/", "_")
         if (d / f"{stem}.csv").exists():
             continue
-        if arm != "B1" and vcam.crop_side(gt(u, 0)) is None:
+        if arm != "B1" and vcam.crop_side(gt(u, 0), 0.5 if arm == "A1z" else vcam.TARGET) is None:
             continue                                   # no crop: A1 == A2 == B1 by construction (tested)
         df, masks = run_unit(pred, heads, s, u, arm)
         atomic_npz(d / f"{stem}.npz", **{arm: np.packbits(np.stack(masks))})
@@ -186,8 +212,9 @@ def run_unit(pred, heads, s, u, arm, n=None, side=None):
     """One object, frames 1..n-1, causal. side overrides the crop rule (tests: full-frame identity box)."""
     stem = u.name.replace("/", "_")
     n, hw = n or len(u.frames), gt(u, 0).shape
-    side = side or vcam.crop_side(gt(u, 0))
-    if arm == "A2":
+    target = 0.5 if arm == "A1z" else vcam.TARGET
+    side = side or vcam.crop_side(gt(u, 0), target)
+    if arm in ("A2", "A2x"):
         g = OUT / "runs/B1" / f"{stem}"
         gm = np.unpackbits(np.load(f"{g}.npz")["B1"])[:(len(u.frames) - 1) * hw[0] * hw[1]].reshape(-1, *hw).astype(bool)
         gs = pd.read_csv(f"{g}.csv").set_index("video_idx").obj_score
@@ -199,6 +226,9 @@ def run_unit(pred, heads, s, u, arm, n=None, side=None):
         state, od, frames = start_crop(pred, u, side, center)
     rows, masks, prev = [], [], None
     for t in range(1, n):
+        if arm == "A1v" and t > 1 and masks[-1].any():
+            b = vcam.bbox(masks[-1])
+            side = int(round(min(max(max(b[1] - b[0], b[3] - b[2]) / target, min(hw) / vcam.MAX_ZOOM), min(hw))))
         if arm != "B1":
             frames.box = vcam.place(center, side, hw)
         m, score, ious, multi, lat = step(pred, state, od, t, heads)
@@ -215,7 +245,7 @@ def run_unit(pred, heads, s, u, arm, n=None, side=None):
             crop_out = vcam.paste(m, box, hw)
             r.update(box=json.dumps(box), side=side, crop_obj_score=score,
                      crop_touch=vcam.touches_border(m, box, hw))
-            if arm == "A1":
+            if arm in ("A1", "A1z", "A1v"):
                 out, src = crop_out, "crop"
             else:
                 ok = score > 0 and m.any() and not r["crop_touch"]
@@ -242,17 +272,18 @@ def run_unit(pred, heads, s, u, arm, n=None, side=None):
 
 
 # ----------------------------------------------------------------------------- Track C diagnostic
-def cscale():
+def cscale(target=None):
     """RETROSPECTIVE upper bound (GT box prompt, GT-centred crop): does a larger input scale let the frozen
     encoder+decoder express small targets better, and is the 256x256 output a limit? Not deployable."""
     from PIL import Image
     small = _small()
     ipred = m55.build_image_predictor()
-    rows, f = [], OUT / "reports" / "cscale_frames.csv"
+    target = float(target or vcam.TARGET)
+    rows, f = [], OUT / "reports" / ("cscale_frames.csv" if target == vcam.TARGET else "cscale_frames_z.csv")
     for s, u in units():
         if u.name not in small:
             continue
-        side, hw = vcam.crop_side(gt(u, 0)), gt(u, 0).shape
+        side, hw = vcam.crop_side(gt(u, 0), target), gt(u, 0).shape
         ps = paths(u)
         for t in range(0, len(u.frames), 5):
             g = gt(u, t)
@@ -289,6 +320,242 @@ def _best_mask(ipred, g):
             if j > best:
                 best, bm = j, m > 0
     return bm
+
+
+# ----------------------------------------------------------------------------- Track B: re-appearance (CPU, B1 logs)
+def reappear_events(vis_area, empty, border, med):
+    """GT-only event finder. vis_area[t]: GT area; empty[t]: GT empty; border[t]: GT box within 2 px of the frame
+    edge. Returns [(absence_start, reappear_t, type)] for runs of non-visible frames (area < 25% of med) that end
+    with a visible frame. type: out_of_frame / occluded (GT empty for the whole run) or partial (never empty)."""
+    vis = [a >= 0.25 * med for a in vis_area]
+    ev, t, n = [], 1, len(vis)
+    while t < n:
+        if not vis[t] and vis[t - 1]:
+            s = t
+            while t < n and not vis[t]:
+                t += 1
+            if t < n:
+                if not any(empty[s:t]):
+                    typ = "partial"
+                else:
+                    typ = "out_of_frame" if border[s - 1] else "occluded"
+                ev.append((s, t, typ))
+        t += 1
+    return ev
+
+
+ANNOTATION_DEFINED = {"pumavos__pumavos/guitar__obj1": "guitar back side annotated as absent (visual check, M5.6)"}
+
+
+def breappear():
+    F = pd.concat([pd.read_csv(f) for f in sorted((OUT / "runs/B1").glob("*.csv"))], ignore_index=True)
+    rows = []
+    for (s, name), g in F.groupby(["set", "unit"]):
+        g = g.sort_values("video_idx").reset_index(drop=True)
+        u = _UNITS()[name]
+        g0 = gt(u, 0)
+        border = [False] + [_touch(gt(u, t)) for t in g.video_idx]
+        area = [int(g0.sum())] + g.gt_area.tolist()
+        empty = [False] + g.gt_empty.tolist()
+        med = np.median([a for a in area if a > 0])
+        J = [np.nan] + g.J.tolist()
+        for a0, tr, typ in reappear_events(area, empty, border, med):
+            el = range(tr, min(tr + 5, len(area)))
+            after = [t for t in range(tr, len(area)) if J[t] >= 0.5]
+            row = g.iloc[tr - 1]
+            ab = g.iloc[a0 - 1:tr - 1]
+            rows.append({"set": s, "unit": name, "video": u.video, "absence_start": a0, "reappear": tr,
+                         "absence_len": tr - a0, "type": "annotation_defined" if name in ANNOTATION_DEFINED else typ,
+                         "J_first": J[tr], "J_first5": float(np.mean([J[t] for t in el])),
+                         "delay": (after[0] - tr) if after else None, "obj_score_first": row.obj_score,
+                         "iou_pred_first": row.iou_pred, "pred_gt_area_ratio": row.pred_area / max(row.gt_area, 1),
+                         "other_obj_frac_first": row.other_obj_frac, "J_cand_best_first": row.J_cand_best,
+                         "absence_obj_score_mean": float(ab.obj_score.mean()),
+                         "absence_pred_present_frac": float((ab.pred_area > 0).mean()),
+                         "absence_frames_gt_empty": int(ab.gt_empty.sum())})
+        print(name, flush=True)
+    atomic_csv(pd.DataFrame(rows), OUT / "reports" / "reappear_events.csv")
+
+
+def _touch(g, px=2):
+    b = vcam.bbox(g)
+    H, W = g.shape
+    return b is not None and (b[0] <= px or b[2] <= px or b[1] >= H - px or b[3] >= W - px)
+
+
+_U = {}
+
+
+def _UNITS():
+    if not _U:
+        _U.update({u.name: u for _, u in units()})
+    return _U
+
+
+# ----------------------------------------------------------------------------- analysis
+def _runs(arm):
+    fs = sorted((OUT / "runs" / arm).glob("*.csv"))
+    return pd.concat([pd.read_csv(f) for f in fs], ignore_index=True) if fs else None
+
+
+def _boot(df, col):
+    from rfeas.risk import cluster_bootstrap
+    return cluster_bootstrap(df, "video", lambda d: float(d[col].mean()), n=2000)
+
+
+def compare(arm, B):
+    """Per-unit arm vs B1 over every unit of B (units the arm skipped are identical to B1 by construction)."""
+    X = _runs(arm)
+    small = {r["unit"]: r["small"] for r in json.loads((OUT / "preregistration.json").read_text())["rows"]}
+    ub = B.groupby(["set", "unit", "video"]).agg(JF_B1=("JF", "mean"), J_B1=("J", "mean"), F_B1=("F", "mean")).reset_index()
+    ux = X.groupby("unit").agg(JF_X=("JF", "mean"), J_X=("J", "mean"), F_X=("F", "mean"), lat_X=("latency_s", "median"),
+                               escape=("gt_in_crop", lambda v: float((v < 0.5).mean())),
+                               crop_frac=("source", lambda v: float((v == "crop").mean()))).reset_index()
+    W = ub.merge(ux, on="unit", how="left")
+    W["applied"] = W.JF_X.notna()
+    for c in ("JF", "J", "F"):
+        W[f"{c}_X"] = W[f"{c}_X"].fillna(W[f"{c}_B1"])
+    W["dJF"], W["dJ"], W["dF"] = W.JF_X - W.JF_B1, W.J_X - W.J_B1, W.F_X - W.F_B1
+    W["small"] = W.unit.map(small)
+    W["arm"] = arm
+    return W, X
+
+
+def gate(W):
+    G = W[W.set.isin(GATE_SETS)]
+    sm, ns = G[G.small], G[~G.small]
+    r = {"n_small": int(len(sm)), "n_small_applied": int(sm.applied.sum()), "small_dJF": float(sm.dJF.mean()),
+         "small_dJF_CI_video": _boot(sm, "dJF"), "small_frac_regress_0.01": float((sm.dJF < -0.01).mean()),
+         "small_up_0.01": int((sm.dJF > 0.01).sum()), "small_down_0.01": int((sm.dJF < -0.01).sum()),
+         "n_nonsmall": int(len(ns)), "n_nonsmall_applied": int(ns.applied.sum()), "nonsmall_dJF": float(ns.dJF.mean())}
+    r["pass"] = {"small_dJF>=0.03": r["small_dJF"] >= 0.03, "regress_frac<0.2": r["small_frac_regress_0.01"] < 0.2,
+                 "nonsmall_dJF>=-0.005": r["nonsmall_dJF"] >= -0.005}
+    r["PASS"] = all(r["pass"].values())
+    return r
+
+
+def analyze():
+    rd = OUT / "reports"
+    rep = {}
+    B = _runs("B1")
+    # 0. reproducibility of B1 against M5.6 (PUMaVOS) / M5.5 (DAVIS, SegTrack 'simple' == P5)
+    old = pd.concat([pd.read_csv(f) for f in sorted((m56.OUT / "runs").glob("*.csv"))])
+    old = pd.concat([old[old.arm == "B1_P5"]] + [pd.read_csv(f).query("arm == 'simple'") for d in ("val", "segtrack")
+                                                 for f in sorted(Path(f"outputs/milestone55/proto/{d}").glob("*.csv"))])
+    mm = B.merge(old[["unit", "video_idx", "J"]], on=["unit", "video_idx"], suffixes=("", "_old"))
+    rep["B1_reproduces_prior_runs"] = {"frames_compared": int(len(mm)), "max_abs_dJ": float((mm.J - mm.J_old).abs().max()),
+                                       "frames_differ_1e-6": int(((mm.J - mm.J_old).abs() > 1e-6).sum())}
+    rep["B1"] = B.groupby("set").agg(units=("unit", "nunique"), frames=("J", "size"), JF=("JF", "mean"),
+                                     lat_median=("latency_s", "median"), vram_GB=("peak_vram_bytes", lambda v: v.max() / 1e9)).reset_index().to_dict("records")
+    # 1. Track A
+    Ep = []
+    for arm in ("A1", "A2", "A1z", "A1v", "A2x"):
+        if _runs(arm) is None:
+            continue
+        W, X = compare(arm, B)
+        atomic_csv(W, rd / f"trackA_{arm}_per_unit.csv")
+        rep[f"gate_{arm}"] = gate(W)
+        rep[f"{arm}_by_set"] = {k: {"units": int(len(g)), "applied": int(g.applied.sum()), "dJF": float(g.dJF.mean()),
+                                    "dJF_CI": _boot(g, "dJF"), "dJF_applied": float(g[g.applied].dJF.mean()) if g.applied.any() else 0.0}
+                                for k, g in W.groupby("set")}
+        rep[f"{arm}_applied_units"] = W[W.applied][["set", "unit", "small", "JF_B1", "JF_X", "dJF", "dJ", "dF", "escape",
+                                                     "crop_frac", "lat_X"]].round(4).to_dict("records")
+        rep[f"{arm}_latency_median_s"] = float(X.latency_s.median())
+        rep[f"{arm}_peak_vram_GB"] = float(X.peak_vram_bytes.max() / 1e9)
+        for a, F in (("B1", B[B.unit.isin(X.unit.unique())]), (arm, X)):
+            e = m56.episode_table(F.assign(arm=a))
+            e["set"] = e.unit.map(dict(zip(F.unit, F.set)))
+            Ep.append(e)
+        if arm == "A1":
+            rep["A2_trigger"] = {"small_up_0.03": int(((W.dJF >= 0.03) & W.small).sum()),
+                                 "small_down_0.03": int(((W.dJF <= -0.03) & W.small).sum())}
+            rep["A2_trigger"]["fire"] = rep["A2_trigger"]["small_up_0.03"] >= 3 or rep["A2_trigger"]["small_down_0.03"] >= 3
+    if Ep:
+        Ep = pd.concat(Ep, ignore_index=True)
+        atomic_csv(Ep, rd / "trackA_episodes.csv")
+        rep["trackA_episodes_on_applied_units"] = Ep.groupby("arm").agg(episodes=("unit", "size"), failed_frames=("duration", "sum"),
+                                                                          unrecovered=("recovered", lambda r: int((~r).sum()))).reset_index().to_dict("records")
+    # 2. Track B
+    from rfeas.risk import auroc
+    ev = rd / "reappear_events.csv"
+    if ev.exists():
+        E = pd.read_csv(ev)
+        E["fail_first"] = E.J_first < 0.5
+        E["cand_opportunity"] = E.fail_first & (E.J_cand_best_first >= 0.5)
+        rep["reappear_by_type"] = E.groupby("type").agg(events=("unit", "size"), units=("unit", "nunique"), videos=("video", "nunique"),
+                                                        J_first=("J_first", "mean"), J_first5=("J_first5", "mean"),
+                                                        fail_first=("fail_first", "sum"), delay_median=("delay", "median"),
+                                                        cand_opportunity=("cand_opportunity", "sum"),
+                                                        absence_pred_present=("absence_pred_present_frac", "mean")).reset_index().to_dict("records")
+        nonann = E[(E.type != "annotation_defined") & E.fail_first]
+        trig = nonann[nonann.cand_opportunity]
+        rep["B3_trigger"] = {"failed_reappearances_nonannotation": int(len(nonann)), "videos": int(nonann.video.nunique()),
+                             "with_online_candidate_opportunity": int(len(trig)), "opportunity_videos": int(trig.video.nunique()),
+                             "fire": bool(len(trig) >= 4 and trig.video.nunique() >= 3)}
+        rep["reappear_failed_events"] = nonann.round(3).to_dict("records")
+    Bv = B[~B.unit.isin(ANNOTATION_DEFINED)]
+    rep["presence_detection"] = {k: {"frames": int(len(g)), "gt_empty_frames": int(g.gt_empty.sum()),
+                                     "auroc_objscore_vs_gt_present": auroc((~g.gt_empty).astype(int).to_numpy(), g.obj_score.to_numpy())
+                                     if g.gt_empty.any() else None,
+                                     "false_presence_on_empty": float((g[g.gt_empty].pred_area > 0).mean()) if g.gt_empty.any() else None,
+                                     "missed_presence_on_visible": float((g[~g.gt_empty].pred_area == 0).mean())}
+                                 for k, g in Bv.groupby("set")}
+    vis = Bv[~Bv.gt_empty]
+    rep["iou_pred_vs_J_spearman"] = float(vis[["iou_pred", "J"]].corr("spearman").iloc[0, 1])
+    rep["identity_frames_other_obj_ge_0.3"] = Bv.groupby("set").other_obj_frac.apply(lambda v: int((v >= 0.3).sum())).to_dict()
+    # 3. Track C
+    cs = rd / "cscale_frames.csv"
+    if cs.exists():
+        C = pd.read_csv(cs)
+        Cc = C.dropna(subset=["J_oracle_crop"])
+        U = Cc.groupby(["unit", "video"]).agg(frames=("J_oracle_full", "size"), full=("J_oracle_full", "mean"), crop=("J_oracle_crop", "mean"),
+                                              ceil_full=("J_ceil_full", "mean"), ceil_crop=("J_ceil_crop", "mean")).reset_index()
+        U["gain"] = U.crop - U.full
+        atomic_csv(U, rd / "trackC_per_unit.csv")
+        rep["trackC"] = {"units_with_crop": int(len(U)), "frames": int(len(Cc)), "oracle_full": float(U.full.mean()), "oracle_crop": float(U.crop.mean()),
+                         "gain_mean": float(U.gain.mean()), "gain_CI_video": _boot(U, "gain"), "frac_units_gain_pos": float((U.gain > 0).mean()),
+                         "ceil256_full_lt_0.8_frame_frac": float((C.J_ceil_full < 0.8).mean()),
+                         "ceil256_crop_lt_0.8_frame_frac": float((Cc.J_ceil_crop < 0.8).mean()),
+                         "all_small_units": int(C.unit.nunique()), "all_frames": int(len(C)),
+                         "oracle_full_all": float(C.J_oracle_full.mean())}
+        rep["trackC"]["input_scale_fixable"] = rep["trackC"]["gain_mean"] >= 0.05 and rep["trackC"]["frac_units_gain_pos"] >= 0.6
+        rep["trackC"]["decoder_output_bottleneck"] = rep["trackC"]["ceil256_full_lt_0.8_frame_frac"] >= 0.25
+        rep["trackC_per_unit"] = U.round(3).to_dict("records")
+    atomic_json(rep, rd / "m6_report.json")
+    print(json.dumps(rep, indent=1, default=float)[:20000])
+
+
+def _overlay(img, g, pr):
+    from spatial.detail import dilate
+    a = np.asarray(img.convert("RGB")).copy()
+    for m, col in ((g, (0, 255, 0)), (pr, (255, 0, 0))):
+        e = dilate(m, 1) & ~m if m.any() else m
+        a[e] = col
+    return a
+
+
+def montage(spec=None):
+    """Visual checks: `unit:t1,t2,..;unit:...` -> figs/<n>.png (green GT edge, red arm output edge). B1 by default."""
+    from PIL import Image
+    arm = "B1"
+    if spec and spec.startswith("@"):
+        arm, spec = spec[1:].split("|", 1)
+    tiles = []
+    for part in spec.split(";"):
+        name, ts = part.split(":")
+        u = _UNITS()[name]
+        hw = gt(u, 0).shape
+        mk = np.unpackbits(np.load(OUT / "runs" / arm / (name.replace("/", "_") + ".npz"))[arm])
+        mk = mk[:(len(u.frames) - 1) * hw[0] * hw[1]].reshape(-1, *hw).astype(bool)
+        ps = paths(u)
+        for t in map(int, ts.split(",")):
+            a = _overlay(Image.open(ps[t]), gt(u, t), mk[t - 1] if t > 0 else gt(u, 0))
+            tiles.append(np.asarray(Image.fromarray(a).resize((427, 240))))
+    rows = [np.concatenate(tiles[i:i + 4] + [np.zeros_like(tiles[0])] * (4 - len(tiles[i:i + 4])), 1) for i in range(0, len(tiles), 4)]
+    (OUT / "figs").mkdir(exist_ok=True)
+    f = OUT / "figs" / f"{arm}_{abs(hash(spec)) % 10**6}.png"
+    Image.fromarray(np.concatenate(rows, 0)).save(f)
+    print(f)
 
 
 def main():

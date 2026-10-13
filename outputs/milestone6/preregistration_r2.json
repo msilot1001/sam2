@@ -1,0 +1,14 @@
+{
+  "created": "2026-10-13 11:56:09",
+  "created_after": "round 1 (A1 failed gate_A: small dJF +0.017 < 0.03; A2 trigger not met; B3 trigger not met; Track C rules not met). Round 2 tests mechanisms, frozen before any round-2 output.",
+  "arms": {
+    "A1z": "A1 with zoom target 0.5 (crop side = 2 x prompt box side, same clamp >= min(H,W)/4; no crop if >= min(H,W)). Dose test of the input-scale mechanism.",
+    "A1v": "A1 with variable scale: crop side recomputed every frame from the previous OUTPUT box with A1's rule (target 0.25, clamp [min(H,W)/4, min(H,W)]); kept if output empty. Memory then mixes scales. Tests H3 (fixed-scale memory consistency matters).",
+    "A2x": "A2 exactly as pre-registered in round 1, run as POST-HOC EXPLORATORY (its trigger was not met): measures whether the global fallback removes A1's crop-escape regressions. Cannot pass a gate."
+  },
+  "gate": "A1z and A1v are judged by the round-1 gate_A unchanged; with 3 looks at the same development data any pass is provisional and still requires the PUMaVOS C confirmation",
+  "H3_rule": "fixed-scale consistency supported if A1 - A1v small-unit dJF >= +0.01 with video-CI lower bound > 0; refuted if A1v >= A1",
+  "dose_rule": "input-scale mechanism supported if image-oracle gain at the A1z scale > gain at the A1 scale on the same frames and A1z small dJF > A1 small dJF",
+  "C_dose": "Track C diagnostic repeated with the A1z crop side (cscale_frames_z.csv)",
+  "rows": []
+}

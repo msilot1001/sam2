@@ -91,3 +91,22 @@ def test_identity_crop_equals_B1_and_crop_arm_is_causal():
     heads.close()
     assert all(np.array_equal(x, y) for x, y in zip(ma, mb[:4]))               # no dependence on later frames
     assert a.box.tolist() == b.box.tolist()[:4] and a.JF.tolist() == b.JF.tolist()[:4]
+
+
+def test_reappear_events():
+    m6 = load()
+    area = [100, 100, 0, 0, 100, 10, 100, 0]
+    empty = [a == 0 for a in area]
+    border = [False, True, False, False, False, False, False, False]
+    ev = m6.reappear_events(area, empty, border, 100)
+    assert ev == [(2, 4, "out_of_frame"), (5, 6, "partial")]            # trailing absence never reappears
+    assert m6.reappear_events([100, 0, 100], [False, True, False], [False] * 3, 100) == [(1, 2, "occluded")]
+
+
+def test_zoom_target_rule():
+    g = np.zeros((480, 854), bool)
+    g[100:200, 100:150] = True                         # side 100: A1 s=400, A1z s=200
+    assert vcam.crop_side(g) == 400 and vcam.crop_side(g, 0.5) == 200
+    g[:, :] = False
+    g[0:300, 0:10] = True
+    assert vcam.crop_side(g, 0.5) is None

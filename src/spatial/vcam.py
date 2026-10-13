@@ -23,11 +23,11 @@ def bbox(m: np.ndarray):
     return (int(ys.min()), int(ys.max()) + 1, int(xs.min()), int(xs.max()) + 1) if len(ys) else None
 
 
-def crop_side(gt0: np.ndarray):
+def crop_side(gt0: np.ndarray, target: float = TARGET):
     """Fixed crop side from the prompt mask, or None (no crop: identical to the full-frame baseline)."""
     H, W = gt0.shape
     y0, y1, x0, x1 = bbox(gt0)
-    s = max(y1 - y0, x1 - x0) / TARGET
+    s = max(y1 - y0, x1 - x0) / target
     if s >= min(H, W):
         return None
     return int(round(max(s, min(H, W) / MAX_ZOOM)))
