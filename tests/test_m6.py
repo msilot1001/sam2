@@ -119,3 +119,11 @@ def test_select_scale_causal_and_ties():
     iou["A1"][:5] = .81
     assert m6.select_scale(iou) == "A1"
     assert m6.select_scale({"B1": np.array([.5] * 5)}) == "B1"
+
+
+def test_untrained_head_is_identity():
+    m6 = load()
+    h = m6.Head()
+    lg = torch.randn(1, 1, 256, 256)
+    out = h(lg, torch.randn(1, 32, 256, 256), torch.randn(1, 64, 128, 128), torch.rand(1, 3, 256, 256))
+    assert torch.equal(out, lg)

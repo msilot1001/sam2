@@ -126,6 +126,31 @@ PREREG_R3 = {
 }
 
 
+PREREG_R4 = {
+    "created_after": "round 3 (S1 failed; per-unit scale-oracle ceiling ~+0.018). Frozen before any round-4 output.",
+    "question": "Track C3: is there LEARNABLE headroom beyond SAM 2's frozen mask decoder for small targets, i.e. do "
+                "the frozen stride-4/8 features carry information the decoder does not express?",
+    "setting": "DIAGNOSTIC, retrospective prompt: SAM 2 image mode, GT box only, multimask_output=False, on the full "
+               "frame; both arms get the identical prompt and frozen features. Not a deployable VOS method.",
+    "head": "residual conv head on [logit, sigmoid(logit), s0 (32ch @256), up2(s1) (64ch), RGB@256] -> 3x3 conv 64, "
+            "3x3 conv 64, 3x3 dilated(2) conv 64 (ReLU), 3x3 conv -> delta; output = logit + delta; last conv "
+            "zero-initialised (untrained head == frozen decoder, tested). 1024 -> 256 grid as SAM 2.",
+    "train": "DAVIS 2017 train split only (never val/PUMaVOS/SegTrack); every 2nd frame, every visible object; loss "
+             "BCE + soft dice at 256 vs area-resized GT, objects with prompt-frame-independent area < 1% of frame "
+             "weighted x4; Adam 1e-3, 2 epochs or 25 min wall cap, seed 0, frozen SAM 2 (no_grad).",
+    "eval": "(a) small frames: every 5th GT-visible frame of every small unit (DAVIS val, PUMaVOS A+B, SegTrack) "
+            "(b) ordinary frames: every 10th GT-visible frame of every non-small DAVIS val + PUMaVOS A+B unit; "
+            "J/F at original resolution",
+    "rule": "learnable decoder-side headroom supported if small-frame mean dJ >= +0.05 with >= 60% of small units "
+            "positive and ordinary-frame mean dJ >= -0.01; otherwise the information is not recoverable by a light "
+            "head on frozen features at this budget",
+}
+
+
+def prereg_r4():
+    m55._freeze(OUT / "preregistration_r4.json", {**PREREG_R4, "rows": []})
+
+
 def prereg_r3():
     m55._freeze(OUT / "preregistration_r3.json", {**PREREG_R3, "rows": []})
 
@@ -608,6 +633,115 @@ def s1():
            "changed_units": W[W.applied].round(4).to_dict("records")}
     atomic_json(rep, OUT / "reports" / "S1_report.json")
     print(json.dumps(rep, indent=1, default=float))
+
+
+# ----------------------------------------------------------------------------- round 4: Track C3 head pilot
+class Head(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        c = torch.nn.Conv2d
+        self.net = torch.nn.Sequential(c(101, 64, 3, padding=1), torch.nn.ReLU(), c(64, 64, 3, padding=1), torch.nn.ReLU(),
+                                       c(64, 64, 3, padding=2, dilation=2), torch.nn.ReLU(), c(64, 1, 3, padding=1))
+        torch.nn.init.zeros_(self.net[-1].weight)
+        torch.nn.init.zeros_(self.net[-1].bias)
+
+    def forward(self, logit, s0, s1, rgb):
+        up = torch.nn.functional.interpolate(s1, size=s0.shape[-2:], mode="bilinear", align_corners=False)
+        return logit + self.net(torch.cat([logit / 10, torch.sigmoid(logit), s0, up, rgb], 1))
+
+
+def _frozen(ipred, im, gts):
+    """set_image + GT-box prediction per object. Returns (s0, s1, rgb256, [logit 1x1x256x256])."""
+    ipred.set_image(im)
+    s0, s1 = ipred._features["high_res_feats"]
+    rgb = torch.nn.functional.interpolate(torch.from_numpy(im).permute(2, 0, 1)[None].float().cuda() / 255, size=(256, 256),
+                                          mode="bilinear", align_corners=False)
+    logits = []
+    for g in gts:
+        b = vcam.bbox(g)
+        _, _, lr = ipred.predict(box=np.array([b[2], b[0], b[3], b[1]], np.float32), multimask_output=False, return_logits=True)
+        logits.append(torch.from_numpy(lr).cuda()[None])
+    return s0, s1, rgb, logits
+
+
+def _to_frame(ipred, logit, hw):
+    return (ipred._transforms.postprocess_masks(logit, hw)[0, 0] > 0).cpu().numpy()
+
+
+def head_pilot():
+    from PIL import Image
+    from rfeas.units import davis_units, davis_gt
+    torch.manual_seed(0)
+    ipred = m55.build_image_predictor()
+    head = Head().cuda()
+    opt = torch.optim.Adam(head.parameters(), 1e-3)
+    tr = {}
+    for u in davis_units("train")[0]:
+        tr.setdefault(u.video, []).append(u)
+    items = [(us, t) for us in tr.values() for t in range(0, len(us[0].frames), 2)]
+    rng = np.random.default_rng(0)
+    t_start, log = time.time(), []
+    for ep in range(2):
+        for i in rng.permutation(len(items)):
+            if time.time() - t_start > 25 * 60:
+                break
+            us, t = items[i]
+            gts = [davis_gt(u, u.frames[t]) for u in us]
+            gts = [g for g in gts if g.any()]
+            if not gts:
+                continue
+            im = np.asarray(Image.open(m55.frame_dir(us[0]) / f"{us[0].frames[t]}.jpg").convert("RGB"))
+            with torch.no_grad():
+                s0, s1, rgb, logits = _frozen(ipred, im, gts)
+            loss = 0
+            for g, lg in zip(gts, logits):
+                y = torch.nn.functional.interpolate(torch.from_numpy(g)[None, None].float().cuda(), size=(256, 256), mode="area")
+                y = (y > 0.5).float()
+                out = head(lg, s0, s1, rgb)
+                p = torch.sigmoid(out)
+                l = torch.nn.functional.binary_cross_entropy_with_logits(out, y) + 1 - (2 * (p * y).sum() + 1) / (p.sum() + y.sum() + 1)
+                loss = loss + l * (4.0 if g.mean() < 0.01 else 1.0)
+            opt.zero_grad()
+            (loss / len(gts)).backward()
+            opt.step()
+            log.append({"epoch": ep, "loss": float(loss) / len(gts), "t": time.time() - t_start})
+            if len(log) % 200 == 0:
+                print(ep, len(log), round(np.mean([x["loss"] for x in log[-200:]]), 4), f"{log[-1]['t']:.0f}s", flush=True)
+    torch.save(head.state_dict(), OUT / "head_pilot.pt")
+    atomic_csv(pd.DataFrame(log), OUT / "reports" / "head_pilot_trainlog.csv")
+    head.eval()
+    small = _small()
+    rows = []
+    for s, u in units():
+        sm = u.name in small
+        if s == "SegTrack" and not sm:
+            continue
+        ps = paths(u)
+        for t in range(0, len(u.frames), 5 if sm else 10):
+            g = gt(u, t)
+            if not g.any():
+                continue
+            im = np.asarray(Image.open(ps[t]).convert("RGB"))
+            with torch.no_grad():
+                s0, s1, rgb, (lg,) = _frozen(ipred, im, [g])
+                a, b = _to_frame(ipred, lg, g.shape), _to_frame(ipred, head(lg, s0, s1, rgb), g.shape)
+            rows.append({"set": s, "unit": u.name, "video": u.video, "small": sm, "video_idx": t, "gt_area": int(g.sum()),
+                         **{f"{k}_frozen": v for k, v in m55.jf(a, g).items()}, **{f"{k}_head": v for k, v in m55.jf(b, g).items()}})
+    E = pd.DataFrame(rows)
+    atomic_csv(E, OUT / "reports" / "head_pilot_frames.csv")
+    E["dJ"] = E.J_head - E.J_frozen
+    U = E.groupby(["set", "unit", "video", "small"]).agg(J_frozen=("J_frozen", "mean"), J_head=("J_head", "mean"), dJ=("dJ", "mean"),
+                                                        dF=("F_head", "mean")).reset_index()
+    U["dF"] = U.dF - E.groupby("unit").F_frozen.mean().reindex(U.unit).to_numpy()
+    sm, od = U[U.small], U[~U.small]
+    rep = {"train_steps": len(log), "train_minutes": log[-1]["t"] / 60 if log else 0,
+           "small": {"units": int(len(sm)), "dJ": float(sm.dJ.mean()), "CI": _boot(sm, "dJ"), "frac_pos": float((sm.dJ > 0).mean()),
+                     "dF": float(sm.dF.mean()), "J_frozen": float(sm.J_frozen.mean()), "J_head": float(sm.J_head.mean())},
+           "ordinary": {"units": int(len(od)), "dJ": float(od.dJ.mean()), "CI": _boot(od, "dJ"), "dF": float(od.dF.mean())},
+           "per_unit_small": sm.round(4).to_dict("records")}
+    rep["supported"] = bool(rep["small"]["dJ"] >= 0.05 and rep["small"]["frac_pos"] >= 0.6 and rep["ordinary"]["dJ"] >= -0.01)
+    atomic_json(rep, OUT / "reports" / "head_pilot_report.json")
+    print(json.dumps({k: v for k, v in rep.items() if k != "per_unit_small"}, indent=1, default=float))
 
 
 def _overlay(img, g, pr):

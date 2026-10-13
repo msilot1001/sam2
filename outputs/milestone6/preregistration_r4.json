@@ -1,0 +1,11 @@
+{
+  "created": "2026-10-13 12:45:45",
+  "created_after": "round 3 (S1 failed; per-unit scale-oracle ceiling ~+0.018). Frozen before any round-4 output.",
+  "question": "Track C3: is there LEARNABLE headroom beyond SAM 2's frozen mask decoder for small targets, i.e. do the frozen stride-4/8 features carry information the decoder does not express?",
+  "setting": "DIAGNOSTIC, retrospective prompt: SAM 2 image mode, GT box only, multimask_output=False, on the full frame; both arms get the identical prompt and frozen features. Not a deployable VOS method.",
+  "head": "residual conv head on [logit, sigmoid(logit), s0 (32ch @256), up2(s1) (64ch), RGB@256] -> 3x3 conv 64, 3x3 conv 64, 3x3 dilated(2) conv 64 (ReLU), 3x3 conv -> delta; output = logit + delta; last conv zero-initialised (untrained head == frozen decoder, tested). 1024 -> 256 grid as SAM 2.",
+  "train": "DAVIS 2017 train split only (never val/PUMaVOS/SegTrack); every 2nd frame, every visible object; loss BCE + soft dice at 256 vs area-resized GT, objects with prompt-frame-independent area < 1% of frame weighted x4; Adam 1e-3, 2 epochs or 25 min wall cap, seed 0, frozen SAM 2 (no_grad).",
+  "eval": "(a) small frames: every 5th GT-visible frame of every small unit (DAVIS val, PUMaVOS A+B, SegTrack) (b) ordinary frames: every 10th GT-visible frame of every non-small DAVIS val + PUMaVOS A+B unit; J/F at original resolution",
+  "rule": "learnable decoder-side headroom supported if small-frame mean dJ >= +0.05 with >= 60% of small units positive and ordinary-frame mean dJ >= -0.01; otherwise the information is not recoverable by a light head on frozen features at this budget",
+  "rows": []
+}
