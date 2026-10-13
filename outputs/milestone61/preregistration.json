@@ -1,0 +1,36 @@
+{
+  "created": "2026-10-13 14:01:56",
+  "created_before_any_m61_output": true,
+  "incumbent": "B2 = A2x (M6): small-unit dJF +0.018 vs P5 on DAVIS_val+PUMaVOS_B (exploratory)",
+  "baselines": {
+    "B0": "official",
+    "B1": "P5",
+    "B2": "A2x self-gated global-local",
+    "B3": "A2c CTU agreement gate"
+  },
+  "track_A_TPLR": {
+    "hypothesis": "SAM 2 image mode re-run on a zoomed local crop, prompted only by the online global tracker's own box, yields masks that carry information absent from both the global (B1) and the crop-tracker (A1) candidates.",
+    "method": "frame t: if B1 obj score > 0 and B1 mask non-empty: crop side s = A1 rule (vcam.crop_side of the prompt), centred on the B1 box centre (frame t, online); SAM 2 image predictor on the crop, box prompt = B1 box in crop coords, multimask_output=False; output T1 = pasted local mask, else B1. Output-only: B1 memory untouched.",
+    "units": "every unit where A1 applied a crop (21 dev units, M6)",
+    "candidate_value": "retrospective per-frame oracle over {B1, A1, T1} minus over {B1, A1} on small gate-set units >= +0.01 => T1 adds information; else stop Track A",
+    "deployable_success": "T1 small-unit dJF >= A2x small dJF + 0.01 on the gate set AND applied non-small mean >= -0.005"
+  },
+  "track_D_calibration": {
+    "fit_data": "B1 and A1 logged on DAVIS *train* units where A1 crops (43 units, 23 videos); never dev/confirm",
+    "replay_variant": "A2o: crop trajectory of A1 (centre from crop output), output chosen per frame between A1 and B1 by a gate; exactly replayable from logs (no state mixing). Gates compared on the same variant: none (always crop), CTU agreement (IoU>0.5 & box/crop<=0.1), self (obj>0, no interior edge), iou-only (iou_L > iou_G), calibrated logistic.",
+    "calibrated": "logistic regression (sklearn-free, numpy IRLS, L2 1e-2) on standardized features [iou_L, iou_G, score_L, score_G, IoU(L,G), touch_L, log(area_L+1), log(area_G+1), log crop side]; target 1[J_L > J_G]; frames where both J equal are dropped from fitting; gate p > 0.5",
+    "success": "calibrated small-unit dJF (gate set) >= self gate + 0.005 with video-CI of the paired difference excluding 0; else retain the A2x self gate",
+    "also": "scale-bias verification: calibration of iou_pred vs J by arm and area bin on dev logs (CPU)"
+  },
+  "track_B_head_v2": {
+    "hypothesis": "a light residual head on frozen SAM 2 decoder logits + stride-4/8 features + RGB, supervised at 1024 with a boundary-weighted loss, corrects systematic mask errors the frozen decoder makes.",
+    "architecture": "256-grid branch: [logit/10, sigmoid, s0(32), up(s1)(64), rgb256(3)] -> 96ch convs dilations 1,2,4,8 -> delta256 (zero-init); 1024 branch: [up4(logit256+delta256), rgb1024] -> 3x conv 16 -> delta1024 (zero-init); output logit1024. Untrained head == frozen decoder (tested).",
+    "training": "DAVIS 2017 train only; image mode; box prompt from GT box with +-10% jitter; loss BCE + dice + 5x BCE weight in a 3 px GT boundary band, all at 1024; AdamW 1e-3 cosine, 30 min cap, seed 0",
+    "positive_control": "32 fixed DAVIS-train object-frames, 400 steps; pass iff train mean J(head) - J(frozen) >= +0.05 on those samples. If it fails: Track B 'technically inconclusive', no main run",
+    "image_eval": "retrospective GT-box frames (same as M6 round 4: small every 5th, ordinary every 10th)",
+    "video_eval": "B1 + head on decoder output (output-only, memory untouched) on DAVIS_val + PUMaVOS_B (+A, SegTrack if time); primary: overall unit-mean dJF vs B1 >= +0.01 with video-CI lower bound > 0 on DAVIS_val+PUMaVOS_B and no set mean below -0.003; secondary: small-unit dJF, F, F_strict"
+  },
+  "track_C": "CPU diagnostics only unless >= 4 non-annotation independent videos with a correctable temporal opportunity (agent report); then pre-register separately",
+  "confirmation": "PUMaVOS C at most once, for exactly one frozen method meeting its own success rule",
+  "rows": []
+}

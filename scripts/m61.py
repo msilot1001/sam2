@@ -1,0 +1,542 @@
+"""M6.1: overnight challenger tracks against the A2x incumbent (CUDA FP32, frozen SAM 2.1 Hiera-T).
+
+    uv run python scripts/m61.py prereg        # freeze round-1 protocols (before any M6.1 output)
+    uv run python scripts/m61.py tplr          # Track A: tracker-prompted local re-segmentation (new candidate masks)
+    uv run python scripts/m61.py dtrain        # Track D: B1 + A1 logs on DAVIS *train* crop units (calibrator fitting)
+    uv run python scripts/m61.py gates         # Track D: gate comparison (CPU, replay of logged arms)
+    uv run python scripts/m61.py head_pc       # Track B: positive control (overfit 32 samples)
+    uv run python scripts/m61.py head_train    # Track B: train refinement head v2 on DAVIS train
+    uv run python scripts/m61.py head_image    # Track B: image-level eval (GT box prompt, retrospective)
+    uv run python scripts/m61.py head_video    # Track B: B1 + head (output-only) video eval
+    uv run python scripts/m61.py analyze
+
+Reuses scripts/m6.py (units, GT, crop wrapper, run_unit) and M5.x helpers. PUMaVOS C is never touched.
+"""
+import argparse
+import importlib.util
+import json
+import time
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import torch
+import torch.nn.functional as Fn
+
+from baseline.dropout_runner import atomic_csv, atomic_json, atomic_npz
+from baseline.metrics import j_measure
+from memint import controlled, engine
+from spatial import vcam
+
+_s = importlib.util.spec_from_file_location("m6", Path(__file__).with_name("m6.py"))
+m6 = importlib.util.module_from_spec(_s)
+_s.loader.exec_module(m6)
+m55, m56 = m6.m55, m6.m56
+OUT = Path("outputs/milestone61")
+M6R = Path("outputs/milestone6/runs")
+GATE_SETS = m6.GATE_SETS
+
+PREREG = {
+    "created_before_any_m61_output": True,
+    "incumbent": "B2 = A2x (M6): small-unit dJF +0.018 vs P5 on DAVIS_val+PUMaVOS_B (exploratory)",
+    "baselines": {"B0": "official", "B1": "P5", "B2": "A2x self-gated global-local", "B3": "A2c CTU agreement gate"},
+    "track_A_TPLR": {
+        "hypothesis": "SAM 2 image mode re-run on a zoomed local crop, prompted only by the online global tracker's own "
+                      "box, yields masks that carry information absent from both the global (B1) and the crop-tracker "
+                      "(A1) candidates.",
+        "method": "frame t: if B1 obj score > 0 and B1 mask non-empty: crop side s = A1 rule (vcam.crop_side of the "
+                  "prompt), centred on the B1 box centre (frame t, online); SAM 2 image predictor on the crop, box "
+                  "prompt = B1 box in crop coords, multimask_output=False; output T1 = pasted local mask, else B1. "
+                  "Output-only: B1 memory untouched.",
+        "units": "every unit where A1 applied a crop (21 dev units, M6)",
+        "candidate_value": "retrospective per-frame oracle over {B1, A1, T1} minus over {B1, A1} on small gate-set units "
+                           ">= +0.01 => T1 adds information; else stop Track A",
+        "deployable_success": "T1 small-unit dJF >= A2x small dJF + 0.01 on the gate set AND applied non-small mean "
+                              ">= -0.005",
+    },
+    "track_D_calibration": {
+        "fit_data": "B1 and A1 logged on DAVIS *train* units where A1 crops (43 units, 23 videos); never dev/confirm",
+        "replay_variant": "A2o: crop trajectory of A1 (centre from crop output), output chosen per frame between A1 "
+                          "and B1 by a gate; exactly replayable from logs (no state mixing). Gates compared on the same "
+                          "variant: none (always crop), CTU agreement (IoU>0.5 & box/crop<=0.1), self (obj>0, no "
+                          "interior edge), iou-only (iou_L > iou_G), calibrated logistic.",
+        "calibrated": "logistic regression (sklearn-free, numpy IRLS, L2 1e-2) on standardized features [iou_L, iou_G, "
+                      "score_L, score_G, IoU(L,G), touch_L, log(area_L+1), log(area_G+1), log crop side]; target "
+                      "1[J_L > J_G]; frames where both J equal are dropped from fitting; gate p > 0.5",
+        "success": "calibrated small-unit dJF (gate set) >= self gate + 0.005 with video-CI of the paired difference "
+                   "excluding 0; else retain the A2x self gate",
+        "also": "scale-bias verification: calibration of iou_pred vs J by arm and area bin on dev logs (CPU)",
+    },
+    "track_B_head_v2": {
+        "hypothesis": "a light residual head on frozen SAM 2 decoder logits + stride-4/8 features + RGB, supervised at "
+                      "1024 with a boundary-weighted loss, corrects systematic mask errors the frozen decoder makes.",
+        "architecture": "256-grid branch: [logit/10, sigmoid, s0(32), up(s1)(64), rgb256(3)] -> 96ch convs dilations "
+                        "1,2,4,8 -> delta256 (zero-init); 1024 branch: [up4(logit256+delta256), rgb1024] -> 3x conv 16 "
+                        "-> delta1024 (zero-init); output logit1024. Untrained head == frozen decoder (tested).",
+        "training": "DAVIS 2017 train only; image mode; box prompt from GT box with +-10% jitter; loss BCE + dice + 5x "
+                    "BCE weight in a 3 px GT boundary band, all at 1024; AdamW 1e-3 cosine, 30 min cap, seed 0",
+        "positive_control": "32 fixed DAVIS-train object-frames, 400 steps; pass iff train mean J(head) - J(frozen) "
+                            ">= +0.05 on those samples. If it fails: Track B 'technically inconclusive', no main run",
+        "image_eval": "retrospective GT-box frames (same as M6 round 4: small every 5th, ordinary every 10th)",
+        "video_eval": "B1 + head on decoder output (output-only, memory untouched) on DAVIS_val + PUMaVOS_B (+A, "
+                      "SegTrack if time); primary: overall unit-mean dJF vs B1 >= +0.01 with video-CI lower bound > 0 "
+                      "on DAVIS_val+PUMaVOS_B and no set mean below -0.003; secondary: small-unit dJF, F, F_strict",
+    },
+    "track_C": "CPU diagnostics only unless >= 4 non-annotation independent videos with a correctable temporal "
+               "opportunity (agent report); then pre-register separately",
+    "confirmation": "PUMaVOS C at most once, for exactly one frozen method meeting its own success rule",
+}
+
+
+def prereg():
+    m55._freeze(OUT / "preregistration.json", {**PREREG, "rows": []})
+
+
+def status(**kw):
+    p = OUT / "EXECUTION_STATUS.json"
+    s = json.loads(p.read_text())
+    for k, v in kw.items():
+        if isinstance(s.get(k), list) and not isinstance(v, list):
+            s[k].append(v)
+        else:
+            s[k] = v
+    s["updated_kst"] = time.strftime("%Y-%m-%d %H:%M", time.gmtime(time.time() + 9 * 3600))
+    atomic_json(s, p)
+
+
+def _masks(arm, u, root=M6R):
+    hw, n = m6.gt(u, 0).shape, len(u.frames)
+    a = np.load(root / arm / (u.name.replace("/", "_") + ".npz"))[arm]
+    return np.unpackbits(a)[:(n - 1) * hw[0] * hw[1]].reshape(n - 1, *hw).astype(bool)
+
+
+# ----------------------------------------------------------------------------- Track A: TPLR
+def tplr():
+    from PIL import Image
+    ipred = m55.build_image_predictor()
+    d = OUT / "trackA" / "T1"
+    d.mkdir(parents=True, exist_ok=True)
+    for f in sorted((M6R / "A1").glob("*.csv")):
+        A = pd.read_csv(f)
+        name = A.unit[0]
+        if (d / f"{f.stem}.csv").exists():
+            continue
+        u = m6._UNITS()[name]
+        B = pd.read_csv(M6R / "B1" / f.name).set_index("video_idx")
+        G = _masks("B1", u)
+        hw = G.shape[1:]
+        side = vcam.crop_side(m6.gt(u, 0))
+        ps = m6.paths(u)
+        rows, out = [], []
+        for t in range(1, len(u.frames)):
+            g, gm = m6.gt(u, t), G[t - 1]
+            t0 = time.perf_counter()
+            r = {"set": A.set[0], "unit": name, "video": u.video, "video_idx": t, "used_local": False, "iou_T": np.nan}
+            o = gm
+            if B.obj_score[t] > 0 and gm.any():
+                box = vcam.place(vcam.center_of(gm), side, hw)
+                y0, y1, x0, x1 = box
+                b = vcam.bbox(gm[y0:y1, x0:x1])
+                if b is not None:
+                    with torch.inference_mode():
+                        ipred.set_image(np.asarray(Image.open(ps[t]).convert("RGB"))[y0:y1, x0:x1])
+                        ms, ious, _ = ipred.predict(box=np.array([b[2], b[0], b[3], b[1]], np.float32), multimask_output=False)
+                    o = vcam.paste(ms[0] > 0, box, hw)
+                    r.update(used_local=True, iou_T=float(ious[0]), box=json.dumps(box))
+            r["latency_s"] = time.perf_counter() - t0
+            r.update(m55.jf(o, g), gt_empty=not g.any())
+            rows.append(r)
+            out.append(o)
+        atomic_npz(d / f"{f.stem}.npz", T1=np.packbits(np.stack(out)))
+        atomic_csv(pd.DataFrame(rows), d / f"{f.stem}.csv")
+        print("T1", name, round(pd.DataFrame(rows).JF.mean(), 4), round(B.JF.mean(), 4), flush=True)
+    status(completed="trackA tplr run")
+
+
+# ----------------------------------------------------------------------------- Track D: DAVIS train logs
+def dtrain():
+    from rfeas.units import davis_units
+    pred = m55.build_predictor()
+    controlled.install(pred, None, {})
+    heads = m6.Heads(pred)
+    for u in davis_units("train")[0]:
+        if vcam.crop_side(m6.gt(u, 0)) is None:
+            continue
+        for arm in ("B1", "A1"):
+            d = OUT / "trackD" / "runs" / arm
+            d.mkdir(parents=True, exist_ok=True)
+            stem = u.name.replace("/", "_")
+            if (d / f"{stem}.csv").exists():
+                continue
+            df, masks = m6.run_unit(pred, heads, "DAVIS_train", u, arm)
+            atomic_npz(d / f"{stem}.npz", **{arm: np.packbits(np.stack(masks))})
+            atomic_csv(df, d / f"{stem}.csv")
+            print(arm, u.name, round(df.JF.mean(), 4), flush=True)
+    heads.close()
+    status(completed="trackD dtrain run")
+
+
+def _pairs(root):
+    """Per-frame joined B1 (global) / A1 (crop) logs + mask-level features. root: dir with B1/ and A1/."""
+    rows = []
+    for f in sorted((root / "A1").glob("*.csv")):
+        L = pd.read_csv(f)
+        G = pd.read_csv(root / "B1" / f.name).set_index("video_idx")
+        units = m6._UNITS() if root == M6R else _TRAIN_UNITS()
+        u = units[L.unit[0]]
+        GM, LM = _masks("B1", u, root), _masks("A1", u, root)
+        side = int(L.side.iloc[0])
+        for i, r in L.iterrows():
+            t = int(r.video_idx)
+            gm, lm = GM[t - 1], LM[t - 1]
+            box = json.loads(r.box)
+            b = vcam.bbox(lm)
+            rows.append({"set": r.set, "unit": r.unit, "video": r.video, "video_idx": t, "J_L": r.J, "J_G": G.J[t],
+                         "JF_L": r.JF, "JF_G": G.JF[t], "iou_L": r.iou_pred, "iou_G": G.iou_pred[t],
+                         "score_L": r.obj_score, "score_G": G.obj_score[t], "agree": j_measure(lm, gm),
+                         "touch": bool(r.crop_touch), "area_L": int(lm.sum()), "area_G": int(gm.sum()), "side": side,
+                         "box_ratio": ((b[1] - b[0]) * (b[3] - b[2]) / side ** 2) if b is not None else 0.0,
+                         "gt_empty": bool(r.gt_empty)})
+    return pd.DataFrame(rows)
+
+
+_TU = {}
+
+
+def _TRAIN_UNITS():
+    if not _TU:
+        from rfeas.units import davis_units
+        _TU.update({u.name: u for u in davis_units("train")[0]})
+    return _TU
+
+
+FEATS = ["iou_L", "iou_G", "score_L", "score_G", "agree", "touch", "lareaL", "lareaG", "lside"]
+
+
+def _X(P):
+    P = P.assign(lareaL=np.log1p(P.area_L), lareaG=np.log1p(P.area_G), lside=np.log(P.side), touch=P.touch.astype(float))
+    return P[FEATS].to_numpy(float)
+
+
+def fit_logistic(X, y, l2=1e-2, iters=50):
+    mu, sd = X.mean(0), X.std(0) + 1e-9
+    Z = np.c_[np.ones(len(X)), (X - mu) / sd]
+    w = np.zeros(Z.shape[1])
+    for _ in range(iters):
+        p = 1 / (1 + np.exp(-Z @ w))
+        H = Z.T @ (Z * (p * (1 - p))[:, None]) + l2 * np.eye(len(w))
+        w -= np.linalg.solve(H, Z.T @ (p - y) + l2 * w)
+    return {"w": w.tolist(), "mu": mu.tolist(), "sd": sd.tolist()}
+
+
+def predict_logistic(m, X):
+    Z = np.c_[np.ones(len(X)), (X - np.array(m["mu"])) / np.array(m["sd"])]
+    return 1 / (1 + np.exp(-Z @ np.array(m["w"])))
+
+
+def gates():
+    tr = _pairs(OUT / "trackD" / "runs")
+    tr = tr[~tr.gt_empty]
+    fit = tr[tr.J_L != tr.J_G]
+    model = fit_logistic(_X(fit), (fit.J_L > fit.J_G).astype(float).to_numpy())
+    atomic_json({**model, "features": FEATS, "n_fit_frames": int(len(fit)), "n_fit_units": int(fit.unit.nunique()),
+                 "n_fit_videos": int(fit.video.nunique())}, OUT / "trackD" / "calibrator.json")
+    dv = _pairs(M6R)
+    p = predict_logistic(model, _X(dv))
+    rules = {"none": np.ones(len(dv), bool),
+             "ctu": (dv.agree > 0.5) | (dv.area_G == 0),
+             "self": (dv.score_L > 0) & (dv.area_L > 0) & ~dv.touch,
+             "iou": dv.iou_L > dv.iou_G,
+             "calibrated": p > 0.5}
+    rules["ctu"] = rules["ctu"] & (dv.box_ratio <= 0.1) & (dv.area_L > 0)
+    for k, v in rules.items():
+        dv[f"JF_{k}"] = np.where(v, dv.JF_L, dv.JF_G)
+        dv[f"use_{k}"] = v
+    dv["p_cal"] = p
+    dv["oracle"] = dv[["JF_L", "JF_G"]].max(axis=1)
+    atomic_csv(dv, OUT / "trackD" / "gates_dev_frames.csv")
+    # whole-unit means (units without crop are identical to B1 for every gate -> dJF 0)
+    B = m6._runs("B1")
+    sm = {r["unit"]: r["small"] for r in json.loads((m6.OUT / "preregistration.json").read_text())["rows"]}
+    ub = B.groupby(["set", "unit", "video"]).JF.mean().rename("JF_B1").reset_index()
+    U = ub.merge(dv.groupby("unit")[[c for c in dv if c.startswith("JF_")] + ["oracle"]].mean().reset_index(), on="unit", how="left")
+    # frame 1..n-1 coverage of the replay equals the unit's frames (A1 logs every frame)
+    for k in list(rules) + ["oracle"]:
+        col = k if k == "oracle" else f"JF_{k}"
+        U[f"d_{k}"] = (U[col] - U.JF_B1).fillna(0)
+    U["small"] = U.unit.map(sm)
+    atomic_csv(U, OUT / "trackD" / "gates_per_unit.csv")
+    G = U[U.set.isin(GATE_SETS)]
+    rep = {"fit": {"frames": int(len(fit)), "units": int(fit.unit.nunique()), "videos": int(fit.video.nunique()),
+                   "frac_crop_better": float((fit.J_L > fit.J_G).mean())}}
+    for k in list(rules) + ["oracle"]:
+        g = G[G.small]
+        rep[k] = {"small_dJF": float(g[f"d_{k}"].mean()), "CI": m6._boot(g, f"d_{k}"),
+                  "nonsmall_dJF": float(G[~G.small][f"d_{k}"].mean()),
+                  "all_dev_dJF": float(U[f"d_{k}"].mean())}
+        if k in rules:
+            v = dv[rules[k].to_numpy()] if k != "none" else dv
+            rep[k]["adopt_rate"] = float(rules[k].mean())
+            rep[k]["wrong_adopt"] = float(((rules[k]) & (dv.JF_L < dv.JF_G - 0.05)).mean())
+            rep[k]["missed_helpful"] = float(((~rules[k]) & (dv.JF_L > dv.JF_G + 0.05)).mean())
+    g = G[G.small].assign(diff=G[G.small].d_calibrated - G[G.small].d_self)
+    rep["calibrated_minus_self"] = {"mean": float(g["diff"].mean()), "CI": m6._boot(g, "diff")}
+    rep["success"] = bool(rep["calibrated_minus_self"]["mean"] >= 0.005 and rep["calibrated_minus_self"]["CI"][0] > 0)
+    # scale-bias verification (D1): predicted IoU minus true J by arm and area bin, dev logs
+    vis = dv[~dv.gt_empty]
+    cal = []
+    for arm, iou, J in (("global", "iou_G", "J_G"), ("crop", "iou_L", "J_L")):
+        for lo, hi in ((0, 500), (500, 2000), (2000, 8000), (8000, 10 ** 9)):
+            x = vis[(vis.area_G >= lo) & (vis.area_G < hi)]
+            if len(x):
+                cal.append({"arm": arm, "area_bin": f"{lo}-{hi}", "frames": int(len(x)), "units": int(x.unit.nunique()),
+                            "mean_iou_pred": float(x[iou].mean()), "mean_J": float(x[J].mean()),
+                            "bias": float((x[iou] - x[J]).mean()),
+                            "spearman": float(x[[iou, J]].corr("spearman").iloc[0, 1])})
+    rep["scale_bias"] = cal
+    ub_ = vis.groupby("unit").apply(lambda x: float(((x.iou_L - x.J_L) - (x.iou_G - x.J_G)).mean()))
+    rep["crop_minus_global_bias_per_unit"] = {"units": int(len(ub_)), "positive": int((ub_ > 0).sum()), "median": float(ub_.median())}
+    atomic_json(rep, OUT / "trackD" / "gates_report.json")
+    print(json.dumps(rep, indent=1, default=float))
+    status(completed="trackD gates")
+
+
+# ----------------------------------------------------------------------------- Track B: refinement head v2
+class HeadV2(torch.nn.Module):
+    def __init__(self, c=96):
+        super().__init__()
+        C = torch.nn.Conv2d
+        layers, cin = [], 101
+        for dil in (1, 2, 4, 8):
+            layers += [C(cin, c, 3, padding=dil, dilation=dil), torch.nn.ReLU()]
+            cin = c
+        self.low = torch.nn.Sequential(*layers, C(c, 1, 3, padding=1))
+        self.high = torch.nn.Sequential(C(4, 16, 3, padding=1), torch.nn.ReLU(), C(16, 16, 3, padding=1), torch.nn.ReLU(),
+                                        C(16, 1, 3, padding=1))
+        for z in (self.low[-1], self.high[-1]):
+            torch.nn.init.zeros_(z.weight)
+            torch.nn.init.zeros_(z.bias)
+
+    def forward(self, logit, s0, s1, rgb1024):
+        up = Fn.interpolate(s1, size=s0.shape[-2:], mode="bilinear", align_corners=False)
+        rgb256 = Fn.interpolate(rgb1024, size=(256, 256), mode="bilinear", align_corners=False)
+        l256 = logit + self.low(torch.cat([logit / 10, torch.sigmoid(logit), s0, up, rgb256], 1))
+        l1024 = Fn.interpolate(l256, size=(1024, 1024), mode="bilinear", align_corners=False)
+        return l1024 + self.high(torch.cat([l1024 / 10, rgb1024], 1))
+
+
+def _rgb1024(im):
+    return Fn.interpolate(torch.from_numpy(np.ascontiguousarray(im)).permute(2, 0, 1)[None].float().cuda() / 255,
+                          size=(1024, 1024), mode="bilinear", align_corners=False)
+
+
+def _gt1024(g):
+    return (Fn.interpolate(torch.from_numpy(g)[None, None].float().cuda(), size=(1024, 1024), mode="area") > 0.5).float()
+
+
+def _loss(out, y):
+    p = torch.sigmoid(out)
+    band = (Fn.max_pool2d(y, 7, 1, 3) - (-Fn.max_pool2d(-y, 7, 1, 3))) > 0           # 3 px boundary band
+    w = 1 + 4 * band.float()
+    bce = (Fn.binary_cross_entropy_with_logits(out, y, reduction="none") * w).sum() / w.sum()
+    return bce + 1 - (2 * (p * y).sum() + 1) / (p.sum() + y.sum() + 1)
+
+
+def _samples(n_every=1):
+    from rfeas.units import davis_units
+    tr = {}
+    for u in davis_units("train")[0]:
+        tr.setdefault(u.video, []).append(u)
+    return [(us, t) for us in tr.values() for t in range(0, len(us[0].frames), n_every)]
+
+
+def _frozen_box(ipred, im, g, rng=None):
+    ipred.set_image(im)
+    b = vcam.bbox(g)
+    box = np.array([b[2], b[0], b[3], b[1]], np.float32)
+    if rng is not None:
+        w, h = box[2] - box[0], box[3] - box[1]
+        box = box + rng.uniform(-0.1, 0.1, 4).astype(np.float32) * np.array([w, h, w, h], np.float32)
+    _, _, lr = ipred.predict(box=box, multimask_output=False, return_logits=True)
+    s0, s1 = ipred._features["high_res_feats"]
+    return torch.from_numpy(lr).cuda()[None], s0, s1
+
+
+def _to_frame_1024(l1024, hw):
+    return (Fn.interpolate(l1024, size=hw, mode="bilinear", align_corners=False)[0, 0] > 0).cpu().numpy()
+
+
+def _train(head, items, minutes, steps=None, log_every=100, tag="train", rng_seed=0):
+    from PIL import Image
+    from rfeas.units import davis_gt
+    ipred = m55.build_image_predictor()
+    opt = torch.optim.AdamW(head.parameters(), 1e-3, weight_decay=1e-4)
+    total = steps or 10 ** 9
+    sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda k: 0.5 * (1 + np.cos(np.pi * min(k / max(total, 1), 1))) if steps else 1.0)
+    rng = np.random.default_rng(rng_seed)
+    t0, log, k = time.time(), [], 0
+    while True:
+        for i in rng.permutation(len(items)):
+            if (steps and k >= steps) or time.time() - t0 > minutes * 60:
+                return log
+            us, t = items[i]
+            im = np.asarray(Image.open(m55.frame_dir(us[0]) / f"{us[0].frames[t]}.jpg").convert("RGB"))
+            gts = [g for g in (davis_gt(u, u.frames[t]) for u in us) if g.any()]
+            if not gts:
+                continue
+            rgb = _rgb1024(im)
+            loss = 0
+            for g in gts:
+                with torch.no_grad():
+                    lg, s0, s1 = _frozen_box(ipred, im, g, rng if steps is None else None)
+                loss = loss + _loss(head(lg, s0, s1, rgb), _gt1024(g))
+            opt.zero_grad()
+            (loss / len(gts)).backward()
+            opt.step()
+            sched.step()
+            k += 1
+            log.append({"step": k, "loss": float(loss.detach()) / len(gts), "t": time.time() - t0})
+            if k % log_every == 0:
+                print(tag, k, round(np.mean([x["loss"] for x in log[-log_every:]]), 4), f"{log[-1]['t']:.0f}s", flush=True)
+
+
+def _eval_items(head, items):
+    from PIL import Image
+    from rfeas.units import davis_gt
+    ipred = m55.build_image_predictor()
+    rows = []
+    for us, t in items:
+        im = np.asarray(Image.open(m55.frame_dir(us[0]) / f"{us[0].frames[t]}.jpg").convert("RGB"))
+        rgb = _rgb1024(im)
+        for u in us:
+            g = davis_gt(u, u.frames[t])
+            if not g.any():
+                continue
+            with torch.no_grad():
+                lg, s0, s1 = _frozen_box(ipred, im, g)
+                a = _to_frame_1024(Fn.interpolate(lg, size=(1024, 1024), mode="bilinear", align_corners=False), g.shape)
+                b = _to_frame_1024(head(lg, s0, s1, rgb), g.shape)
+            rows.append({"unit": u.name, "t": t, "J_frozen": j_measure(a, g), "J_head": j_measure(b, g)})
+    return pd.DataFrame(rows)
+
+
+def head_pc():
+    torch.manual_seed(0)
+    items = _samples()
+    rng = np.random.default_rng(1)
+    pc = [items[i] for i in rng.choice(len(items), 32, replace=False)]
+    head = HeadV2().cuda()
+    log = _train(head, pc, minutes=12, steps=400, log_every=50, tag="pc")
+    E = _eval_items(head, pc)
+    rep = {"steps": len(log), "minutes": log[-1]["t"] / 60, "loss_first50": float(np.mean([x["loss"] for x in log[:50]])),
+           "loss_last50": float(np.mean([x["loss"] for x in log[-50:]])), "J_frozen": float(E.J_frozen.mean()),
+           "J_head": float(E.J_head.mean()), "objects": int(len(E))}
+    rep["pass"] = rep["J_head"] - rep["J_frozen"] >= 0.05
+    (OUT / "trackB").mkdir(parents=True, exist_ok=True)
+    atomic_csv(pd.DataFrame(log), OUT / "trackB" / "pc_trainlog.csv")
+    atomic_json(rep, OUT / "trackB" / "positive_control.json")
+    print(json.dumps(rep, indent=1))
+    status(completed=f"trackB positive control pass={rep['pass']}")
+
+
+def head_train():
+    torch.manual_seed(0)
+    head = HeadV2().cuda()
+    log = _train(head, _samples(), minutes=30, tag="train")
+    (OUT / "trackB").mkdir(parents=True, exist_ok=True)
+    torch.save(head.state_dict(), OUT / "trackB" / "head_v2.pt")
+    atomic_csv(pd.DataFrame(log), OUT / "trackB" / "trainlog.csv")
+    status(completed=f"trackB head_train steps={len(log)}")
+
+
+def _load_head():
+    h = HeadV2().cuda()
+    h.load_state_dict(torch.load(OUT / "trackB" / "head_v2.pt"))
+    return h.eval()
+
+
+def head_image():
+    """RETROSPECTIVE image-level eval (GT box prompt) on the M6 round-4 frame set."""
+    from PIL import Image
+    head = _load_head()
+    ipred = m55.build_image_predictor()
+    small = m6._small()
+    rows = []
+    for s, u in m6.units():
+        sm = u.name in small
+        if s == "SegTrack" and not sm:
+            continue
+        ps = m6.paths(u)
+        for t in range(0, len(u.frames), 5 if sm else 10):
+            g = m6.gt(u, t)
+            if not g.any():
+                continue
+            im = np.asarray(Image.open(ps[t]).convert("RGB"))
+            with torch.no_grad():
+                lg, s0, s1 = _frozen_box(ipred, im, g)
+                a = _to_frame_1024(Fn.interpolate(lg, size=(1024, 1024), mode="bilinear", align_corners=False), g.shape)
+                b = _to_frame_1024(head(lg, s0, s1, _rgb1024(im)), g.shape)
+            rows.append({"set": s, "unit": u.name, "video": u.video, "small": sm, "video_idx": t,
+                         **{f"{k}_frozen": v for k, v in m55.jf(a, g).items()}, **{f"{k}_head": v for k, v in m55.jf(b, g).items()}})
+    E = pd.DataFrame(rows)
+    atomic_csv(E, OUT / "trackB" / "image_eval_frames.csv")
+    E["dJ"], E["dJF"] = E.J_head - E.J_frozen, E.JF_head - E.JF_frozen
+    U = E.groupby(["set", "unit", "video", "small"])[["dJ", "dJF"]].mean().reset_index()
+    rep = {k: {"units": int(len(g)), "dJ": float(g.dJ.mean()), "dJF": float(g.dJF.mean()), "CI_dJF": m6._boot(g, "dJF"),
+               "frac_pos": float((g.dJF > 0).mean())} for k, g in (("small", U[U.small]), ("ordinary", U[~U.small]))}
+    atomic_json(rep, OUT / "trackB" / "image_eval.json")
+    print(json.dumps(rep, indent=1))
+    status(completed="trackB head_image")
+
+
+def head_video(sets="DAVIS_val,PUMaVOS_B,PUMaVOS_A,SegTrack"):
+    """B1 + head applied to the decoder output of every frame (output-only; memory untouched)."""
+    from PIL import Image
+    head = _load_head()
+    pred = m55.build_predictor()
+    controlled.install(pred, None, {})
+    d = OUT / "trackB" / "video"
+    d.mkdir(parents=True, exist_ok=True)
+    for s, u in m6.units(tuple(sets.split(","))):
+        stem = u.name.replace("/", "_")
+        if (d / f"{stem}.csv").exists():
+            continue
+        state, od = m56.start(pred, u, p5=True)
+        ps, rows = m6.paths(u), []
+        for t in range(1, len(u.frames)):
+            t0 = time.perf_counter()
+            out, m, _, score = engine.predict(pred, state, od, t)
+            od["non_cond_frame_outputs"][t] = out
+            g = m6.gt(u, t)
+            with torch.no_grad():
+                feats = state["cached_features"][t][1]["backbone_fpn"]
+                im = np.asarray(Image.open(ps[t]).convert("RGB"))
+                l1024 = head(out["pred_masks"].to("cuda").float(), feats[0], feats[1], _rgb1024(im))
+                lg = out["pred_masks"].to("cuda").float()
+                pm = _to_frame_1024(Fn.interpolate(lg, size=(1024, 1024), mode="bilinear", align_corners=False), g.shape)
+                hm = m if score <= 0 else _to_frame_1024(l1024, g.shape)   # SAM 2 says absent: keep its output
+            torch.cuda.synchronize()
+            rows.append({"set": s, "unit": u.name, "video": u.video, "video_idx": t, "obj_score": score,
+                         "latency_s": time.perf_counter() - t0, "gt_empty": not g.any(),
+                         **{f"{k}_B1": v for k, v in m55.jf(m, g).items()}, **{f"{k}_head": v for k, v in m55.jf(hm, g).items()},
+                         "J_path1024": j_measure(m if score <= 0 else pm, g)})
+        pred.reset_state(state)
+        df = pd.DataFrame(rows).assign(peak_vram_bytes=torch.cuda.max_memory_allocated())
+        atomic_csv(df, d / f"{stem}.csv")
+        print(u.name, round(df.JF_B1.mean(), 4), round(df.JF_head.mean(), 4), flush=True)
+    controlled.uninstall(pred)
+    status(completed=f"trackB head_video {sets}")
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("what")
+    ap.add_argument("arg", nargs="?")
+    a = ap.parse_args()
+    OUT.mkdir(parents=True, exist_ok=True)
+    fn = globals()[a.what]
+    fn(a.arg) if a.arg else fn()
+
+
+if __name__ == "__main__":
+    main()
