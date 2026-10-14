@@ -25,6 +25,14 @@
     {
       "id": "T-TRAIN+TEVAL, CAUSAL-PILOTS",
       "status": "NOT STARTED: queued chain2/chain3 stopped with user approval (2026-10-14 ~11:50 KST) for migration to Vast.ai RTX 5090"
+    },
+    {
+      "id": "MIGRATION",
+      "status": "Vast RTX 5090 verified: tests 8/8, stage-0 path bit-identical J&F on 5 full units (339 frames) with fill_hole_area=0 (commit 4c63eb1); see docs/m7/MIGRATION_RTX5090.md"
+    },
+    {
+      "id": "CAUSAL-PILOTS",
+      "status": "running on Vast (started 2026-10-14 12:16 KST): F1-blend.7, M3-vel, M1-always on DEV+REP; outputs/milestone7/runs/<arm> + ENV_vast.json"
     }
   ],
   "known_bugs": [
@@ -34,7 +42,7 @@
     "stage0 rec DEV,REP",
     "tcache REP every 2"
   ],
-  "next_scheduled": "migration to Vast.ai RTX 5090; then T positive controls + training (cache transferred from Ubuntu), teval, causal pilots F1-blend.7, M3-vel, M1-always",
+  "next_scheduled": "T PC + train + teval on Vast after tcache transfer verification",
   "base_commit": "9d6f14bd1d12b9ec56b166992b4932a119dc33aa",
-  "updated_kst": "2026-10-14 11:54"
+  "updated_kst": "2026-10-14 12:19"
 }
