@@ -31,6 +31,7 @@ class View:
     score: float              # object score logit
     iou: float                # decoder's predicted IoU of the returned mask
     box: tuple | None = None  # crop box in frame coords (None = full frame)
+    pix: torch.Tensor | None = None   # memory-conditioned features 1x256x64x64 (GPU) if capture_pix() was installed
 
 
 @dataclass
@@ -111,8 +112,9 @@ class Dual:
             self.pred._memint_planner = None
         if store:
             s.od["non_cond_frame_outputs"][t] = out
+        pix, self.pred._m7_pix = getattr(self.pred, "_m7_pix", None), None
         return View(name, out, out["pred_masks"].float().cpu(), mask, score, self._iou[0],
-                    None if s.side is None else s.frames.box)
+                    None if s.side is None else s.frames.box, pix)
 
     def probe(self, name, t, kind, trusted=None, image=None) -> View:
         """Non-storing diagnostic prediction of frame t on state `name` (after its production `view`).
@@ -143,6 +145,20 @@ class Dual:
     def close(self):
         for s in self.S.values():
             self.pred.reset_state(s.st)
+
+
+def capture_pix(pred):
+    """Keep the last memory-conditioned feature map (decoder input) on pred._m7_pix (outputs untouched)."""
+    if getattr(pred, "_m7_capture", False):
+        return
+    orig = pred._prepare_memory_conditioned_features
+
+    def f(*a, **k):
+        out = orig(*a, **k)
+        pred._m7_pix = out
+        return out
+    pred._prepare_memory_conditioned_features = f
+    pred._m7_capture = True
 
 
 def _hook_iou(pred, box):

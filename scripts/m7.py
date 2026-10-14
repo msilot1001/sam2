@@ -274,6 +274,301 @@ def rec(sets="DEV,REP"):
     status(completed=f"stage0 rec {sets}")
 
 
+# ----------------------------------------------------------------------------- causal rollout of a policy
+def live_obs(d, t, views, hw):
+    """Observation dict for policies (same fields as m7_replay.observations, fp32 logits)."""
+    G, L = views["G"], views["L"]
+    o = {"t": t, "hw": hw, "box": L.box, "sG": G.score, "sL": L.score, "touchL": vcam.touches_border(L.mask, L.box, hw),
+         "simL": None, "lG": sggl.full_to_frame(G.logit, hw), "mG": G.mask, "mL_view": L.mask}
+    for k, v in views.items():
+        if k == "G":
+            continue
+        o[f"s{k}"] = v.score
+        o[f"l{k}"] = sggl.crop_to_frame(v.logit, v.box, hw)
+        o[f"m{k}"] = vcam.paste(v.mask, v.box, hw)
+    return o
+
+
+def run_policy(pred, s, u, P, n=None, head=None):
+    """Causal rollout: the policy's output sets the next crop centre. Probes are run only if the policy needs them."""
+    from spatial import policies
+    n = n or len(u.frames)
+    g0 = gt(u, 0)
+    hw = g0.shape
+    d = sggl.Dual(pred, paths(u), g0, scale2=2.0 if "L2" in P.needs else None)
+    y0, y1, x0, x1 = d.S["L"].frames.box
+    refL = _pool(d.features("L", 0), g0[y0:y1, x0:x1], None)
+    tok = None
+    if head is not None:
+        with torch.inference_mode():
+            tok = _tokens(d, g0)
+    pol, trusted, rows = P(g0), [], []
+    for t in range(1, n):
+        t0 = time.perf_counter()
+        views = {"G": d.view("G", t), "L": d.view("L", t)}
+        if "L2" in P.needs:
+            views["L2"] = d.view("L2", t)
+        if "Lp" in P.needs:
+            views["Lp"] = d.probe("L", t, "protected")
+        if "Lt" in P.needs:
+            views["Lt"] = d.probe("L", t, "trusted", trusted=trusted)
+        if head is not None:
+            with torch.inference_mode():
+                views["L"].logit = head(t_inputs(d, views["G"], views["L"], hw, tok, t)).float().cpu()
+            side = views["L"].mask.shape[0]
+            views["L"].mask = Fn.interpolate(views["L"].logit, size=(side, side), mode="bilinear", align_corners=False)[0, 0].numpy() > 0
+        o = live_obs(d, t, views, hw)
+        with torch.inference_mode():
+            o["simL"] = _cos_map(d.features("L", t), refL).float().cpu().numpy()
+        out, acc = pol(o)
+        torch.cuda.synchronize()
+        lat = time.perf_counter() - t0
+        G, L = views["G"], views["L"]
+        if L.score > 0 and G.score > 0 and policies._iou(o["mL"], G.mask) > 0.5:
+            trusted.append(t)
+        g = gt(u, t)
+        rows.append({"set": s, "unit": u.name, "video": u.video, "arm": P.name, "video_idx": t, "acc": acc, "latency_s": lat,
+                     "score_G": G.score, "score_L": L.score, "gt_empty": not g.any(), "area0": float(g0.mean()),
+                     **m55.jf(out, g), "JF_G": m55.jf(G.mask, g)["JF"], **{f"{k}": v for k, v in pol.log.items()}})
+        pol.log = {}
+        d.set_center(vcam.center_of(out))
+    peak = torch.cuda.max_memory_allocated()
+    d.close()
+    return pd.DataFrame(rows).assign(peak_vram_bytes=peak)
+
+
+def run(arm, sets="DEV,REP", head_name=""):
+    """Causal rollout of policy `arm` (class name or .name in spatial.policies) on the given sets."""
+    from spatial import policies
+    P = next(c for c in policies.ALL if arm in (c.__name__, c.name))
+    pred = m55.build_predictor()
+    controlled.install(pred, None, {})
+    head = None
+    if head_name:
+        from spatial.feature_fusion import FusionHead
+        sggl.capture_pix(pred)
+        head = FusionHead(head_name.split("_")[0]).cuda().eval()
+        head.load_state_dict(torch.load(HEADS / f"{head_name}.pt"))
+    tag = P.name + (f"+{head_name}" if head_name else "")
+    dd = OUT / "runs" / tag
+    dd.mkdir(parents=True, exist_ok=True)
+    for s, x, u in units(sets):
+        f = dd / f"{stem(u)}.csv"
+        if f.exists():
+            continue
+        torch.cuda.reset_peak_memory_stats()
+        df = run_policy(pred, s, u, P, head=head)
+        atomic_csv(df.assign(subset=x, arm=tag), f)
+        print(tag, u.name, round(df.JF.mean(), 4), flush=True)
+    status(completed=f"run {tag} {sets}")
+
+
+# ----------------------------------------------------------------------------- T family: feature cache, training
+TC = OUT / "tcache"
+HEADS = OUT / "heads"
+
+
+def _soft(m, size=256):
+    return Fn.interpolate(torch.as_tensor(m, dtype=torch.float32)[None, None], size=(size, size), mode="area")
+
+
+def _tokens(d, g0):
+    """Frame-0 reference tokens (fg/bg, local and global view) from stride-16 backbone features; prompt only."""
+    from spatial import detail
+    y0, y1, x0, x1 = d.S["L"].frames.box
+    mL = g0[y0:y1, x0:x1]
+    bgL = ~detail.dilate(mL, max(2, d.side // 32))
+    ringG = np.zeros_like(g0)
+    ringG[y0:y1, x0:x1] = True
+    bgG = ringG & ~detail.dilate(g0, max(2, d.side // 32))
+    fL, fG = d.features("L", 0), d.features("G", 0)
+    return torch.stack([_pool(fL, mL, None), _pool(fL, bgL, None), _pool(fG, g0, None), _pool(fG, bgG, None)])
+
+
+def t_inputs(d, G, L, hw, tok, t):
+    """One frame's head inputs on the crop grid (GPU tensors, batch 1)."""
+    box = L.box
+    return {"memL": L.pix, "bbL": d.features("L", t), "lL": L.logit.cuda(),
+            "memG": sggl.sample_global_in_crop(G.pix, box, hw, 32), "bbG": sggl.sample_global_in_crop(d.features("G", t), box, hw, 32),
+            "lG": sggl.sample_global_in_crop(G.logit.cuda(), box, hw, 256), "sL": torch.tensor([L.score], device="cuda"),
+            "sG": torch.tensor([G.score], device="cuda"), "tok": tok[None]}
+
+
+def tcache(sets="REP", every="2"):
+    """Live SGGL rollout storing T-head inputs (fp16) for every `every`-th frame (training data; DAVIS train only)."""
+    pred = m55.build_predictor()
+    controlled.install(pred, None, {})
+    sggl.capture_pix(pred)
+    TC.mkdir(parents=True, exist_ok=True)
+    for s, x, u in units(sets):
+        assert s == "REP", "T heads are trained on DAVIS train (REP) only"
+        f = TC / f"{stem(u)}.pt"
+        if f.exists():
+            continue
+        g0 = gt(u, 0)
+        hw = g0.shape
+        d = sggl.Dual(pred, paths(u), g0)
+        with torch.inference_mode():
+            tok = _tokens(d, g0)
+        keep = {k: [] for k in ("memL", "bbL", "lL", "memG", "bbG", "lG", "sL", "sG", "gt", "t", "a2x")}
+        for t in range(1, len(u.frames)):
+            G, L = d.view("G", t), d.view("L", t)
+            out, ok = sggl.a2x(G, L, hw)
+            if t % int(every) == 0:
+                with torch.inference_mode():
+                    xi = t_inputs(d, G, L, hw, tok, t)
+                for k in ("memL", "bbL", "lL", "memG", "bbG", "lG"):
+                    keep[k].append(xi[k][0].half().cpu())
+                y0, y1, x0, x1 = L.box
+                keep["gt"].append((_soft(gt(u, t)[y0:y1, x0:x1])[0] * 255).round().to(torch.uint8))
+                keep["sL"].append(L.score), keep["sG"].append(G.score), keep["t"].append(t), keep["a2x"].append(ok)
+            d.set_center(vcam.center_of(out))
+        d.close()
+        blob = {k: (torch.stack(v) if torch.is_tensor(v[0]) else torch.tensor(v)) for k, v in keep.items() if v}
+        blob.update(tok=tok.half().cpu(), unit=u.name, video=u.video)
+        torch.save(blob, TC / f"{stem(u)}.tmp")
+        (TC / f"{stem(u)}.tmp").rename(f)
+        print("tcache", u.name, len(keep["t"]), flush=True)
+    status(completed=f"tcache {sets} every {every}")
+
+
+def _tdata(split):
+    """REP cache split video-disjointly (fixed hash): 'fit' ~80 % of videos, 'val' ~20 %."""
+    from rfeas.units import stable_hash
+    items = []
+    for f in sorted(TC.glob("*.pt")):
+        b = torch.load(f)
+        sp = "val" if stable_hash(f"m7-tsplit|{b['video']}") % 5 == 0 else "fit"
+        if split in (sp, "all"):
+            for i in range(len(b["t"])):
+                items.append({**{k: b[k][i] for k in ("memL", "bbL", "lL", "memG", "bbG", "lG", "gt")},
+                              "sL": b["sL"][i], "sG": b["sG"][i], "tok": b["tok"], "video": b["video"]})
+    return items
+
+
+def _batch(items, idx):
+    x = {k: torch.stack([items[i][k] for i in idx]).cuda() for k in ("memL", "bbL", "lL", "memG", "bbG", "lG", "tok")}
+    x["lL"], x["lG"] = x["lL"].float(), x["lG"].float()
+    x["sL"] = torch.tensor([float(items[i]["sL"]) for i in idx], device="cuda")
+    x["sG"] = torch.tensor([float(items[i]["sG"]) for i in idx], device="cuda")
+    y = torch.stack([items[i]["gt"] for i in idx]).cuda().float() / 255
+    return x, y
+
+
+def _jsoft(logit, y):
+    """Mean J at the 256 grid (pred > 0 vs target >= 0.5) per sample."""
+    p, g = logit > 0, y >= 0.5
+    inter, union = (p & g).sum((1, 2, 3)).float(), (p | g).sum((1, 2, 3)).float()
+    return torch.where(union > 0, inter / union.clamp(min=1), torch.ones_like(union))
+
+
+def ttrain(variant="T1", steps="3000", n_items="0", lr="1e-3", bs="8", tag=""):
+    """Train a head on REP 'fit' (or the first n_items fixed items for the positive control). Cosine lr, AdamW."""
+    from spatial.feature_fusion import FusionHead, loss_fn, n_params
+    torch.manual_seed(0)
+    fit = _tdata("fit")
+    if int(n_items):
+        rng = np.random.default_rng(0)
+        fit = [fit[i] for i in sorted(rng.choice(len(fit), int(n_items), replace=False))]
+    val = _tdata("val") if not int(n_items) else fit
+    head = FusionHead(variant).cuda()
+    opt = torch.optim.AdamW(head.parameters(), lr=float(lr), weight_decay=1e-4)
+    steps, bs = int(steps), int(bs)
+    sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, steps)
+    rng = np.random.default_rng(1)
+    curve, t0 = [], time.time()
+    torch.cuda.reset_peak_memory_stats()
+
+    def evaluate(items):
+        head.eval()
+        js, j0, ls = [], [], []
+        with torch.no_grad():
+            for i in range(0, len(items), 16):
+                x, y = _batch(items, range(i, min(i + 16, len(items))))
+                out = head(x)
+                ls.append(float(loss_fn(out, y)) * len(y))
+                js += _jsoft(out, y).tolist()
+                j0 += _jsoft(x["lL"], y).tolist()
+        head.train()
+        return sum(ls) / len(items), float(np.mean(js)), float(np.mean(j0))
+
+    for it in range(1, steps + 1):
+        x, y = _batch(fit, rng.choice(len(fit), bs, replace=False))
+        loss = loss_fn(head(x), y)
+        opt.zero_grad()
+        loss.backward()
+        gn = float(torch.nn.utils.clip_grad_norm_(head.parameters(), 5.0))
+        opt.step()
+        sched.step()
+        if it % 250 == 0 or it == 1:
+            vl, vj, vj0 = evaluate(val)
+            curve.append({"step": it, "train_loss": float(loss), "grad_norm": gn, "val_loss": vl, "val_J": vj, "val_J_input": vj0,
+                          "lr": sched.get_last_lr()[0]})
+            print(variant, curve[-1], flush=True)
+    fl, fj, fj0 = evaluate(fit)
+    rep = {"variant": variant, "steps": steps, "bs": bs, "lr": float(lr), "schedule": "cosine", "n_fit": len(fit),
+           "n_val": len(val), "fit_videos": sorted({i["video"] for i in fit}), "val_videos": sorted({i["video"] for i in val}),
+           "params": n_params(head), "peak_vram_bytes": torch.cuda.max_memory_allocated(), "minutes": (time.time() - t0) / 60,
+           "fit_J": fj, "fit_J_input": fj0, "curve": curve}
+    HEADS.mkdir(parents=True, exist_ok=True)
+    name = f"{variant}{tag}"
+    torch.save(head.state_dict(), HEADS / f"{name}.pt")
+    atomic_json(rep, HEADS / f"{name}.json")
+    print(name, "fit J", round(fj, 4), "input", round(fj0, 4), flush=True)
+    return rep
+
+
+def teval(names, sets="DEV"):
+    """Output-only screening of trained heads along the live SGGL trajectory (all heads in one pass). Output of head h
+    at frame t = refined local logits if SGGL accepts the crop, else G (selection unchanged)."""
+    from spatial.feature_fusion import FusionHead
+    pred = m55.build_predictor()
+    controlled.install(pred, None, {})
+    sggl.capture_pix(pred)
+    heads = {}
+    for nm in names.split(","):
+        h = FusionHead(nm.split("_")[0]).cuda().eval()
+        h.load_state_dict(torch.load(HEADS / f"{nm}.pt"))
+        heads[nm] = h
+    dd = OUT / "teval"
+    dd.mkdir(parents=True, exist_ok=True)
+    for s, x, u in units(sets):
+        f = dd / f"{stem(u)}.csv"
+        if f.exists():
+            continue
+        g0 = gt(u, 0)
+        hw = g0.shape
+        d = sggl.Dual(pred, paths(u), g0)
+        with torch.inference_mode():
+            tok = _tokens(d, g0)
+        rows = []
+        for t in range(1, len(u.frames)):
+            G, L = d.view("G", t), d.view("L", t)
+            out, ok = sggl.a2x(G, L, hw)
+            g = gt(u, t)
+            r = {"set": s, "subset": x, "unit": u.name, "video": u.video, "video_idx": t, "area0": float(g0.mean()), "acc": ok,
+                 "gt_empty": not g.any(), **{f"{k}|SGGL": v for k, v in m55.jf(out, g).items()}, "JF_G": m55.jf(G.mask, g)["JF"]}
+            with torch.inference_mode():
+                xi = t_inputs(d, G, L, hw, tok, t)
+                for nm, h in heads.items():
+                    t0 = time.perf_counter()
+                    lg = h(xi).float()
+                    torch.cuda.synchronize()
+                    side = L.mask.shape[0]
+                    mv = Fn.interpolate(lg, size=(side, side), mode="bilinear", align_corners=False)[0, 0].cpu().numpy() > 0
+                    o = vcam.paste(mv, L.box, hw) if ok else G.mask
+                    r.update({f"{k}|{nm}": v for k, v in m55.jf(o, g).items()})
+                    r[f"lat|{nm}"] = time.perf_counter() - t0
+                    if h.last_alpha is not None:
+                        r[f"alpha|{nm}"] = float(h.last_alpha.mean())
+            rows.append(r)
+            d.set_center(vcam.center_of(out))
+        d.close()
+        atomic_csv(pd.DataFrame(rows), f)
+        print("teval", u.name, flush=True)
+    status(completed=f"teval {names} {sets}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("what")
