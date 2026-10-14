@@ -1,0 +1,25 @@
+{
+  "created": "2026-10-14 09:58:02",
+  "created_before_any_m7_output": true,
+  "base": "SGGL = M6 A2x (self gate, centre follows output); SGGL-V = A2x + global score > 0 (M6.1 A2v, post-hoc)",
+  "sets": {
+    "DEV": "21 M6 dev crop units (gate set DAVIS_val+PUMaVOS_B = 13, aux PUMaVOS_A + SegTrack = 8)",
+    "REP": "43 DAVIS-2017-train crop units / 23 videos (M6.1 replication; miami-surf = discovery case)",
+    "VK": "28 VKITTI2 Scene01/06 clone crop units (2 scenes, synthetic, many same-class distractors); NOT used during screening/revision; run once per frozen finalist + SGGL + SGGL-V",
+    "C": "PUMaVOS C untouched; at most one run for the single final frozen method meeting the final rule"
+  },
+  "development_data": "DEV + REP (both previously inspected => every M7 screening result is exploratory)",
+  "training_data": "learned modules (T family, any fitted gate) fit on REP videos only (DAVIS train); video-disjoint inner split for validation curves; evaluated on DEV (+ VK for finalists). REP is then not an evaluation set for that module (reported).",
+  "metric": "per-unit mean J&F over frames 1..n-1 (prompt frame excluded, M5.5 J/F); delta vs SGGL and vs P5 (= the live G state, identical to B1); CIs: 2000x bootstrap clustered by video; small = prompt area < 1%, tiny = < 0.1%",
+  "stage0_recording": "live SGGL rollout on DEV+REP storing per frame: low-res logits of G, L, L2 (2x crop side, same centre), L protected-memory probe (prompt memory only), L trusted-memory probe (non-cond memory restricted to frames where L and G agreed: both scores > 0 and IoU > 0.5, backfilled), G protected probe (scalars), L resolution probe (crop image down/up-sampled to G's effective resolution of that region; same memory) on event frames (presence disagreement or IoU<0.5) and every 10th frame; frozen frame-0 identity references (mask-pooled stride-16 backbone features) and per-frame cosine maps in both views. Production outputs must equal SGGL exactly.",
+  "replay_screening": "output-only candidates are first screened by replay on the recorded SGGL trajectory (label: REPLAY). Any candidate that changes the output must be confirmed by a causal rollout (centre follows its own output) before it can ADVANCE.",
+  "pilot_rule": {
+    "ADVANCE": "pooled small crop units of DEV+REP: dJF vs SGGL >= +0.005 AND >= 3 videos improved by > 0.01 AND leave-one-video-out min > 0 AND still > 0 without miami-surf AND no unit < -0.05 vs SGGL",
+    "REJECT": "pooled dJF vs SGGL <= 0, or all gain from <= 2 videos with LOVO min <= 0",
+    "INCONCLUSIVE": "otherwise, or a learned module failing its positive control"
+  },
+  "learned_positive_control": "overfit 64 fixed REP frames: train-set J gain >= +0.05 over the frozen input mask within 1500 steps, loss decreasing; else the T result is INCONCLUSIVE (not a negative result)",
+  "final_rule": "the final method must beat SGGL on pooled small DEV+REP crop units with video-CI lower bound > 0 in a causal rollout, not regress on VK (dJF vs SGGL >= -0.005, 2 scenes => descriptive), and have no DEV/REP unit < -0.05 vs SGGL; otherwise KEEP_SGGL or INSUFFICIENT_EVIDENCE",
+  "multiplicity": "about 15-25 candidate comparisons on the same development videos; a screening winner is exploratory until VK/C or new data; reported as such",
+  "rows": []
+}

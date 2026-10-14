@@ -1,0 +1,17 @@
+{
+  "experiments": [
+    {
+      "id": "S0-REC",
+      "prereg": "outputs/milestone7/preregistration.json",
+      "code": "scripts/m7.py rec, src/spatial/sggl.py (uncommitted->see next commit)",
+      "units": "DEV(21)+REP(43)",
+      "start_kst": null,
+      "status": "scheduled"
+    }
+  ],
+  "known_bugs": [],
+  "completed": [],
+  "next_scheduled": "S0-REC on DEV,REP",
+  "base_commit": "9d6f14bd1d12b9ec56b166992b4932a119dc33aa",
+  "updated_kst": "2026-10-14 09:58"
+}
