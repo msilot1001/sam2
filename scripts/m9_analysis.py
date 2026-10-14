@@ -313,5 +313,44 @@ def catmiss(arm, ds):
     (OUT / "reports" / "catmiss.json").write_text(json.dumps(prev, indent=1))
 
 
+def anchor(ds):
+    """Amendment 2: in scale-category misses, is the output a small part of the GT (anchor) or outside it (drift)?"""
+    rd = OUT / "runpod" / "runs_area" / "SGGL"
+    A = pd.concat([pd.read_csv(f) for f in sorted(rd.glob(f"{ds}__*.csv"))])
+    ref = OUT / "runpod" / ("diag/mosev2" if ds == "mosev2" else "runs/SGGL")
+    B = pd.concat([pd.read_csv(ref / f.name)[["unit", "video_idx", "JF"]] for f in sorted(rd.glob(f"{ds}__*.csv"))])
+    par = A[["unit", "video_idx", "JF"]].merge(B, on=["unit", "video_idx"], suffixes=("", "_ref"))
+    parity = {"frames": int(len(par)), "max_abs_dJF": float((par.JF - par.JF_ref).abs().max())}
+    box = pd.read_csv(OUT / "gtbox" / f"{ds}.csv")
+    X = A.drop(columns=["crop_side", "gt_long_over_side"]).merge(box, on=["unit", "video_idx"], how="left")
+    X["area_ratio"] = X.gt_area / X.prompt_area
+    X["gt_long_over_side"] = X.gt_long / X.crop_side
+    miss = X[~X.gt_empty.astype(bool) & (X.J < GOOD)].copy()
+    miss["cat"] = miss.apply(classify, axis=1)
+    sc = miss[(miss.cat == "SCALE") & (miss.out_area > 0)].copy()
+    sc["prec"], sc["rec"] = sc.out_inter_gt / sc.out_area, sc.out_inter_gt / sc.gt_area
+    g = sc[sc.G_area > 0]
+    anc = (sc.prec >= 0.8) & (sc.rec < 0.5)
+    rep = {"dataset": ds, "parity_vs_reference": parity, "scale_miss_frames": int((miss.cat == "SCALE").sum()),
+           "scale_miss_nonempty": int(len(sc)), "anchor_frac": float(anc.mean()), "anchor_videos": int(sc[anc].video.nunique()),
+           "drift_frac(prec<0.5)": float((sc.prec < 0.5).mean()), "median_prec": float(sc.prec.median()), "median_rec": float(sc.rec.median()),
+           "G_anchor_frac": float(((g.G_inter_gt / g.G_area >= 0.8) & (g.G_inter_gt / g.gt_area < 0.5)).mean()),
+           "G_median_prec": float((g.G_inter_gt / g.G_area).median()), "G_median_rec": float((g.G_inter_gt / g.gt_area).median()),
+           "verdict": "H_anchor" if anc.mean() >= 0.5 and sc[anc].video.nunique() >= 3 else ("H_drift" if (sc.prec < 0.5).mean() >= 0.5 else "MIXED")}
+    # post hoc (disclosed): what the output does in ALL missed frames, by taxonomy category (loss = 1 - J&F)
+    miss["loss"] = 1 - miss.JF
+    pr, rc = miss.out_inter_gt / miss.out_area.replace(0, np.nan), miss.out_inter_gt / miss.gt_area
+    miss["rel"] = np.select([miss.out_area == 0, pr < 0.5, (pr >= 0.8) & (rc < 0.5)], ["EMPTY", "ELSEWHERE", "PART_OF_TARGET"], "OVERLAP_OTHER")
+    tab = miss.pivot_table(index="cat", columns="rel", values="loss", aggfunc="sum", fill_value=0)
+    rep["miss_loss_by_output_relation"] = {c: float(v) for c, v in tab.sum().items()}
+    rep["miss_loss_share_by_output_relation"] = {c: float(v / tab.values.sum()) for c, v in tab.sum().items()}
+    rep["elsewhere_videos"] = int(miss[miss.rel == "ELSEWHERE"].video.nunique())
+    rep["category_x_relation"] = {i: {c: float(v) for c, v in r.items()} for i, r in tab.iterrows()}
+    print(json.dumps(rep, indent=1))
+    prev = json.loads((OUT / "reports" / "anchor.json").read_text()) if (OUT / "reports" / "anchor.json").exists() else {}
+    prev[ds] = rep
+    (OUT / "reports" / "anchor.json").write_text(json.dumps(prev, indent=1))
+
+
 if __name__ == "__main__":
     globals()[sys.argv[1]](*sys.argv[2:])

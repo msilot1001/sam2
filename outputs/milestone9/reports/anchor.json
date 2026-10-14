@@ -1,0 +1,71 @@
+{
+ "mosev2": {
+  "dataset": "mosev2",
+  "parity_vs_reference": {
+   "frames": 10320,
+   "max_abs_dJF": 0.0
+  },
+  "scale_miss_frames": 993,
+  "scale_miss_nonempty": 743,
+  "anchor_frac": 0.3472409152086137,
+  "anchor_videos": 22,
+  "drift_frac(prec<0.5)": 0.5881561238223418,
+  "median_prec": 0.0732662192393736,
+  "median_rec": 0.020918070889018012,
+  "G_anchor_frac": 0.1703601108033241,
+  "G_median_prec": 0.14118090769854572,
+  "G_median_rec": 0.04243406604571337,
+  "verdict": "H_drift",
+  "miss_loss_by_output_relation": {
+   "ELSEWHERE": 1033.2135242093216,
+   "EMPTY": 623.0,
+   "OVERLAP_OTHER": 70.0895686721087,
+   "PART_OF_TARGET": 197.37247896851153
+  },
+  "miss_loss_share_by_output_relation": {
+   "ELSEWHERE": 0.5371038335823493,
+   "EMPTY": 0.3238591834905297,
+   "OVERLAP_OTHER": 0.0364352335174198,
+   "PART_OF_TARGET": 0.10260174940970128
+  },
+  "elsewhere_videos": 64,
+  "category_x_relation": {
+   "OBSERVABILITY": {
+    "ELSEWHERE": 98.07213864282284,
+    "EMPTY": 84.0,
+    "OVERLAP_OTHER": 3.9341271029596223,
+    "PART_OF_TARGET": 1.3655021000929022
+   },
+   "PARTIAL_SEGMENTATION": {
+    "ELSEWHERE": 70.87835624428327,
+    "EMPTY": 0.0,
+    "OVERLAP_OTHER": 36.97202535891574,
+    "PART_OF_TARGET": 26.284562423771114
+   },
+   "POSITION": {
+    "ELSEWHERE": 212.3257786849008,
+    "EMPTY": 144.0,
+    "OVERLAP_OTHER": 0.9309519446896701,
+    "PART_OF_TARGET": 1.1422127792147823
+   },
+   "PRESENCE_ABSENT_CLAIM": {
+    "ELSEWHERE": 0.0,
+    "EMPTY": 145.0,
+    "OVERLAP_OTHER": 0.0,
+    "PART_OF_TARGET": 0.0
+   },
+   "PRESENCE_WRONG_TARGET": {
+    "ELSEWHERE": 245.10533168942112,
+    "EMPTY": 0.0,
+    "OVERLAP_OTHER": 0.0,
+    "PART_OF_TARGET": 1.30387532822072
+   },
+   "SCALE": {
+    "ELSEWHERE": 406.8319189478935,
+    "EMPTY": 250.0,
+    "OVERLAP_OTHER": 28.25246426554367,
+    "PART_OF_TARGET": 167.27632633721203
+   }
+  }
+ }
+}
