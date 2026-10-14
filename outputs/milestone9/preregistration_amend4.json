@@ -1,0 +1,10 @@
+{
+ "created_kst": "2026-10-15 05:08",
+ "type": "late dataset (LVOS v2 valid), registered before any SAM 2 output on it",
+ "context": "LVOS v2 valid archive arrived at 02:26 KST on the second automatic retry round (sha256 beb48804...e2, 11.8 GB, zip store) and was noticed at 04:58 KST. All other M9 conclusions were already reached on MOSEv2 and VOST.",
+ "manifest": "scripts/m9_manifest.py lvosv2 '' 300 9000: the unchanged GT-only M9 unit rule (first visible frame prompt, >=10 frames, crop unit, small < 1%, <=3 per video seed 9, video-hash dev/conf split), plus a compute budget: each unit keeps its first 300 annotated frames, and whole videos are added in seeded order (seed 9) while the total stays <= 9,000 frames. The budget follows from the sprint clock (no new long jobs after 09:00 KST), not from any result.",
+ "caveat": "Truncation to 300 frames removes the long-term part of LVOS; results speak to the first ~300 frames (about 50 s at 6 fps) only.",
+ "arms_in_order": ["SGGL (pod baseline)", "FLOWVEL (frozen M8)", "SCALE (frozen M9 23:13)", "NULLJIT (frozen amend3)"],
+ "criteria": "Identical to the M9 pre-registration: FLOWVEL generalization and SCALE success criteria as written; NULLJIT as the null reference. No new arm, no tuning. Arms that do not finish by 09:00 KST are reported NOT_RUN.",
+ "holm": "FLOWVEL per-dataset tests are Holm-adjusted across MOSEv2, VOST and LVOS v2."
+}

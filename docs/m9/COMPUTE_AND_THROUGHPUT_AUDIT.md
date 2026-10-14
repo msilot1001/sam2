@@ -39,3 +39,31 @@
 |---|---|---|
 | MOSEv2 | Pod에서 HF 분할 파일 3개(58 GB)를 한 번 스트리밍하며 선택 영상만 tar 추출 | 약 110 MB/s, 약 9분. 추출 결과 약 3 GB (컨테이너 디스크) |
 | VOST | Ubuntu에서 S3 zip에 byte-range 요청 (remotezip, 16–32 thread) | 정답 7,820개 약 10분, JPEG 4,935개 약 8분. 연결 재설정이 한 번 나서 재시도 로직을 넣었다 |
+
+## 실행 시간 (RunPod 4090, 4 worker × 3 thread, KST)
+
+| 작업 | 시작 → 끝 | 소요 | frame |
+|---|---|---|---|
+| MOSEv2 Stage 1 진단 (생성기 11종 + SGGL) | ~23:30 → 00:39 | ~69분 | 10,459 |
+| FLOWVEL MOSEv2 | 00:39 → 01:06 | 27분 | 10,459 |
+| SCALE MOSEv2 | 01:06 → 01:30 | 24분 | 10,459 |
+| CONSENSUS MOSEv2 | 01:30 → 01:53 | 23분 | 10,459 |
+| SGGL VOST (Pod 기준선) | 01:53 → 02:15 | 22분 | 8,396 |
+| SCALE VOST | 02:15 → 02:37 | 22분 | 8,396 |
+| PCCARRY MOSEv2 | 02:37 → 03:01 | 24분 | 10,459 |
+| FLOWVEL VOST | 03:01 → 03:27 | 26분 | 8,396 |
+| SGGL 면적 진단 MOSEv2 / VOST | 03:27 → 04:12 | 45분 | 18,855 |
+| NULLJIT MOSEv2 | 04:12 → (아래 FINAL 참고) | ~23분 | 10,459 |
+
+- **처리량:** SGGL 계열 arm은 약 7.3–7.9 frame/s, RAFT를 쓰는 FLOWVEL은 약 5.4–6.7 frame/s다. 4 worker 합산이며, 지연 열의 0.26–0.35 s/frame은 동시 실행 중 단일 worker 기준이다.
+- **최대 VRAM (단일 worker):** SGGL 계열 1.19–1.23 GB, FLOWVEL 1.32–1.39 GB.
+- **GPU 사용 시간:** Pod 가동은 23:02부터 종료까지(FINAL에 기록). 실제 연산은 약 5.5시간이다.
+
+## Ubuntu RTX 2080 (1 worker)
+
+| 작업 | 소요 |
+|---|---|
+| SGGL VOST (실패 분류 궤적) | 약 1.5시간 |
+| FLOWVEL VOST (재현) | 약 2시간 |
+| 운동 추정 일치 (15단위) | 약 10분 |
+| NULLJIT VOST | 약 1.5시간 |

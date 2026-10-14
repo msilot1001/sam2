@@ -1,5 +1,5 @@
 {
- "updated_kst": "2026-10-15 03:05",
+ "updated_kst": "2026-10-15 05:20",
  "note": "M9 live task ledger (agent-maintained); progress = result files / expected units.",
  "tasks": [
   {
@@ -19,9 +19,9 @@
   {
    "id": "M9-DATA-LVOS",
    "title": "LVOS v2 확보",
-   "description": "Google Drive 할당량 초과로 거부. Pod 자동 재시도 6회 모두 실패 → BLOCKED_USER_ACTION",
+   "description": "2차 재시도 1회차(02:26)에 수신. 수정 4: 예산 manifest 32단위/27영상, 8,854 frame",
    "machine": "RunPod",
-   "status": "BLOCKED"
+   "status": "DONE"
   },
   {
    "id": "M9-BENCH",
@@ -71,7 +71,7 @@
    "title": "FLOWVEL vs SGGL — VOST",
    "description": "VOST 74단위 FLOWVEL 인과 rollout",
    "machine": "Ubuntu 2080",
-   "status": "RUNNING",
+   "status": "DONE",
    "progress": {
     "glob": "outputs/milestone9/runs/FLOWVEL/vost*.csv",
     "total": 74
@@ -172,9 +172,9 @@
   {
    "id": "M9-FLOWVEL-VOST-POD",
    "title": "FLOWVEL vs SGGL — VOST (Pod)",
-   "description": "VOST 주 검정(같은 기계 Pod SGGL). 2080 결과는 재현",
+   "description": "VOST 주 검정(같은 기계 Pod SGGL). 2080 결과는 재현 — 결과: +0.0046 [−0.0181,+0.0272], 2080 재현 상관 0.999 → 일반화 실패",
    "machine": "RunPod 4090",
-   "status": "RUNNING",
+   "status": "DONE",
    "progress": {
     "glob": "outputs/milestone9/runpod/runs/FLOWVEL/vost*.csv",
     "total": 74
@@ -183,12 +183,30 @@
   {
    "id": "M9-AREA-DIAG",
    "title": "스케일 실패 진단 (고착 vs 이탈)",
-   "description": "사전 등록 수정 2: SGGL 재실행에 출력 면적·교집합 열 추가, 스케일 범주 놓친 frame의 precision/recall 측정",
+   "description": "사전 등록 수정 2: SGGL 재실행에 출력 면적·교집합 열 추가, 스케일 범주 놓친 frame의 precision/recall 측정 — 두 데이터셋 모두 H_drift: 놓친 손실의 54%/68%가 출력이 대상 밖",
    "machine": "RunPod 4090",
-   "status": "QUEUED",
+   "status": "DONE",
    "progress": {
     "glob": "outputs/milestone9/runpod/runs_area/SGGL/*.csv",
     "total": 213
+   }
+  },
+  {
+   "id": "M9-NULLJIT",
+   "title": "NULLJIT 영 대조",
+   "description": "정보 없는 crop 크기 흔들림 ±15%. MOSEv2 9↑/8↓, VOST 9↑/7↓ (±0.05) → 단위 변동은 어떤 교란에서나 생김",
+   "machine": "RunPod 4090 + Ubuntu 2080",
+   "status": "DONE"
+  },
+  {
+   "id": "M9-LVOS-RUNS",
+   "title": "LVOS v2 — SGGL/FLOWVEL/SCALE/NULLJIT",
+   "description": "사전 등록 수정 4. 09:00 전에 끝나지 않은 arm은 NOT_RUN",
+   "machine": "RunPod 4090",
+   "status": "RUNNING",
+   "progress": {
+    "glob": "outputs/milestone9/runpod/runs/*/lvosv2*.csv",
+    "total": 128
    }
   }
  ]

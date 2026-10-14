@@ -1,0 +1,16 @@
+{
+  "machine": "ubuntu-rtx2080",
+  "torch": "2.14.1+cu130",
+  "cuda": "13.0",
+  "gpu": "NVIDIA GeForce RTX 2080",
+  "fill_hole_area": 0,
+  "arm": {
+    "name": "NULLJIT",
+    "gens": [],
+    "center": "out",
+    "jitter": 0.15,
+    "why": "M9 null control (amend3): L crop side = SGGL side x U(0.85,1.15) per frame, seeded by unit; no information",
+    "frozen_kst": "2026-10-15 03:13"
+  },
+  "code": "ubuntu working tree"
+}
