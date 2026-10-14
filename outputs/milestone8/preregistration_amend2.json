@@ -1,0 +1,6 @@
+{
+ "created": "2026-10-14 16:45 KST, after the shard-0 diag (22 units) and a look at its stage-1 table",
+ "bug": "H_s8 used state['cached_features'][t][1]['backbone_fpn'][1], which SAM 2's forward_image has already replaced by the mask decoder's conv_s1 projection (64-d high-res detail features), not the 256-d stride-8 FPN-neck features the pre-registration describes.",
+ "fix": "scripts/m8.py raw_s8(): recompute the raw neck features from the cached frame image (extra encoder pass on trigger frames only). Shard-0 units get H_s8 candidates and H_s8 localisation from the stage-1b pass (*.cand1b.csv, *.diag1b.csv); their shard-0 H_s8 rows are discarded by the analysis.",
+ "also_seen_before_this_amendment": "shard-0 stage-1 table (42 coabs GT-present frames, 5 videos). No threshold or generator other than H_s8 was changed after seeing it."
+}

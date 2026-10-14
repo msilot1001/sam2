@@ -1,0 +1,23 @@
+{
+  "M3vel": {
+    "name": "M3vel",
+    "gens": [],
+    "center": "m3vel",
+    "why": "M7 challenger, unchanged (damp 0.5), machine-matched control",
+    "frozen_kst": "2026-10-14 16:14"
+  },
+  "FLOWVEL": {
+    "name": "FLOWVEL",
+    "gens": [],
+    "center": "flowvel",
+    "why": "C3: crop centre driven by RAFT flow displacement of the target region (damp 0.5); keeps following the flow-carried box while both views miss",
+    "frozen_kst": "2026-10-14 16:14"
+  },
+  "SGGL": {
+    "name": "SGGL",
+    "gens": [],
+    "center": "out",
+    "why": "machine-matched SGGL baseline for every worker that runs arms (== diag trajectory on Ubuntu)",
+    "frozen_kst": "2026-10-14 17:06"
+  }
+}

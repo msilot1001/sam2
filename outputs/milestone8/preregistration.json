@@ -1,0 +1,40 @@
+{
+  "created": "2026-10-14 16:00:05",
+  "created_before_any_m8_output": true,
+  "incumbent": "SGGL (M6 A2x; M7 KEEP_SGGL). M3-vel = low-cost control (damp 0.5, unchanged).",
+  "data": "DEV + REP crop units (64 units / 34 videos; exploratory, previously inspected). VK (Scene01/06) only for frozen finalists. PUMaVOS C sealed. Learned modules: fit on REP, evaluated on DEV only.",
+  "headroom_disclosed": "stage-0 (M7 rec): co-absence frames with GT present = 131 (14 units / 11 videos); perfect rescue of all of them = +0.028 mean unit J&F. The report's +0.03 STRONG_WIN is therefore out of reach for a rescue-only method on this data; reported anyway.",
+  "stage1": {
+    "trigger": "causal, production views only: coabs = both scores <= 0; disagree = exactly one present or IoU(L,G) < 0.5; regular = every 10th other frame (calibration). All generators run NON-STORING on the live SGGL trajectory.",
+    "generators": {
+      "A_cos": "frame-0 prototype cosine on G stride-16 -> top-3 peaks -> point prompt on G memory",
+      "B_att": "contrastive token attention (8 fg + 32 bg k-means tokens, tau 0.1) -> top-3 -> point prompt",
+      "H_s8": "prototype cosine on stride-8 FPN features (representation) -> top-3 -> point prompt",
+      "G_neg": "B top-1 positive + negative points at A peaks with B posterior < 0.5",
+      "D_ref": "B top-1 point prompt with frame-0-only memory",
+      "A/B_crop": "L-memory crop re-placed at the A / B top-1 peak (attention-guided crop placement)",
+      "E_beam1/2": "L-memory crop at last confident centre + 1x / 2x raw velocity x elapsed frames",
+      "C_flowcrop/C_flowbox": "RAFT-small flow-carried box -> L crop at its centre / G box prompt",
+      "F_oclr/cpfr{8,4}_{G,L}": "matched-magnification plain crop vs context-preserving separable foveation (target long side -> 8 or 4 stride-16 cells), on G and L memory",
+      "Gp/Lp": "M7 protected-memory probes (reference)"
+    },
+    "metrics": "per generator on coabs: recall (any of its candidates J > 0.5) when GT present; false-positive rate (non-empty with score > 0) when GT empty; localisation hit@1/@3 of heatmap peaks (GT cells dilated by 1 cell); video spread of hits",
+    "advance_to_causal": "recall >= 0.25 AND >= 2x max(Gp, Lp) recall in the same run AND hits in >= 4 videos AND, with a ranker/threshold fit on REP only, FP rate on DEV coabs-absent <= 0.10",
+    "falsification": {
+      "attention (B vs A)": "B_att loc@1 and recall not above A_cos (paired, video-clustered) -> no attention benefit for search",
+      "representation (H vs A)": "stride-8 not above stride-16 -> occupancy-of-features hypothesis unsupported",
+      "foveation (cpfr vs oclr, same state, same magnification)": "recall difference CI includes 0 -> context preservation unsupported",
+      "motion (C/E vs L)": "flow/beam recall not above the production L view at coabs -> motion adds no evidence"
+    },
+    "rankers": "R0 SAM 2 score; R1 train-free (score > 0, cos_fg - cos_bg, area ratio, flow distance); R2 logistic regression; R3 attention ranker over candidate tokens + frame-0 tokens. R2/R3 fit on REP, evaluated on DEV."
+  },
+  "stage2_causal_rule": {
+    "PROMISING": "M7 pilot rule vs machine-matched SGGL: dJF >= +0.005 AND >= 3 videos > +0.01 AND LOVO min > 0 AND > 0 without miami-surf AND no unit < -0.05",
+    "STRONG_WIN": "dJF >= +0.03 AND video-CI lower > 0",
+    "REJECTED": "dJF <= 0 or gains from <= 2 videos with LOVO min <= 0",
+    "INCONCLUSIVE": "otherwise",
+    "also_reported": "coabs-subset dJF, false re-acquisition (output non-empty on GT-empty frames), latency, peak VRAM, extra SAM 2 calls"
+  },
+  "no_tuning": "each causal arm gets at most one pre-registered revision; thresholds fixed before its causal run",
+  "rows": []
+}

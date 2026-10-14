@@ -33,3 +33,4 @@ checkpoints/
 outputs/
 .pytest_cache/
 *.egg-info/
+.gpu_worker.env

@@ -1,0 +1,6 @@
+{
+ "created": "2026-10-14 16:05 KST, after diag of 6 shard-0 units (1 with co-absence frames: kite-surf obj2)",
+ "observation": "F_oclr/F_cpfr views without prompts on G or L memory are never 'present' at co-absence (SAM 2 memory attention does not re-identify the target in a geometrically re-mapped view); point-prompted G generators are always present (score > 0) even when GT is empty.",
+ "amendment": "add F_{oclr,cpfr}8_{G,L}_pt and F_{oclr,cpfr}4_G_pt: same views + one positive point at the flow-carried centre. Units already recorded (shard 0) get these generators in a separate stage-1b pass (same code, `diag1b`), so every unit has every generator on its coabs frames. The matched CPFR-vs-OCLR test is run for both prompt-free and prompted variants; prompted variants are reported as the primary F test.",
+ "consequence_disclosed": "point-prompted candidates force presence, so their raw false-positive rate on GT-empty frames is ~100%; the stage-1 FP criterion is therefore evaluated after the REP-fitted ranker/threshold as pre-registered, not on raw presence."
+}
