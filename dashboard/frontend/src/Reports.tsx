@@ -74,7 +74,7 @@ export default function Reports({ path, nav }: { path?: string; nav: Nav }) {
 
 /** "31_causal_timelines.png" -> "causal timelines" */
 export const caption = (name: string) => name.replace(/\.[^.]+$/, '').replace(/^\d+[_-]/, '').replace(/[_-]+/g, ' ')
-const GROUP_LABEL: Record<string, string> = { 'outputs/milestone8/viz': 'M8 그림', 'outputs/milestone7/viz': 'M7 그림' }
+const GROUP_LABEL: Record<string, string> = { 'outputs/milestone9': 'M9 그림', 'outputs/milestone8/viz': 'M8 그림', 'outputs/milestone7/viz': 'M7 그림' }
 
 export function Figures() {
   const { data } = useFetch<Entry[]>('/api/images', 30_000)

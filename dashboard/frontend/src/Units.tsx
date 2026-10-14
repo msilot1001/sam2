@@ -9,9 +9,16 @@ import { stemOf } from './Arms'
 import { Help } from '@/HelpTip'
 import { DOWN, INK, SERIES, tick } from './charts'
 
-type Frame = { i: number; JF: number | null; gt_empty: boolean; rescued: boolean; coabs: boolean; gen: string | null }
+type Frame = { i: number; JF: number | null; gt_empty: boolean; rescued: boolean; coabs: boolean; gen: string | null } & Partial<Record<Extra, number>>
 type Series = { machine: string; arm: string; path: string; frames: Frame[] }
-type UnitData = { stem: string; series: Series[]; baseline: Record<string, { path: string; frames: Frame[] }>; candidates: { path: string; rows: Record<string, string>[] } | null }
+type UnitData = {
+  stem: string; milestone?: 'm8' | 'm9'; series: Series[]; baseline: Record<string, { path: string; frames: Frame[] }>
+  metrics?: Record<string, any>[] | null; candidates: { path: string; rows: Record<string, string>[] } | null
+}
+// M9 run-row columns plotted as extra series when present (server.py EXTRA)
+const EXTRA = ['crop_side', 'gt_in_crop', 'gt_long_over_side', 'pc_dx', 'pc_dy'] as const
+type Extra = typeof EXTRA[number]
+const isM9 = (stem: string) => /^(mosev2|vost|lvos)/.test(stem)
 
 const BASE_COLOR: Record<string, string> = { runpod: '#52514e', ubuntu: '#898781' }
 const COABS = '#e34948'
@@ -38,6 +45,7 @@ export default function Units({ stem, nav }: { stem?: string; nav: Nav }) {
   const [hidden, setHidden] = useState<Set<string>>(new Set())
   const [frame, setFrame] = useState<string>('')
   const [genFilter, setGenFilter] = useState('')
+  const [extra, setExtra] = useState<Extra>('crop_side')
   const diag = (arm: string) => !!summary?.arms?.[arm]?.diagnostic
 
   const view = useMemo(() => {
@@ -62,10 +70,15 @@ export default function Units({ stem, nav }: { stem?: string; nav: Nav }) {
       jf: mean(s.frames.map((f) => f.JF)), d: mean(data.map((p) => p[`d:${keys[k]}`] ?? null).filter((x) => x != null)),
       rescued: s.frames.filter((f) => f.rescued).length,
     }))
-    return { data, stats, empty: ref ? spans(ref.frames, (f) => f.gt_empty) : [], coabs: ref ? spans(ref.frames, (f) => f.coabs) : [], nCoabs: ref?.frames.filter((f) => f.coabs).length ?? 0 }
+    const extras = EXTRA.filter((c) => [...u.series.map((s) => s.frames), ...Object.values(u.baseline).map((b) => b.frames)].some((fs) => fs.some((f) => f[c] != null)))
+    for (const [m, b] of Object.entries(u.baseline)) for (const f of b.frames) for (const c of extras) at(f.i)[`x:${c}:base:${m}`] = f[c]
+    u.series.forEach((s, k) => { for (const f of s.frames) for (const c of extras) at(f.i)[`x:${c}:${keys[k]}`] = f[c] })
+    return { data, stats, extras, empty: ref ? spans(ref.frames, (f) => f.gt_empty) : [], coabs: ref ? spans(ref.frames, (f) => f.coabs) : [], nCoabs: ref?.frames.filter((f) => f.coabs).length ?? 0 }
   }, [u])
 
-  const metrics = (summary?.per_unit ?? []).filter((r: any) => stemOf(r.unit) === current)
+  const metrics = u?.metrics ?? (summary?.per_unit ?? []).filter((r: any) => stemOf(r.unit) === current)
+  const m9 = u?.milestone === 'm9'
+  const ex = view?.extras.includes(extra) ? extra : view?.extras[0]
   const cands = (u?.candidates?.rows ?? []).filter((r) => (frame === '' || r.video_idx === frame) && (!genFilter || r.gen?.toLowerCase().includes(genFilter.toLowerCase())))
   const candCols = u?.candidates?.rows[0] ? Object.keys(u.candidates.rows[0]).filter((c) => c !== 'unit' && c !== 'video') : []
   const visible = view?.stats.filter((s) => !hidden.has(s.key)) ?? []
@@ -84,10 +97,12 @@ export default function Units({ stem, nav }: { stem?: string; nav: Nav }) {
       <div className="flex flex-wrap items-center gap-3">
         <label className="text-sm">unit{' '}
           <select className="max-w-lg rounded-md border bg-background px-2 py-1 font-mono text-sm" value={current ?? ''} onChange={(e) => { setFrame(''); nav('units', e.target.value) }}>
-            {stems.map((s) => <option key={s} value={s}>{s} ({list![s].length})</option>)}
+            {([['M9 (MOSEv2 · VOST)', stems.filter(isM9)], ['M8 (DAVIS · PUMaVOS A/B · SegTrack · VKITTI2)', stems.filter((s) => !isM9(s))]] as const).map(([g, ss]) => ss.length > 0 && (
+              <optgroup key={g} label={g}>{ss.map((s) => <option key={s} value={s}>{s} ({list![s].join(', ')})</option>)}</optgroup>
+            ))}
           </select>
         </label>
-        <Help k="units.unit" />
+        <Help k="units.unit" /><Help k="m9.unit" />
         {error && <span className="text-sm text-red-600">{error}</span>}
         <span className="text-xs text-muted-foreground">30초마다 갱신 · 차트를 누르면 후보 표를 그 프레임으로 필터링</span>
         <span className="text-xs">실패 사례 조사 방법<Help k="units.howto" /></span>
@@ -98,7 +113,7 @@ export default function Units({ stem, nav }: { stem?: string; nav: Nav }) {
           <CardHeader>
             <CardTitle className="font-mono">{current}<Help k="units.chart_jf" /></CardTitle>
             <CardDescription>
-              각 arm을 같은 기계의 SGGL과 비교 (runpod → runpod/runs/SGGL, ubuntu → diag) · 회색 음영: gt_empty · 빨간 띠: co-absence (score_G ≤ 0이고 score_L ≤ 0, {view.nCoabs} frames) · 굵은 점: rescued 프레임<Help k="units.shading" />
+              각 arm을 같은 기계의 SGGL과 비교 ({m9 ? 'M9: runpod → runpod/diag/<데이터셋>, ubuntu → runs/SGGL' : 'runpod → runpod/runs/SGGL, ubuntu → diag'}){m9 && <Help k="m9.unitBaseline" />} · 회색 음영: gt_empty · 빨간 띠: co-absence (score_G ≤ 0이고 score_L ≤ 0, {view.nCoabs} frames) · 굵은 점: rescued 프레임<Help k="units.shading" />
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -149,6 +164,34 @@ export default function Units({ stem, nav }: { stem?: string; nav: Nav }) {
                 ))}
               </LineChart>
             </ResponsiveContainer>
+            {ex && (
+              <>
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  프레임별 crop 진단
+                  <select className="rounded-md border bg-background px-2 py-0.5 font-mono text-xs" value={ex} onChange={(e) => setExtra(e.target.value as Extra)}>
+                    {view.extras.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <Help k="m9.extraSeries" />
+                </div>
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={view.data} margin={{ right: 16, left: 0 }} onClick={pick}>
+                    <CartesianGrid stroke={INK.grid} vertical={false} />
+                    <XAxis dataKey="i" type="number" domain={['dataMin', 'dataMax']} tick={tick} stroke={INK.axis} />
+                    <YAxis tick={tick} stroke={INK.axis} tickFormatter={(v) => num(v, 2)} />
+                    <Tooltip formatter={(v, n) => [num(v as number, 3), String(n)]} labelFormatter={(l) => `frame ${l}`} />
+                    {shade}
+                    {ex === 'gt_long_over_side' && <ReferenceLine y={0.6} stroke={DOWN} strokeDasharray="4 3" label={{ value: 'SCALE 0.6', fontSize: 10, fill: DOWN, position: 'right' }} />}
+                    {ex === 'gt_in_crop' && <ReferenceLine y={0.5} stroke={DOWN} strokeDasharray="4 3" label={{ value: 'POSITION 0.5', fontSize: 10, fill: DOWN, position: 'right' }} />}
+                    {Object.keys(u!.baseline).map((m) => (
+                      <Line key={m} dataKey={`x:${ex}:base:${m}`} name={`SGGL ${m}`} stroke={BASE_COLOR[m]} strokeWidth={5} strokeOpacity={0.35} dot={false} isAnimationActive={false} connectNulls />
+                    ))}
+                    {visible.map((s) => (
+                      <Line key={s.key} dataKey={`x:${ex}:${s.key}`} name={s.key} stroke={s.color} strokeWidth={1.5} strokeDasharray={s.dashed ? '5 3' : undefined} dot={false} isAnimationActive={false} connectNulls />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </>
+            )}
             <Table className="text-xs">
               <TableHeader>
                 <TableRow>{([['arm', 'metrics'], ['mean J&F', 'm.jf'], ['mean Δ (frames)', 'm.dframes'], ['rescued frames', 'm.rescued'], ['d (report)', 'm.d'], ['dJ', 'm.dJ'], ['dF', 'm.dF'], ['오재획득 arm/SGGL', 'm.fp'], ['latency arm/SGGL', 'm.lat'], ['set', 'm.set']] as const).map(([h, k]) => <TableHead key={h}>{h}<Help k={`units.${k}`} /></TableHead>)}</TableRow>

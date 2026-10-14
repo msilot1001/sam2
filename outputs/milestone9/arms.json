@@ -33,5 +33,13 @@
     "center": "pccarry",
     "why": "M9 cheap motion: while SGGL output is empty, move the crop by the global phase-correlation shift between frames t-1 and t (4x down-sampled gray, FFT; no learned model); else SGGL centre. Mirrors M8 CAMCARRY without RAFT",
     "frozen_kst": "2026-10-14 23:13"
+  },
+  "CONSENSUS": {
+    "name": "CONSENSUS",
+    "gens": [],
+    "center": "out",
+    "gate": "consensus",
+    "why": "M9 presence/abstention (evidence-driven, one rule, no threshold): SGGL, except that when the L self gate fails, the G mask is output only if L also claims presence (score_L > 0); otherwise the output is empty and the crop centre is held. Designed from the MOSEv2 DEV-split replay only (157 FP frames removed vs 124 GT-present frames emptied, J 43.4); judged on MOSEv2 conf and VOST.",
+    "frozen_kst": "2026-10-15 00:42"
   }
 }

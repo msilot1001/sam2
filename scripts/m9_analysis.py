@@ -139,7 +139,11 @@ def classify(r):
         return "SCALE"
     if r.gt_in_crop < 0.5:
         return "POSITION"
-    return "PRESENCE_ABSENT_CLAIM" if r.out_empty else "PRESENCE_WRONG_TARGET"
+    if r.out_empty:
+        return "PRESENCE_ABSENT_CLAIM"
+    # prereg defines wrong-target as non-empty output with J < 0.1; the remaining 0.1 <= J < 0.5 frames are a
+    # residual the prereg did not name -> reported separately as PARTIAL_SEGMENTATION (disclosed)
+    return "PRESENCE_WRONG_TARGET" if r.J < 0.1 else "PARTIAL_SEGMENTATION"
 
 
 def taxonomy(ds):
@@ -193,7 +197,7 @@ def _unit_deltas(arm):
             assert len(mm) == len(a) == len(b), (arm, f.name)
             co_b = mm.coabs_b.to_numpy()
             rows.append({"dataset": ds, "machine": m, "unit": a.unit.iloc[0], "video": a.video.iloc[0],
-                         "set": a.set.iloc[0], "area0": a.area0.iloc[0],
+                         "set": a.subset.iloc[0] if "subset" in a else a.set.iloc[0], "area0": a.area0.iloc[0],
                          "small": a.area0.iloc[0] < 0.01, "tiny": a.area0.iloc[0] < 0.001,
                          "d": a.JF.mean() - mm.JF_b.mean(), "dJ": a.J.mean() - mm.J_b.mean(), "dF": a.F.mean() - mm.F_b.mean(),
                          "base_JF": mm.JF_b.mean(), "arm_JF": a.JF.mean(),
@@ -213,7 +217,13 @@ def _summ(S, label):
     p_sign = min(1.0, 2 * sum(comb(n, k) for k in range(max(pos, neg), n + 1)) / 2 ** n) if n else 1.0
     gain = S.d.clip(lower=0).groupby(S.video).sum().sort_values(ascending=False)
     top2 = float(S[S.video.isin(vid.sort_values(ascending=False).index[:2])].d.sum() / S.d.sum()) if S.d.sum() > 0 else np.nan
+    rng = np.random.default_rng(0)
+    vm = vid.to_numpy()
+    obs = abs(vm.mean()) if len(vm) else 0.0
+    flips = rng.choice([-1.0, 1.0], size=(10000, len(vm))) if len(vm) else np.zeros((1, 0))
+    perm_p = float(((np.abs((flips * vm).mean(1)) >= obs - 1e-12).sum() + 1) / (len(flips) + 1)) if len(vm) else 1.0
     return {"label": label, "n_units": int(len(S)), "n_videos": int(S.video.nunique()), "dJF": float(S.d.mean()),
+            "dJF_video_mean": float(vm.mean()) if len(vm) else None, "perm_p_video": perm_p,
             "dJ": float(S.dJ.mean()), "dF": float(S.dF.mean()),
             "CI_video": cluster_bootstrap(S, "video", lambda q: q.d.mean(), n=2000) if S.video.nunique() > 1 else [np.nan, np.nan],
             "videos_up_0.01": int((vid > 0.01).sum()), "videos_down_0.01": int((vid < -0.01).sum()),
@@ -241,7 +251,14 @@ def causal(*arms):
             res[ds] = _summ(d, ds)
             for sp, e in d.groupby("set"):
                 res[f"{ds}:{sp}"] = _summ(e, f"{ds}:{sp}")
-        # Holm across per-dataset bootstrap tests: one-sided p from the bootstrap sign of the mean
+        # Holm across the per-dataset tests (video sign-flip permutation p-values)
+        dss = sorted(k for k in res if k != "pooled" and ":" not in k)
+        ps = sorted((res[k]["perm_p_video"], k) for k in dss)
+        m = len(ps)
+        run = 0.0
+        for i, (pv, k) in enumerate(ps):
+            run = max(run, min(1.0, (m - i) * pv))
+            res[k]["holm_p"] = run
         out[arm] = res
         for k, r in res.items():
             print(f"{arm:10s} {k:16s} n={r['n_units']:3d}/{r['n_videos']:3d}v dJF={r['dJF']:+.4f} CI=[{r['CI_video'][0]:+.4f},{r['CI_video'][1]:+.4f}] "
@@ -252,6 +269,24 @@ def causal(*arms):
     prev = json.loads((OUT / "reports" / "causal.json").read_text()) if (OUT / "reports" / "causal.json").exists() else {}
     prev.update(out)
     (OUT / "reports" / "causal.json").write_text(json.dumps(prev, indent=1, default=float))
+
+
+def pair(a, b):
+    """Paired arm-vs-arm on the same units and machine (small units), per dataset: d_a - d_b."""
+    A, B = _unit_deltas(a), _unit_deltas(b)
+    if not len(A) or not len(B):
+        print("missing", a if not len(A) else b)
+        return
+    m = A[A.small].merge(B[B.small][["unit", "machine", "d", "dJ", "dF"]], on=["unit", "machine"], suffixes=("", "_b"))
+    m = m.assign(d=m.d - m.d_b, dJ=m.dJ - m.dJ_b, dF=m.dF - m.dF_b)
+    res = {"pooled": _summ(m, "pooled")}
+    for ds, d in m.groupby("dataset"):
+        res[ds] = _summ(d, ds)
+    for k, r in res.items():
+        print(f"{a}-{b} {k:10s} n={r['n_units']}/{r['n_videos']}v d={r['dJF']:+.4f} CI=[{r['CI_video'][0]:+.4f},{r['CI_video'][1]:+.4f}] perm_p={r['perm_p_video']:.3f}")
+    prev = json.loads((OUT / "reports" / "pairs.json").read_text()) if (OUT / "reports" / "pairs.json").exists() else {}
+    prev[f"{a}-{b}"] = res
+    (OUT / "reports" / "pairs.json").write_text(json.dumps(prev, indent=1, default=float))
 
 
 if __name__ == "__main__":

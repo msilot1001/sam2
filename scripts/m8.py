@@ -466,6 +466,8 @@ def run_arm(pred, flow, s, u, A, rank, n=None):
         t0 = time.perf_counter()
         G, L = d.view("G", t), d.view("L", t)
         out, ok = sggl.a2x(G, L, hw)
+        if A.get("gate") == "consensus" and not ok and L.score <= 0:
+            out = np.zeros(hw, bool)        # M9 CONSENSUS: G alone may not claim presence when L says absent
         frame = R.frame_tensor(ps[t]).cuda() if (use_flow or use_pc or A["gens"]) else None
         if use_flow:
             trk.step_flow(flow(prev, frame), hw)

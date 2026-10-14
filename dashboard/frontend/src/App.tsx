@@ -7,13 +7,14 @@ import Arms from './Arms'
 import Stage1 from './Stage1'
 import Units from './Units'
 import M7 from './M7'
+import M9 from './M9'
 import Reports, { Figures } from './Reports'
 import { Code, RawData } from './Explorer'
 import Glossary from './Glossary'
 import { Help } from '@/HelpTip'
 
 const TABS = [
-  ['overview', '개요'], ['arms', 'Causal arms'], ['stage1', 'Stage 1'], ['units', 'Unit 탐색'], ['m7', 'M7'],
+  ['overview', '개요'], ['m9', 'M9 교차 검증'], ['arms', 'Causal arms'], ['stage1', 'Stage 1'], ['units', 'Unit 탐색'], ['m7', 'M7'],
   ['figures', '그림'], ['reports', '리포트'], ['raw', '원시 데이터'], ['code', '코드'], ['glossary', '용어집'],
 ] as const
 
@@ -64,7 +65,7 @@ export default function App() {
   return (
     <Tabs value={loc.tab} onValueChange={(t) => nav(String(t), last[String(t)])} className="flex h-screen flex-col gap-0">
       <header className="flex items-center gap-4 border-b px-4 py-2">
-        <h1 className="text-sm font-semibold whitespace-nowrap">SAM 2 연구 사이트 <span className="font-normal text-muted-foreground">M7 · M8</span></h1>
+        <h1 className="text-sm font-semibold whitespace-nowrap">SAM 2 연구 사이트 <span className="font-normal text-muted-foreground">M7 · M8 · M9</span></h1>
         <div className="min-w-0 flex-1 overflow-x-auto">
           <TabsList>{TABS.map(([v, l]) => <TabsTrigger key={v} value={v}>{l}</TabsTrigger>)}</TabsList>
         </div>
@@ -72,6 +73,7 @@ export default function App() {
       </header>
       <main className="min-h-0 flex-1 overflow-auto">
         <TabsContent value="overview"><Overview nav={nav} /></TabsContent>
+        <TabsContent value="m9"><M9 nav={nav} /></TabsContent>
         <TabsContent value="arms"><Arms sel={path} nav={nav} /></TabsContent>
         <TabsContent value="stage1"><Stage1 /></TabsContent>
         <TabsContent value="units"><Units stem={path} nav={nav} /></TabsContent>

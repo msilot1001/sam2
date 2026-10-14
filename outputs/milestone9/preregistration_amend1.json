@@ -1,0 +1,11 @@
+{
+ "created_kst": "2026-10-15 00:50",
+ "observation": "MOSEv2 SGGL trajectory (all 139 units): 495 of 3,392 GT-empty frames have non-empty output (false re-acquisition, loss 495 frame-J, 40 videos, top video 13%); 225 of them come from G when the L self gate fails, mostly while L itself reports absence. With these losses counted, presence/identity (wrong target + absent claim + false re-acquisition, 886) is as large as SCALE (852).",
+ "hypothesis": "When L (the high-resolution view) says the target is absent and its gate fails, G's mask is more often a distractor than the target; abstaining in that case removes false re-acquisitions at a smaller cost in missed targets.",
+ "minimal_change": "arm CONSENSUS (outputs/milestone9/arms.json): output G only if score_L > 0 when the L gate fails, else empty.",
+ "control": "SGGL (machine-matched); also compared with SGGL-V-style veto evidence from M7 (opposite direction).",
+ "design_data": "MOSEv2 DEV split replay only (62 units / 48 videos): +157 FP frames removed, 124 GT-present frames emptied (J 43.4).",
+ "expected_effect": "dJ&F > 0 on MOSEv2 conf; false re-acquisition frames reduced; no unit < -0.05",
+ "falsification": "MOSEv2 conf dJ&F <= 0 or video-cluster CI lower bound < 0 with mean <= +0.005, or any unit < -0.05, or VOST mean < 0 -> stop",
+ "time_budget": "one RunPod run on MOSEv2 (~45 min) + VOST if positive"
+}

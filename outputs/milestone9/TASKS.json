@@ -1,0 +1,144 @@
+{
+ "updated_kst": "2026-10-15 01:10",
+ "note": "M9 live task ledger (agent-maintained); progress = result files / expected units.",
+ "tasks": [
+  {
+   "id": "M9-DATA-MOSE",
+   "title": "MOSEv2 확보·manifest",
+   "description": "HF 공식 train 3분할(58 GB) 스트리밍, 180영상 선추출(meta seed 9), GT로 139단위/102영상 고정. 분할 sha256 공식값 일치",
+   "machine": "RunPod",
+   "status": "DONE"
+  },
+  {
+   "id": "M9-DATA-VOST",
+   "title": "VOST 확보·manifest",
+   "description": "공식 S3 zip byte-range로 val 정답 전체 + 44영상 JPEG만 수신, GT로 74단위/44영상 고정",
+   "machine": "Ubuntu",
+   "status": "DONE"
+  },
+  {
+   "id": "M9-DATA-LVOS",
+   "title": "LVOS v2 확보",
+   "description": "Google Drive 할당량 초과로 거부(BLOCKED). Pod에서 20분 간격 6회 자동 재시도",
+   "machine": "RunPod",
+   "status": "BLOCKED"
+  },
+  {
+   "id": "M9-BENCH",
+   "title": "새 Pod 검증·worker 벤치마크",
+   "description": "RTX4090, quota 13.6 vCPU; M8 FLOWVEL 8단위 수치 동일(차이 0); 4 worker×3 thread 4.39 frame/s 채택",
+   "machine": "RunPod",
+   "status": "DONE"
+  },
+  {
+   "id": "M9-DIAG-MOSE",
+   "title": "MOSEv2 Stage 1 최소 진단",
+   "description": "SGGL 궤적(같은 기계 기준선) + 생성기 11종 비저장 probe (A_cos, B_att, C_flow, F_oclr8_L, Gp, Lp)",
+   "machine": "RunPod 4090",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone9/runpod/diag/mosev2/*.cand.csv",
+    "total": 139
+   }
+  },
+  {
+   "id": "M9-FLOWVEL-MOSE",
+   "title": "FLOWVEL vs SGGL — MOSEv2",
+   "description": "M8에서 고정한 FLOWVEL을 MOSEv2 전체 단위에서 인과 rollout",
+   "machine": "RunPod 4090",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone9/runpod/runs/FLOWVEL/mosev2*.csv",
+    "total": 139
+   },
+   "depends_on": [
+    "M9-DIAG-MOSE"
+   ]
+  },
+  {
+   "id": "M9-SGGL-VOST",
+   "title": "SGGL 기준선 — VOST",
+   "description": "VOST 74단위 SGGL 궤적(실패 분류용, 같은 기계 기준선)",
+   "machine": "Ubuntu 2080",
+   "status": "RUNNING",
+   "progress": {
+    "glob": "outputs/milestone9/runs/SGGL/vost*.csv",
+    "total": 74
+   }
+  },
+  {
+   "id": "M9-FLOWVEL-VOST",
+   "title": "FLOWVEL vs SGGL — VOST",
+   "description": "VOST 74단위 FLOWVEL 인과 rollout",
+   "machine": "Ubuntu 2080",
+   "status": "QUEUED",
+   "progress": {
+    "glob": "outputs/milestone9/runs/FLOWVEL/vost*.csv",
+    "total": 74
+   },
+   "depends_on": [
+    "M9-SGGL-VOST"
+   ]
+  },
+  {
+   "id": "M9-SCALE-MOSE",
+   "title": "SCALE vs SGGL — MOSEv2",
+   "description": "스케일만: crop 한 변이 믿을 만한 출력 크기를 따라감 (사전 등록 23:13)",
+   "machine": "RunPod 4090",
+   "status": "RUNNING",
+   "progress": {
+    "glob": "outputs/milestone9/runpod/runs/SCALE/mosev2*.csv",
+    "total": 139
+   },
+   "depends_on": [
+    "M9-FLOWVEL-MOSE"
+   ]
+  },
+  {
+   "id": "M9-JOINT-MOSE",
+   "title": "JOINT vs SGGL — MOSEv2",
+   "description": "FLOWVEL 이동 + SCALE 크기",
+   "machine": "RunPod 4090",
+   "status": "BLOCKED",
+   "progress": {
+    "glob": "outputs/milestone9/runpod/runs/JOINT/mosev2*.csv",
+    "total": 139
+   },
+   "depends_on": [
+    "M9-FLOWVEL-MOSE"
+   ]
+  },
+  {
+   "id": "M9-PCCARRY-MOSE",
+   "title": "PCCARRY vs SGGL — MOSEv2",
+   "description": "값싼 운동: 부재 중 위상 상관 전역 이동만큼 crop 이동 (RAFT 없음)",
+   "machine": "RunPod 4090",
+   "status": "QUEUED",
+   "progress": {
+    "glob": "outputs/milestone9/runpod/runs/PCCARRY/mosev2*.csv",
+    "total": 139
+   },
+   "depends_on": [
+    "M9-FLOWVEL-MOSE"
+   ]
+  },
+  {
+   "id": "M9-GATE",
+   "title": "H4 결정 관문 (실패 분류)",
+   "description": "놓친 frame을 관측 불가/스케일/위치/존재·신원으로 분류해 다음 실험 결정",
+   "machine": "Ubuntu CPU",
+   "status": "DONE",
+   "depends_on": [
+    "M9-DIAG-MOSE",
+    "M9-SGGL-VOST"
+   ]
+  },
+  {
+   "id": "M9-DASH",
+   "title": "대시보드 M9 탭",
+   "description": "M9 데이터셋·진행·결과·실패 분류 표시 (연구를 막지 않음)",
+   "machine": "Ubuntu",
+   "status": "DONE"
+  }
+ ]
+}

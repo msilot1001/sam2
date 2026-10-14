@@ -55,8 +55,10 @@ function TaskRow({ t, byId }: { t: Task; byId: Record<string, Task> }) {
   )
 }
 
-function Tasks({ nav }: { nav: Nav }) {
-  const { data, error, at } = useFetch<any>('/api/tasks', 15_000)
+const MS_DIR: Record<string, string> = { m8: 'outputs/milestone8', m9: 'outputs/milestone9' }
+
+export function Tasks({ nav, ms = 'm8' }: { nav: Nav; ms?: 'm8' | 'm9' }) {
+  const { data, error, at } = useFetch<any>(`/api/tasks?ms=${ms}`, 15_000)
   const tasks: Task[] = data?.tasks?.tasks ?? []
   const byId = Object.fromEntries(tasks.map((t) => [t.id, t]))
   const groups = STATUS_ORDER.map((s) => [s, tasks.filter((t) => t.status === s)] as const)
@@ -64,7 +66,7 @@ function Tasks({ nav }: { nav: Nav }) {
   return (
     <Card className="border-[#2a78d6]/40">
       <CardHeader>
-        <CardTitle>현재 작업<Help k="overview.tasks" /></CardTitle>
+        <CardTitle>현재 작업 — {ms.toUpperCase()}{ms === 'm9' && <span className="font-normal text-muted-foreground"> (교차 데이터셋 검증)</span>}<Help k={ms === 'm9' ? 'm9.tasks' : 'overview.tasks'} /></CardTitle>
         <CardDescription>
           TASKS.json · 갱신 {data?.tasks?.updated_kst ?? '—'} · 진행률은 결과 파일 수를 실시간으로 센 값<Help k="overview.taskProgress" /> · 15초마다 갱신 ({at?.toLocaleTimeString()})
           {error && <span className="text-red-600"> · 오류: {error}</span>}
@@ -72,7 +74,7 @@ function Tasks({ nav }: { nav: Nav }) {
       </CardHeader>
       <CardContent className="grid gap-6 xl:grid-cols-[3fr_2fr]">
         <div>
-          {data && !data.tasks && <p className="text-sm text-muted-foreground">outputs/milestone8/TASKS.json 없음</p>}
+          {data && !data.tasks && <p className="text-sm text-muted-foreground">{MS_DIR[ms]}/TASKS.json 없음</p>}
           {data?.tasks?.note && <p className="mb-2 text-xs text-muted-foreground">{data.tasks.note}</p>}
           {groups.map(([s, ts]) => ts.length === 0 ? null : s === 'DONE' ? (
             <details key={s} className="mt-2">
@@ -91,7 +93,7 @@ function Tasks({ nav }: { nav: Nav }) {
           <div className="text-xs font-semibold uppercase text-muted-foreground">최신 로그<Help k="overview.logs" /></div>
           {(data?.logs ?? []).map((l: any) => (
             <div key={l.path}>
-              <button className="font-mono text-xs underline" onClick={() => nav('raw', l.path)}>{l.path.replace('outputs/milestone8/', '')}</button>
+              <button className="font-mono text-xs underline" onClick={() => nav('raw', l.path)}>{l.path.replace(`${MS_DIR[ms]}/`, '')}</button>
               <span className="ml-2 text-xs text-muted-foreground">{new Date(l.mtime * 1000).toLocaleTimeString()}</span>
               <pre className="mt-1 max-h-48 overflow-auto rounded bg-muted p-2 text-[11px] leading-snug">{l.tail}</pre>
             </div>
@@ -104,7 +106,7 @@ function Tasks({ nav }: { nav: Nav }) {
 
 export default function Overview({ nav }: { nav: Nav }) {
   const { data: d, error, at } = useFetch<any>('/api/overview', 30_000)
-  if (!d) return <div className="space-y-4 p-4"><Tasks nav={nav} /><p className="text-muted-foreground">{error ?? '불러오는 중…'}</p></div>
+  if (!d) return <div className="space-y-4 p-4"><Tasks nav={nav} ms="m9" /><Tasks nav={nav} /><p className="text-muted-foreground">{error ?? '불러오는 중…'}</p></div>
   const arms = d.arms ?? {}
   const causal: Record<string, any> = Object.fromEntries(Object.entries(d.causal ?? {}).filter(([k]) => !k.includes('@')))
   const s1 = d.stage1 ?? {}
@@ -129,6 +131,7 @@ export default function Overview({ nav }: { nav: Nav }) {
         30초마다 자동 갱신 · 마지막 갱신 {at?.toLocaleTimeString()} {error && <span className="text-red-600">· 오류: {error}</span>}
       </div>
 
+      <Tasks nav={nav} ms="m9" />
       <Tasks nav={nav} />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

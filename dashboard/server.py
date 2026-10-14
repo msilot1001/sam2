@@ -24,12 +24,27 @@ from urllib.parse import parse_qs, parse_qsl, urlencode, urlparse
 REPO = Path(__file__).resolve().parent.parent
 DIST = (REPO / "dashboard/frontend/dist").resolve()
 M8 = "outputs/milestone8"
-ALLOW = ["docs/m7", "docs/m8", "docs/GPU_WORKER_OPERATIONS.md", "AGENTS.md", "outputs/milestone7",
-         M8, "outputs/SYNC_LEDGER.tsv", "outputs/SYNC_STATUS.json", "scripts", "src/spatial", "tests"]
+M9 = "outputs/milestone9"
+ALLOW = ["docs/m7", "docs/m8", "docs/m9", "docs/GPU_WORKER_OPERATIONS.md", "AGENTS.md", "outputs/milestone7",
+         M8, M9, "outputs/SYNC_LEDGER.tsv", "outputs/SYNC_STATUS.json", "scripts", "src/spatial", "tests"]
 ROOTS = [(a, (REPO / a).resolve()) for a in ALLOW]
 DENY_PARTS = {"tcache", "checkpoints", "data", ".ssh", "__pycache__", ".git"}
 BINARY = {".npz", ".npy", ".pt"}  # listed with size only, never served
-MACHINES = {"ubuntu": f"{M8}/runs", "runpod": f"{M8}/runpod/runs"}
+# per milestone: run dirs per machine, machine-matched SGGL baseline and stage-1 candidate paths ({ds} = stem prefix)
+MILESTONES = {
+    "m8": {"dir": M8, "runs": {"ubuntu": f"{M8}/runs", "runpod": f"{M8}/runpod/runs"},
+           "base": {"runpod": [f"{M8}/runpod/runs/SGGL/{{stem}}.csv"], "ubuntu": [f"{M8}/diag/{{stem}}.csv"]},
+           "cand": [f"{M8}/diag/{{stem}}.cand.csv", f"{M8}/runpod/diag/{{stem}}.cand.csv"],
+           "logs": [f"{M8}/logs/*.log", f"{M8}/runpod/logs/queue*.log"]},
+    "m9": {"dir": M9, "runs": {"ubuntu": f"{M9}/runs", "runpod": f"{M9}/runpod/runs"},
+           # same order as scripts/m9_analysis.py _unit_deltas: diag rows, else the plain SGGL arm
+           "base": {"runpod": [f"{M9}/runpod/diag/{{ds}}/{{stem}}.csv", f"{M9}/runpod/runs/SGGL/{{stem}}.csv"],
+                    "ubuntu": [f"{M9}/diag/{{ds}}/{{stem}}.csv", f"{M9}/runs/SGGL/{{stem}}.csv"]},
+           "cand": [f"{M9}/runpod/diag/{{ds}}/{{stem}}.cand.csv", f"{M9}/diag/{{ds}}/{{stem}}.cand.csv"],
+           "logs": [f"{M9}/*.log", f"{M9}/logs/*.log", f"{M9}/runpod/logs/*.log"]},
+}
+MACHINES = MILESTONES["m8"]["runs"]
+M9_PREFIXES = ("mosev2__", "vost__", "lvos")
 MAX_BYTES = 8 << 20
 TYPES = {".json": "application/json", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif",
                ".webp": "image/webp"}
@@ -74,10 +89,15 @@ def is_listable(p):
         return False
 
 
+def size_only(p):
+    """Listed with size only, never served (binaries, the 7 MB MOSEv2 meta dump)."""
+    return p.suffix in BINARY or p.name.endswith("_meta_train.json")
+
+
 def entry(p):
     st = p.stat()
     return {"name": p.name, "path": rel(p), "dir": p.is_dir(), "size": st.st_size, "mtime": st.st_mtime,
-            "binary": p.suffix in BINARY}
+            "binary": size_only(p)}
 
 
 def ls(path):
@@ -134,13 +154,13 @@ def overview():
 
 def docs():
     out = []
-    for d in ["docs/m8", "docs/m7"]:
+    for d in ["docs/m9", "docs/m8", "docs/m7"]:
         out += [rel(p) for p in sorted((REPO / d).glob("*.md"))]
     return out + [f for f in ["docs/GPU_WORKER_OPERATIONS.md", "AGENTS.md"] if (REPO / f).exists()]
 
 
 def images():
-    return [entry(p) for d in [f"{M8}/viz", "outputs/milestone7/viz"]
+    return [entry(p) for d in [M9, f"{M8}/viz", "outputs/milestone7/viz"]
             for p in sorted((REPO / d).rglob("*.png")) if is_listable(p)]
 
 
@@ -180,36 +200,55 @@ def fnum(v):
         return None
 
 
-def arm_dirs():
-    """[(machine, arm, dir)] for every arm run directory (incl. the RunPod SGGL baseline)."""
+def arm_dirs(ms="m8"):
+    """[(machine, arm, dir)] for every arm run directory of a milestone (incl. SGGL baseline dirs)."""
     out = []
-    for m, d in MACHINES.items():
+    for m, d in MILESTONES[ms]["runs"].items():
         base = REPO / d
         if base.exists():
             out += [(m, a.name, a) for a in sorted(base.iterdir()) if a.is_dir()]
     return out
 
 
-def baseline_path(machine, stem):
-    return REPO / (f"{M8}/runpod/runs/SGGL/{stem}.csv" if machine == "runpod" else f"{M8}/diag/{stem}.csv")
+def ms_of(stem):
+    return "m9" if stem.startswith(M9_PREFIXES) else "m8"
+
+
+def ms_paths(templates, stem):
+    return [REPO / t.format(stem=stem, ds=stem.split("__")[0]) for t in templates]
+
+
+def baseline_paths(machine, stem, ms="m8"):
+    return ms_paths(MILESTONES[ms]["base"][machine], stem)
+
+
+def baseline_path(machine, stem, ms="m8"):
+    """first existing baseline candidate (else the first one)"""
+    c = baseline_paths(machine, stem, ms)
+    return next((p for p in c if p.exists()), c[0])
 
 
 def arms_summary():
-    per_unit = [{k: (v if k in ("unit", "video", "machine", "set", "arm") else
-                     v == "True" if v in ("True", "False") else fnum(v)) for k, v in r.items()}
-                for r in rows(REPO / M8 / "causal_per_unit.csv")]
+    per_unit = [typed(r) for r in rows(REPO / M8 / "causal_per_unit.csv")]
     return {"arms": jsonf(REPO / M8 / "arms.json"), "causal": jsonf(REPO / M8 / "causal_report.json"),
             "per_unit": per_unit,
             "runs": {f"{m}/{a}": len(list(d.glob("*.csv"))) for m, a, d in arm_dirs()}}
 
 
 def units():
-    """{stem: ["machine/arm", ...]} over all per-frame run CSVs."""
+    """{stem: ["machine/arm", ...]} over all per-frame run CSVs (M8 + M9, incl. the M9 RunPod diag baselines)."""
     out = {}
-    for m, a, d in arm_dirs():
-        for f in d.glob("*.csv"):
-            out.setdefault(f.stem, []).append(f"{m}/{a}")
+    for ms in MILESTONES:
+        for m, a, d in arm_dirs(ms):
+            for f in d.glob("*.csv"):
+                out.setdefault(f.stem, []).append(f"{m}/{a}")
+    for f in REPO.glob(f"{M9}/runpod/diag/*/*.csv"):
+        if not f.name.endswith(".cand.csv"):
+            out.setdefault(f.stem, []).append("runpod/diag")
     return dict(sorted(out.items()))
+
+
+EXTRA = ["crop_side", "gt_in_crop", "gt_long_over_side", "pc_dx", "pc_dy"]  # M9 run columns, plotted if present
 
 
 def frames(p):
@@ -218,7 +257,21 @@ def frames(p):
         g, l = fnum(r.get("score_G")), fnum(r.get("score_L"))
         out.append({"i": int(r["video_idx"]), "JF": fnum(r.get("JF")), "J": fnum(r.get("J")), "F": fnum(r.get("F")),
                     "gt_empty": r.get("gt_empty") == "True", "rescued": r.get("rescued") == "True",
-                    "coabs": g is not None and l is not None and g <= 0 and l <= 0, "gen": r.get("gen") or None})
+                    "coabs": g is not None and l is not None and g <= 0 and l <= 0, "gen": r.get("gen") or None,
+                    **{c: fnum(r[c]) for c in EXTRA if r.get(c) not in (None, "")}})
+    return out
+
+
+def typed(r):
+    return {k: (v if k in ("unit", "video", "machine", "set", "arm", "dataset") else
+                v == "True" if v in ("True", "False") else fnum(v)) for k, v in r.items()}
+
+
+def m9_unit_metrics(stem):
+    out = []
+    for p in sorted((REPO / M9 / "reports").glob("causal_units_*.csv")):
+        out += [{"arm": p.stem[len("causal_units_"):], **typed(r)} for r in rows(p)
+                if (r.get("unit") or "").replace("/", "_") == stem]
     return out
 
 
@@ -228,20 +281,21 @@ STEM = re.compile(r"^[\w.-]+$")
 def unit(stem):
     if not STEM.match(stem) or ".." in stem:
         raise Denied(stem)
+    ms = ms_of(stem)
     series, base = [], {}
-    for m, a, d in arm_dirs():
+    for m, a, d in arm_dirs(ms):
         f = d / f"{stem}.csv"
-        if f.exists() and not (m == "runpod" and a == "SGGL"):
+        if f.exists() and f not in baseline_paths(m, stem, ms):  # a baseline is not an arm
             series.append({"machine": m, "arm": a, "path": rel(f), "frames": frames(f)})
-    for m in MACHINES:
-        b = baseline_path(m, stem)
+    for m in MILESTONES[ms]["base"]:
+        b = baseline_path(m, stem, ms)
         if b.exists():
             base[m] = {"path": rel(b), "frames": frames(b)}
-    cand = [p for p in (REPO / M8 / "diag" / f"{stem}.cand.csv", REPO / M8 / "runpod/diag" / f"{stem}.cand.csv")
-            if p.exists()]
+    cand = [p for p in ms_paths(MILESTONES[ms]["cand"], stem) if p.exists()]
     if not series and not base:
         raise FileNotFoundError(stem)
-    return {"stem": stem, "series": series, "baseline": base,
+    return {"stem": stem, "milestone": ms, "series": series, "baseline": base,
+            "metrics": m9_unit_metrics(stem) if ms == "m9" else None,
             "candidates": {"path": rel(cand[0]), "rows": rows(cand[0])} if cand else None}
 
 
@@ -270,8 +324,8 @@ def safe_glob(pattern):
     return sum(1 for p in REPO.glob(pattern) if p.is_file() and is_listable(p))
 
 
-def tasks():
-    t = copy.deepcopy(jsonf(REPO / M8 / "TASKS.json"))  # the cached object must not be mutated
+def tasks(ms="m8"):
+    t = copy.deepcopy(jsonf(REPO / MILESTONES[ms]["dir"] / "TASKS.json"))  # the cached object must not be mutated
     if not t:
         return None
     for task in t.get("tasks", []):
@@ -286,13 +340,39 @@ def tasks():
     return t
 
 
-LOG_GLOBS = [f"{M8}/logs/*.log", f"{M8}/runpod/logs/queue*.log"]
-
-
-def latest_logs(n=4, lines=15):
-    logs = [p for g in LOG_GLOBS for p in REPO.glob(g) if is_listable(p)]
+def latest_logs(ms="m8", n=4, lines=15):
+    logs = [p for g in MILESTONES[ms]["logs"] for p in REPO.glob(g) if is_listable(p)]
     logs.sort(key=lambda p: p.stat().st_mtime, reverse=True)
     return [{"path": rel(p), "mtime": p.stat().st_mtime, "tail": tail(p, lines)} for p in logs[:n]]
+
+
+UNIT_KEYS = ["video", "obj_id", "split", "area0_frac", "growth_max", "absent_frames", "tiny", "n_frames_from_prompt"]
+
+
+def ds_count(files):
+    """{dataset: n} over per-unit CSVs (stem prefix before '__'), ignoring .cand.csv"""
+    c = {}
+    for f in files:
+        if not f.name.endswith(".cand.csv"):
+            ds = f.stem.split("__")[0]
+            c[ds] = c.get(ds, 0) + 1
+    return c
+
+
+def m9():
+    man = {}
+    for p in sorted((REPO / M9 / "manifests").glob("*_units.json")):
+        j = jsonf(p)
+        man[j.get("dataset", p.stem[:-6])] = {**{k: v for k, v in j.items() if k not in ("units", "videos", "rule")},
+                                               "path": rel(p), "units": [{k: u.get(k) for k in UNIT_KEYS} for u in j["units"]]}
+    rep = REPO / M9 / "reports"
+    by_ds = lambda pre: {p.stem[len(pre):]: jsonf(p) for p in sorted(rep.glob(f"{pre}*.json"))}
+    runs = {f"{m}/{a}": ds_count(d.glob("*.csv")) for m, a, d in arm_dirs("m9")}
+    runs["runpod/diag"] = ds_count(REPO.glob(f"{M9}/runpod/diag/*/*.csv"))
+    return {"prereg": jsonf(REPO / M9 / "preregistration.json"), "arms": jsonf(REPO / M9 / "arms.json"),
+            "manifests": man, "stage1": by_ds("stage1_"), "taxonomy": by_ds("taxonomy_"),
+            "causal": jsonf(rep / "causal.json"), "runs": runs,
+            "causal_units": [rel(p) for p in sorted(rep.glob("causal_units_*.csv"))]}
 
 
 _index = {"at": 0.0, "files": []}
@@ -414,18 +494,23 @@ class H(BaseHTTPRequestHandler):
             return self.send(200, stage1())
         if name == "m7":
             return self.send(200, m7())
+        if name == "m9":
+            return self.send(200, m9())
         if name == "tasks":
-            return self.send(200, {"tasks": tasks(), "logs": latest_logs()})
+            ms = q.get("ms", "m8")
+            if ms not in MILESTONES:
+                raise Denied(ms)
+            return self.send(200, {"tasks": tasks(ms), "logs": latest_logs(ms)})
         if name == "search":
             return self.send(200, search(q.get("q", "")))
         p = safe(q.get("path", ""))
         if not p.is_file():
             raise FileNotFoundError
+        if size_only(p):
+            raise Denied(p)
         if name == "csv":
             return self.send(200, read_table(p, int(q.get("offset", 0)), min(int(q.get("limit", 2000)), 20000)))
         if name == "file":
-            if p.suffix in BINARY:
-                raise Denied(p)
             if "tail" in q:
                 return self.send(200, tail(p, int(q["tail"])), "text/plain; charset=utf-8")
             if p.stat().st_size > MAX_BYTES:
