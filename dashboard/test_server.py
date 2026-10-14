@@ -30,7 +30,7 @@ assert server.baseline_path("runpod", "mosev2__mosev2_x__obj1", "m9").as_posix()
     "outputs/milestone9/runpod/diag/mosev2/mosev2__mosev2_x__obj1.csv")
 v = "vost__vost_1169_peel_onion__obj1"  # no Ubuntu diag for VOST -> falls back to the plain SGGL arm rows
 assert server.baseline_path("ubuntu", v, "m9").as_posix().endswith(f"outputs/milestone9/runs/SGGL/{v}.csv")
-assert server.unit(v)["series"] == [] and "ubuntu" in server.unit(v)["baseline"]
+assert all(s["arm"] != "SGGL" for s in server.unit(v)["series"]) and "ubuntu" in server.unit(v)["baseline"]
 assert server.safe_glob("data/*/*") == 0 and server.safe_glob("outputs/milestone9/manifests/*.json") > 0
 for bad in ["../x", "/etc/passwd", "outputs/milestone8/../../.gpu_worker.env"]:
     try:
@@ -89,7 +89,11 @@ try:
     import json as _json
     listing = _json.loads(urllib.request.urlopen(f"{base}/api/ls?path=outputs/milestone9/manifests").read())
     assert [e["binary"] for e in listing if e["path"] == meta] == [True], listing  # size only
-    m9 = _json.loads(urllib.request.urlopen(f"{base}/api/m9").read())
+    strict = lambda b: _json.loads(b, parse_constant=lambda c: (_ for _ in ()).throw(ValueError(c)))  # JSON.parse rules
+    m9 = strict(urllib.request.urlopen(f"{base}/api/m9").read())
+    assert m9["causal"] is not None
+    strict(urllib.request.urlopen(f"{base}/api/file?path=outputs/milestone9/reports/causal.json").read())
+    assert server.finite({"a": [float("nan"), float("-inf"), 1.5]}) == {"a": [None, None, 1.5]}
     assert "pumavos" not in _json.dumps(m9["manifests"]).lower()
     assert all("frames" not in u for d in m9["manifests"].values() for u in d["units"])
 

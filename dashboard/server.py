@@ -10,6 +10,7 @@ import csv
 import hmac
 import ipaddress
 import json
+import math
 import mimetypes
 import os
 import re
@@ -191,6 +192,22 @@ def rows(p):
 def jsonf(p):
     p = Path(p)
     return _json(str(p), p.stat().st_mtime_ns) if p.exists() else None
+
+
+def finite(o):
+    """Browser JSON.parse rejects NaN/Infinity (Python json.dump writes them): map non-finite floats to null."""
+    if isinstance(o, float):
+        return o if math.isfinite(o) else None
+    if isinstance(o, dict):
+        return {k: finite(v) for k, v in o.items()}
+    if isinstance(o, (list, tuple)):
+        return [finite(v) for v in o]
+    return o
+
+
+def dumps(o):
+    """The one JSON encoder for every response (API payloads and served .json files)."""
+    return json.dumps(finite(o), default=str, allow_nan=False)
 
 
 def fnum(v):
@@ -420,7 +437,7 @@ class H(BaseHTTPRequestHandler):
 
     def send(self, code, body, ctype="application/json; charset=utf-8"):
         if not isinstance(body, bytes):
-            body = (body if isinstance(body, str) else json.dumps(body, default=str)).encode()
+            body = (body if isinstance(body, str) else dumps(body)).encode()
         self.send_response(code)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(body)))
@@ -515,6 +532,8 @@ class H(BaseHTTPRequestHandler):
                 return self.send(200, tail(p, int(q["tail"])), "text/plain; charset=utf-8")
             if p.stat().st_size > MAX_BYTES:
                 return self.send(413, {"error": "too large; use tail"})
+            if p.suffix.lower() == ".json":  # report files may hold NaN (json.dump default): re-encode via dumps()
+                return self.send(200, jsonf(p))
             ctype = TYPES.get(p.suffix.lower(), "text/plain; charset=utf-8")  # never html/svg -> no script
             return self.send(200, p.read_bytes(), ctype)
         self.send(404, {"error": "unknown endpoint"})
