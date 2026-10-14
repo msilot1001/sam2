@@ -1,0 +1,34 @@
+{
+  "machine": "runpod-rtx4090",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "fill_hole_area": 0,
+  "arm": {
+    "name": "FLOWVEL",
+    "gens": [],
+    "center": "flowvel",
+    "why": "C3: crop centre driven by RAFT flow displacement of the target region (damp 0.5); keeps following the flow-carried box while both views miss",
+    "frozen_kst": "2026-10-14 16:14"
+  },
+  "code": {
+    "ubuntu_head": "550f7c5fb1f4a3a0739251ac274a91ca39f7e9d4",
+    "uncommitted_paths": 17,
+    "pushed": "2026-10-15 00:42:32",
+    "items": [
+      "src",
+      "scripts",
+      "tests",
+      "configs",
+      "pyproject.toml",
+      "outputs/milestone8/preregistration.json",
+      "outputs/milestone8/preregistration_vk.json",
+      "outputs/milestone8/arms.json",
+      "outputs/milestone8/preregistration_vk_amend1.json",
+      "outputs/milestone8/preregistration_amend1.json",
+      "outputs/milestone8/preregistration_amend2.json",
+      "outputs/milestone9/arms.json",
+      "outputs/milestone9/preregistration_amend1.json"
+    ]
+  }
+}

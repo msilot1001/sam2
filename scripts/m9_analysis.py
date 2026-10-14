@@ -314,10 +314,11 @@ def catmiss(arm, ds):
 
 
 def anchor(ds):
-    """Amendment 2: in scale-category misses, is the output a small part of the GT (anchor) or outside it (drift)?"""
-    rd = OUT / "runpod" / "runs_area" / "SGGL"
+    """Amendment 2: in scale-category misses, is the output a small part of the GT (anchor) or outside it (drift)?
+    LVOS v2 SGGL rows already carry the area columns (run after the m8.py change), so they are read directly."""
+    rd = OUT / "runpod" / ("runs" if ds == "lvosv2" else "runs_area") / "SGGL"
     A = pd.concat([pd.read_csv(f) for f in sorted(rd.glob(f"{ds}__*.csv"))])
-    ref = OUT / "runpod" / ("diag/mosev2" if ds == "mosev2" else "runs/SGGL")
+    ref = OUT / "runpod" / ("diag/mosev2" if ds == "mosev2" else "runs/SGGL")       # lvosv2: self (parity trivially 0)
     B = pd.concat([pd.read_csv(ref / f.name)[["unit", "video_idx", "JF"]] for f in sorted(rd.glob(f"{ds}__*.csv"))])
     par = A[["unit", "video_idx", "JF"]].merge(B, on=["unit", "video_idx"], suffixes=("", "_ref"))
     parity = {"frames": int(len(par)), "max_abs_dJF": float((par.JF - par.JF_ref).abs().max())}

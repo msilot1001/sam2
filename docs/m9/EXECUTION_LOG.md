@@ -38,3 +38,4 @@
 | 04:58 | H5.9 | LVOS v2 valid 압축이 02:26에 2차 재시도 1회차로 도착해 있었음을 확인(sha256 beb48804…, 11.8 GB) |
 | 05:08 | H6.1 | 사전 등록 수정 4(LVOS v2): M9 단위 규칙 그대로 + 연산 예산(단위당 첫 300 frame, 영상을 seed 9 순서로 9,000 frame까지). manifest 고정: 32단위 / 27영상(dev 16 / conf 16, 극소 11), 8,854 frame. 필요한 JPEG 7,654개만 추출 |
 | 05:12 | H6.2 | Pod q7: LVOS v2 SGGL → FLOWVEL → SCALE → NULLJIT 시작. 첫 단위 정상(299 frame) |
+| 05:47 | H6.8 | LVOS v2 SGGL·FLOWVEL 완료. FLOWVEL −0.0021 [−0.0110, +0.0071], 영상 7↑ / 20↓ → 세 데이터셋 모두 일반화 기준 불충족 |
