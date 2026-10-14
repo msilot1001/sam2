@@ -356,7 +356,7 @@ def run_policy(pred, s, u, P, n=None, head=None):
                      "score_G": G.score, "score_L": L.score, "gt_empty": not g.any(), "area0": float(g0.mean()),
                      **m55.jf(out, g), "JF_G": m55.jf(G.mask, g)["JF"], **{f"{k}": v for k, v in pol.log.items()}})
         pol.log = {}
-        d.set_center(vcam.center_of(out))
+        d.set_center(pol.center(out) if hasattr(pol, "center") else vcam.center_of(out))
     peak = torch.cuda.max_memory_allocated()
     d.close()
     return pd.DataFrame(rows).assign(peak_vram_bytes=peak)
@@ -365,7 +365,7 @@ def run_policy(pred, s, u, P, n=None, head=None):
 def run(arm, sets="DEV,REP", head_name=""):
     """Causal rollout of policy `arm` (class name or .name in spatial.policies) on the given sets."""
     from spatial import policies
-    P = next(c for c in policies.ALL if arm in (c.__name__, c.name))
+    P = next(c for c in policies.ALL + policies.CAUSAL_ONLY if arm in (c.__name__, c.name))
     pred = m55.build_predictor()
     controlled.install(pred, None, {})
     head = None

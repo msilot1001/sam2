@@ -230,6 +230,28 @@ class M1Trusted(Policy):
         return o["mL"] if acc else o["mG"]
 
 
+# ----------------------------------------------------------------------------- M3: crop-centre control (causal only)
+class M3Velocity(Policy):
+    """M3: output selection = SGGL; the NEXT crop centre is the output's box centre plus half the last centre
+    displacement (damped constant velocity). Targets crop escape on fast motion. Changes only the crop trajectory, so it
+    cannot be replayed; causal rollout only."""
+    name, damp = "M3-vel", 0.5
+
+    def __init__(self, gt0):
+        super().__init__(gt0)
+        self.prev_c = None
+
+    def center(self, out):
+        from spatial import vcam
+        c = vcam.center_of(out)
+        if c is None:
+            self.prev_c = None
+            return None
+        nxt = c if self.prev_c is None else (c[0] + self.damp * (c[0] - self.prev_c[0]), c[1] + self.damp * (c[1] - self.prev_c[1]))
+        self.prev_c = c
+        return nxt
+
+
 # ----------------------------------------------------------------------------- R family
 class R2Scale(Policy):
     """R2: an unconfirmed re-acquisition needs G support OR agreement of the 2x-wider crop state (cross-scale
@@ -249,3 +271,4 @@ class R2Scale(Policy):
 
 ALL = [Policy, SGGLV, S1Persist, S1State, S2Observe, S3Identity, S3Relative, S4Evidence,
        F1Blend, F1BlendL, F2Boundary, F3Asym, F3Sym, F4Instance, FUnion, FInter, M1Verify, M1Always, M1Trusted, R2Scale]
+CAUSAL_ONLY = [M3Velocity]

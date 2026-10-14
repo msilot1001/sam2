@@ -253,5 +253,43 @@ def summary():
               f"lovo[{r['lovo_min']:+.4f},{r['lovo_max']:+.4f}] noMiami {r['without_miami']:+.4f} worst {r['worst_unit'][1]:+.3f} {r['verdict']}")
 
 
+def _pix_unit(f):
+    """Pixel accounting of F-family edits vs the SGGL mask (frames where SGGL accepts the crop)."""
+    torch.set_num_threads(1)
+    df = pd.read_csv(f)
+    Z = np.load(f.with_suffix(".npz"))
+    from rfeas.units import davis_units
+    u = m7.m6._UNITS().get(df.unit.iloc[0]) or next(x for x in davis_units("train")[0] if x.name == df.unit.iloc[0])
+    g0 = m7.gt(u, 0)
+    pols = {P.name: P(g0) for P in policies.ALL if P.name.startswith("F")}
+    base = policies.Policy(g0)
+    acc = {k: np.zeros(4, np.int64) for k in pols}
+    for o in observations(df, Z, g0.shape):
+        g = m7.gt(u, o["t"])
+        b, ok = base(o)
+        for k, p in pols.items():
+            m, _ = p(o)
+            p.log = {}
+            if not ok:
+                continue
+            add, rem = m & ~b, b & ~m
+            acc[k] += [(add & g).sum(), (add & ~g).sum(), (rem & ~g).sum(), (rem & g).sum()]
+    return [{"unit": df.unit.iloc[0], "video": df.video.iloc[0], "area0": float(g0.mean()), "policy": k,
+             "added_TP": int(v[0]), "added_FP": int(v[1]), "removed_FP": int(v[2]), "removed_TP": int(v[3])} for k, v in acc.items()]
+
+
+def fusion_pixels(n_proc="8"):
+    with Pool(int(n_proc)) as p:
+        rows = [r for rs in p.imap_unordered(_pix_unit, sorted(REC.glob("*.csv"))) for r in rs]
+    D = pd.DataFrame(rows)
+    atomic_csv(D, m7.OUT / "fusion_pixels_per_unit.csv")
+    T = D.groupby("policy")[["added_TP", "added_FP", "removed_FP", "removed_TP"]].sum()
+    T["net_correct_px"] = T.added_TP + T.removed_FP - T.added_FP - T.removed_TP
+    T["units_net_pos"] = D.assign(n=D.added_TP + D.removed_FP - D.added_FP - D.removed_TP).groupby("policy").n.apply(lambda v: int((v > 0).sum()))
+    T["units_net_neg"] = D.assign(n=D.added_TP + D.removed_FP - D.added_FP - D.removed_TP).groupby("policy").n.apply(lambda v: int((v < 0).sum()))
+    print(T.to_string())
+    atomic_csv(T.reset_index(), m7.OUT / "fusion_pixels_summary.csv")
+
+
 if __name__ == "__main__":
     globals()[sys.argv[1]](*sys.argv[2:])

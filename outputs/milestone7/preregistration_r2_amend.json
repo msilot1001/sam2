@@ -1,0 +1,10 @@
+{
+ "created": "2026-10-14 11:45:17",
+ "amends": "preregistration_r2.json causal_pilots.arms",
+ "text": "S2-observe dropped (replay-identical to SGGL-V on every unit: its observability rule never fired on the units SGGL-V hurts); replaced by M3-vel (damped constant-velocity crop centre, damp 0.5, causal-only, targets crop escape: 51 frames / 9 videos in the stage-0 audit). Decided before any causal pilot output.",
+ "arms": [
+  "F1-blend.7",
+  "M3-vel",
+  "M1-always"
+ ]
+}
