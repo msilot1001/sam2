@@ -145,3 +145,41 @@ def test_shards_partition_units_disjointly(monkeypatch):
         monkeypatch.setenv("M7_SHARD", f"{i}/4")
         parts.append(m.shard(us))
     assert sorted(sum(parts, [])) == us and sum(map(len, parts)) == len(us)
+
+
+def test_m3_velocity_r_uses_velocity_only_after_two_accepted_crops_and_caps_the_step():
+    from spatial import policies
+    g0 = np.zeros((200, 300), bool)
+    g0[90:100, 140:150] = True
+    p = policies.M3VelocityR(g0)
+    m1 = np.zeros_like(g0); m1[90:100, 100:110] = True          # centre (95, 105)
+    m2 = np.zeros_like(g0); m2[90:100, 180:190] = True          # centre (95, 185): +80 px in x
+    p.side = 80
+    p._acc_now = p._acc_prev = True
+    assert p.center(m1) == (95.0, 105.0)                         # no previous centre -> plain box centre
+    c = p.center(m2)
+    assert c == (95.0, 185.0 + 80 / 8)                           # damp*80 = 40 capped at side/8 = 10
+    p._acc_prev = False
+    assert p.center(m1) == (95.0, 105.0)                         # source not consistently the crop -> no velocity
+    v = policies.M3Velocity(g0)
+    v.center(m1)
+    assert v.center(m2) == (95.0, 185.0 + 0.5 * 80)              # M3-vel: damped, uncapped
+
+
+def test_identity_margin_and_hist_reacquisition_state():
+    from spatial import evidence
+    sim = np.zeros((64, 64), np.float32)
+    sim[10:20, 10:20] = 0.9
+    sim[40:50, 40:50] = 0.95                                     # a more similar distractor elsewhere
+    m = np.zeros((256, 256), bool)
+    m[40:80, 40:80] = True                                       # candidate covers the first blob
+    s, margin = evidence.identity(sim, m)
+    assert abs(s - 0.9) < 1e-5 and margin < 0
+    h = evidence.Hist(10)
+    empty, full = np.zeros((50, 50), bool), np.ones((50, 50), bool)
+    h.update(empty, False, False, -1.0, None, False)
+    assert h.lost and not h.reacq
+    h.update(full, True, True, -1.0, 0.5, False)                 # re-acquired without confirmation
+    assert h.reacq and not h.lost
+    h.update(full, True, True, 1.0, 0.5, True)                   # confirmed
+    assert not h.reacq

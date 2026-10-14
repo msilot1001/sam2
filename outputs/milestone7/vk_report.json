@@ -1,90 +1,93 @@
 {
- "units": 28,
- "scenes": 2,
- "frames": 1736,
- "SGGL-P5": {
-  "mean": 0.017327598799751372,
-  "CI_by_unit": [
-   0.008689461228991299,
-   0.024643901325136934
-  ],
-  "by_scene": {
-   "vkitti/Scene01": 0.0165,
-   "vkitti/Scene06": 0.0204
+  "units": 28,
+  "scenes": 2,
+  "frames": 1736,
+  "note": "VKITTI2 Scene01/06 were development scenes in M2-M4 (fresh only for SGGL); effective n = 2 scenes",
+  "veto_frames_total": 5,
+  "veto_units": 1,
+  "SGGL-P5": {
+    "mean": 0.017327598799751372,
+    "CI_by_unit_descriptive": [
+      0.008689461228991299,
+      0.024643901325136934
+    ],
+    "by_scene": {
+      "vkitti/Scene01": 0.0165,
+      "vkitti/Scene06": 0.0204
+    },
+    "up_0.01": 22,
+    "down_0.01": 1,
+    "worst": [
+      "vkitti__vkitti/Scene01__obj57",
+      -0.07343704143658414
+    ]
   },
-  "up": 22,
-  "down": 1,
-  "worst": [
-   "vkitti__vkitti/Scene01__obj57",
-   -0.07343704143658414
-  ]
- },
- "SGGL-V-SGGL": {
-  "mean": -1.91048322224417e-05,
-  "CI_by_unit": [
-   -5.73144966673251e-05,
-   0.0
-  ],
-  "by_scene": {
-   "vkitti/Scene01": -0.0,
-   "vkitti/Scene06": 0.0
+  "SGGL-V-SGGL": {
+    "mean": -1.91048322224417e-05,
+    "CI_by_unit_descriptive": [
+      -5.73144966673251e-05,
+      0.0
+    ],
+    "by_scene": {
+      "vkitti/Scene01": -0.0,
+      "vkitti/Scene06": 0.0
+    },
+    "up_0.01": 0,
+    "down_0.01": 0,
+    "worst": [
+      "vkitti__vkitti/Scene01__obj91",
+      -0.0005349353022283676
+    ]
   },
-  "up": 0,
-  "down": 0,
-  "worst": [
-   "vkitti__vkitti/Scene01__obj91",
-   -0.0005349353022283676
-  ]
- },
- "M3-vel-SGGL": {
-  "mean": 0.001250859830723142,
-  "CI_by_unit": [
-   -6.619608123948628e-05,
-   0.0029316267128584603
-  ],
-  "by_scene": {
-   "vkitti/Scene01": 0.0015,
-   "vkitti/Scene06": 0.0002
+  "M3-vel-SGGL": {
+    "mean": 0.001250859830723142,
+    "CI_by_unit_descriptive": [
+      -6.619608123948628e-05,
+      0.0029316267128584603
+    ],
+    "by_scene": {
+      "vkitti/Scene01": 0.0015,
+      "vkitti/Scene06": 0.0002
+    },
+    "up_0.01": 1,
+    "down_0.01": 0,
+    "worst": [
+      "vkitti__vkitti/Scene01__obj59",
+      -0.0062902122981652875
+    ]
   },
-  "up": 1,
-  "down": 0,
-  "worst": [
-   "vkitti__vkitti/Scene01__obj59",
-   -0.0062902122981652875
-  ]
- },
- "J:SGGL-B0": {
-  "mean": 0.034107219288235215,
-  "CI_by_unit": [
-   0.023520596209614032,
-   0.04418418040074415
-  ],
-  "by_scene": {
-   "vkitti/Scene01": 0.0322,
-   "vkitti/Scene06": 0.0412
+  "J:SGGL-B0": {
+    "mean": 0.034107219288235215,
+    "CI_by_unit_descriptive": [
+      0.023520596209614032,
+      0.04418418040074415
+    ],
+    "by_scene": {
+      "vkitti/Scene01": 0.0322,
+      "vkitti/Scene06": 0.0412
+    },
+    "up_0.01": 24,
+    "down_0.01": 1,
+    "worst": [
+      "vkitti__vkitti/Scene01__obj57",
+      -0.06533345787126743
+    ]
   },
-  "up": 24,
-  "down": 1,
-  "worst": [
-   "vkitti__vkitti/Scene01__obj57",
-   -0.06533345787126743
-  ]
- },
- "J:P5-B0": {
-  "mean": -0.0011034953436741665,
-  "CI_by_unit": [
-   -0.0030152806866427665,
-   0.00020359682289090034
-  ],
-  "by_scene": {
-   "vkitti/Scene01": -0.0016,
-   "vkitti/Scene06": 0.0006
-  },
-  "up": 0,
-  "down": 1,
-  "worst": [
-   "vkitti__vkitti/Scene01__obj23",
-   -0.021902079121571827
-  ]
- }
+  "J:P5-B0": {
+    "mean": -0.0011034953436741665,
+    "CI_by_unit_descriptive": [
+      -0.0030152806866427665,
+      0.00020359682289090034
+    ],
+    "by_scene": {
+      "vkitti/Scene01": -0.0016,
+      "vkitti/Scene06": 0.0006
+    },
+    "up_0.01": 0,
+    "down_0.01": 1,
+    "worst": [
+      "vkitti__vkitti/Scene01__obj23",
+      -0.021902079121571827
+    ]
+  }
 }

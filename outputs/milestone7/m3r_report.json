@@ -1,26 +1,34 @@
 {
- "n_units": 57,
- "n_videos": 34,
- "dJF_vs_SGGL": 0.004436719731999559,
- "CI_video": [
-  -5.3502655212329376e-05,
-  0.011388327488813675
- ],
- "videos_up_0.01": 2,
- "videos_down_0.01": 1,
- "units_up_0.01": 5,
- "units_down_0.01": 2,
- "lovo_min": 0.001526026740577298,
- "lovo_max": 0.004808371007731841,
- "without_miami": 0.004630207342899421,
- "worst_unit": [
-  "davis__davis/lab-coat__obj2",
-  -0.017612257841307377
- ],
- "best_unit": [
-  "davis__davis/skate-park__obj2",
-  0.16941023205550665
- ],
- "dJF_vs_P5": 0.015618454665747997,
- "verdict": "INCONCLUSIVE"
+  "n_units": 57,
+  "n_videos": 34,
+  "dJF_vs_SGGL": 0.004436719731999559,
+  "CI_video": [
+    -5.3502655212329376e-05,
+    0.011388327488813675
+  ],
+  "videos_up_0.01": 2,
+  "videos_down_0.01": 1,
+  "units_up_0.01": 5,
+  "units_down_0.01": 2,
+  "lovo_min": 0.001526026740577298,
+  "lovo_max": 0.004808371007731841,
+  "without_miami": 0.004630207342899421,
+  "worst_unit": [
+    "davis__davis/lab-coat__obj2",
+    -0.017612257841307377
+  ],
+  "best_unit": [
+    "davis__davis/skate-park__obj2",
+    0.16941023205550665
+  ],
+  "dJF_vs_P5": 0.015618454665747997,
+  "verdict": "INCONCLUSIVE",
+  "minus_M3vel": {
+    "mean": -0.00014014739669320929,
+    "CI": [
+      -0.000661046293447958,
+      0.0002696841944775626
+    ],
+    "caveat": "M3-vel ran on Vast; ubuntu units cross-machine"
+  }
 }

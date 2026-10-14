@@ -87,6 +87,59 @@ def figure(unit, t_show, why, out):
     plt.close(fig)
 
 
+def timelines():
+    """Per-frame J&F of SGGL vs M3-vel (both causal, Vast, machine-matched) for the largest gains and the worst loss."""
+    d = m7.OUT / "viz"
+    d.mkdir(parents=True, exist_ok=True)
+    us = ["davis__davis/skate-park__obj2", "davis__davis/sheep__obj4", "davis__davis/lab-coat__obj2"]
+    fig, axs = plt.subplots(len(us), 1, figsize=(8, 2.2 * len(us)), sharex=False)
+    for ax, u in zip(axs, us):
+        st = u.replace("/", "_")
+        a = pd.read_csv(m7.OUT / "runs/SGGL" / f"{st}.csv")
+        b = pd.read_csv(m7.OUT / "runs/M3-vel" / f"{st}.csv")
+        ax.plot(a.video_idx, a.JF, "k-", lw=1, label=f"SGGL {a.JF.mean():.3f}")
+        ax.plot(b.video_idx, b.JF, "r-", lw=1, label=f"M3-vel {b.JF.mean():.3f}")
+        ax.plot(a.video_idx, a.JF_G, color="0.6", lw=0.8, label=f"P5 {a.JF_G.mean():.3f}")
+        ax.set_title(u, fontsize=8)
+        ax.set_ylabel("J&F")
+        ax.legend(fontsize=7, loc="lower left")
+    axs[-1].set_xlabel("frame")
+    fig.tight_layout()
+    fig.savefig(d / "20_M3vel_timelines.png", dpi=110)
+    plt.close(fig)
+    print("ok timelines")
+
+
+def vk_example():
+    """One VKITTI frame where SGGL differs most from P5 (largest positive) and the worst VK unit (SGGL < P5)."""
+    from vkitti.dataset import track_mask  # noqa: F401
+    d = m7.OUT / "viz"
+    R = pd.concat([pd.read_csv(f) for f in sorted((m7.OUT / "rec_vk").glob("*.csv"))], ignore_index=True)
+    R["d"] = R.JF - R.JF_G
+    picks = [R.loc[R.d.idxmax()], R.loc[R[R.unit == "vkitti__vkitti/Scene01__obj57"].d.idxmin()]]
+    from rfeas.units import vkitti_units
+    us = {u.name: u for u in vkitti_units()[0]}
+    fig, axs = plt.subplots(len(picks), 3, figsize=(12, 2.4 * len(picks)))
+    for row, p in zip(axs, picks):
+        u, t = us[p.unit], int(p.video_idx)
+        Z = np.load(m7.OUT / "rec_vk" / f"{p.unit.replace('/', '_')}.npz")
+        df = pd.read_csv(m7.OUT / "rec_vk" / f"{p.unit.replace('/', '_')}.csv")
+        i = int(np.nonzero(df.video_idx.to_numpy() == t)[0][0])
+        g = m7.gt(u, t)
+        o = next(x for k, x in enumerate(r.observations(df.iloc[i:i + 1].reset_index(drop=True),
+                                                         {k: (v[i:i + 1] if v.ndim and len(v) == len(df) else v) for k, v in Z.items()}, g.shape)))
+        rgb = np.asarray(Image.open(m7.paths(u)[t]).convert("RGB"))
+        sg = o["mL"] if p.a2x_crop else o["mG"]
+        overlay(row[0], rgb, o["mG"], (0, 0.4, 1), f"P5 / G  J&F={p.JF_G:.2f}", o["box"])
+        overlay(row[1], rgb, sg, (1, 0, 0), f"SGGL ({'crop' if p.a2x_crop else 'global'})  J&F={p.JF:.2f}", o["box"])
+        overlay(row[2], rgb, g, (0, 1, 0), "GT (offline only)", o["box"])
+        row[0].set_ylabel(f"{p.unit.split('__', 1)[1]} t={t}", fontsize=7)
+    fig.tight_layout()
+    fig.savefig(d / "21_VK_examples.png", dpi=110)
+    plt.close(fig)
+    print("ok vk")
+
+
 def main():
     d = m7.OUT / "viz"
     d.mkdir(parents=True, exist_ok=True)
@@ -99,4 +152,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    globals()[sys.argv[1]]() if len(sys.argv) > 1 else main()

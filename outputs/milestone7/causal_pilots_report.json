@@ -1,80 +1,80 @@
 {
- "F1-blend.7": {
-  "n_units": 57,
-  "n_videos": 34,
-  "dJF_vs_SGGL": 0.00425539787128163,
-  "CI_video": [
-   -0.00667220230720996,
-   0.02131384116025054
-  ],
-  "videos_up_0.01": 2,
-  "videos_down_0.01": 7,
-  "units_up_0.01": 4,
-  "units_down_0.01": 11,
-  "lovo_min": -0.004633457363779511,
-  "lovo_max": 0.00581144465047237,
-  "without_miami": -0.004633457363779511,
-  "worst_unit": [
-   "davis__davis/dog-gooses__obj5",
-   -0.0579585261380684
-  ],
-  "best_unit": [
-   "davis__davis/miami-surf__obj5",
-   0.47835941973391155
-  ],
-  "dJF_vs_P5": 0.015452325572650753,
-  "verdict": "REJECT"
- },
- "M3-vel": {
-  "n_units": 57,
-  "n_videos": 34,
-  "dJF_vs_SGGL": 0.0045604349336250795,
-  "CI_video": [
-   -7.55154644789847e-05,
-   0.011452952806712678
-  ],
-  "videos_up_0.01": 2,
-  "videos_down_0.01": 1,
-  "units_up_0.01": 5,
-  "units_down_0.01": 2,
-  "lovo_min": 0.0016542406768073835,
-  "lovo_max": 0.0050026737729746825,
-  "without_miami": 0.004504793316625592,
-  "worst_unit": [
-   "davis__davis/lab-coat__obj2",
-   -0.014394740901666592
-  ],
-  "best_unit": [
-   "davis__davis/skate-park__obj2",
-   0.16941023205550665
-  ],
-  "dJF_vs_P5": 0.0157573626349942,
-  "verdict": "INCONCLUSIVE"
- },
- "M1-always": {
-  "n_units": 57,
-  "n_videos": 34,
-  "dJF_vs_SGGL": 0.00027402630713367745,
-  "CI_video": [
-   -0.002472242488714786,
-   0.0027121005191632656
-  ],
-  "videos_up_0.01": 1,
-  "videos_down_0.01": 1,
-  "units_up_0.01": 3,
-  "units_down_0.01": 1,
-  "lovo_min": -0.0008973063656499425,
-  "lovo_max": 0.0010553242906614646,
-  "without_miami": -0.0008973063656499425,
-  "worst_unit": [
-   "davis__davis/lady-running__obj2",
-   -0.043478660770422395
-  ],
-  "best_unit": [
-   "davis__davis/miami-surf__obj2",
-   0.0323966169083898
-  ],
-  "dJF_vs_P5": 0.0114709540085028,
-  "verdict": "REJECT"
- }
+  "F1-blend.7": {
+    "n_units": 57,
+    "n_videos": 34,
+    "dJF_vs_SGGL": 0.00425539787128163,
+    "CI_video": [
+      -0.00667220230720996,
+      0.02131384116025054
+    ],
+    "videos_up_0.01": 2,
+    "videos_down_0.01": 7,
+    "units_up_0.01": 4,
+    "units_down_0.01": 11,
+    "lovo_min": -0.004633457363779511,
+    "lovo_max": 0.00581144465047237,
+    "without_miami": -0.004633457363779511,
+    "worst_unit": [
+      "davis__davis/dog-gooses__obj5",
+      -0.0579585261380684
+    ],
+    "best_unit": [
+      "davis__davis/miami-surf__obj5",
+      0.47835941973391155
+    ],
+    "dJF_vs_P5": 0.015452325572650753,
+    "verdict": "REJECT"
+  },
+  "M3-vel": {
+    "n_units": 57,
+    "n_videos": 34,
+    "dJF_vs_SGGL": 0.0045604349336250795,
+    "CI_video": [
+      -7.55154644789847e-05,
+      0.011452952806712678
+    ],
+    "videos_up_0.01": 2,
+    "videos_down_0.01": 1,
+    "units_up_0.01": 5,
+    "units_down_0.01": 2,
+    "lovo_min": 0.0016542406768073835,
+    "lovo_max": 0.0050026737729746825,
+    "without_miami": 0.004504793316625592,
+    "worst_unit": [
+      "davis__davis/lab-coat__obj2",
+      -0.014394740901666592
+    ],
+    "best_unit": [
+      "davis__davis/skate-park__obj2",
+      0.16941023205550665
+    ],
+    "dJF_vs_P5": 0.0157573626349942,
+    "verdict": "INCONCLUSIVE"
+  },
+  "M1-always": {
+    "n_units": 57,
+    "n_videos": 34,
+    "dJF_vs_SGGL": 0.00027402630713367745,
+    "CI_video": [
+      -0.002472242488714786,
+      0.0027121005191632656
+    ],
+    "videos_up_0.01": 1,
+    "videos_down_0.01": 1,
+    "units_up_0.01": 3,
+    "units_down_0.01": 1,
+    "lovo_min": -0.0008973063656499425,
+    "lovo_max": 0.0010553242906614646,
+    "without_miami": -0.0008973063656499425,
+    "worst_unit": [
+      "davis__davis/lady-running__obj2",
+      -0.043478660770422395
+    ],
+    "best_unit": [
+      "davis__davis/miami-surf__obj2",
+      0.0323966169083898
+    ],
+    "dJF_vs_P5": 0.0114709540085028,
+    "verdict": "REJECT"
+  }
 }

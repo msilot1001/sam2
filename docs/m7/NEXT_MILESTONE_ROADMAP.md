@@ -20,7 +20,7 @@
 | M71-04 | '두 view 동시 부재' 전용 후보 생성: 부재 연속 k frame 뒤 L2(2× crop) 또는 전역 재탐지 후보를 만들고, 신원 + G 일치로 확인. M7 재생에서 L2 fallback은 +3.4 frame-JF였고, miami-surf에서는 −14 | `src/spatial/policies.py` | 거짓 재획득 사건에서 손실 증가 없이 부재 frame 회수율 향상. 사전 pilot 규칙 |
 | M71-05 | (조건부) T head를 대규모 데이터(SA-V train 일부)로 학습. 단 M71-01 승인 시만. M7은 18 영상에서 일반화하지 않았다 | `src/spatial/feature_fusion.py` | 학습에 쓰지 않은 영상에서 J > 입력 J, 그리고 DEV 영상 평가 > SGGL |
 | M71-06 | 확인 1회: 코드를 고정하고 커밋한 뒤, 새 데이터 확인 절반 + PUMaVOS C (C는 Ubuntu에서만 존재. 실행 시 그 영상만 Vast로 전송하거나 Ubuntu 2080에서 실행) | `scripts/m7.py confirm` (신설) | 결과를 모두 보고하고 이후 튜닝하지 않는다 |
-| M71-07 | 원고: 상한 분해, 실패 분류, 해상도 probe 발견, 음성 결과, VK 재현 | `docs/m71/` | 초안 |
+| M71-07 | 원고: 상한 분해, 실패 분류, 해상도 probe 진단(가설), 음성 결과, VK 서술 결과 | `docs/m71/` | 초안 |
 
 ## 계산 예산 (RTX 5090, 이번 M7에서 측정한 처리량 기준)
 

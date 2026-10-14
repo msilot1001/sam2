@@ -25,7 +25,7 @@
 | SegTrack v2 `clips` | 250 MB / 1,104 | md5 1,104개 일치 |
 | PUMaVOS `clips` 중 **A 9개 + B 6개 영상만** (M5.6 manifest 분할 그대로) | 1.9 GB / 4,530 | md5 4,530개 일치. clip이 raw를 가리키는 symlink라 `tar -h`로 실제 파일을 보냈다. C 영상 9개가 Vast에 없음을 확인 |
 | `outputs/milestone55, 56, 6, 61, 5pre` (기준 출력, manifest, M6/M6.1 run) | 약 180 MB | 디렉터리별 파일 수 일치. `--skip-old-files`로 기존 파일을 덮어쓰지 않았다 |
-| `outputs/milestone7/tcache` (T head 학습 캐시, RTX 2080에서 생성, 43 REP 객체) | 8.0 GB | 전송 중. 완료 후 파일 수와 크기를 검증한다 |
+| `outputs/milestone7/tcache` (T head 학습 캐시, RTX 2080에서 생성, 43 REP 객체) | 8.0 GB / 43 | md5 43개 일치 (12:51 KST) |
 
 **옮기지 않은 것과 이유:**
 - **Stage 0 기록 2.3 GB:** CPU 재생은 Ubuntu에서 끝났다. GPU 작업에 필요 없다.
@@ -70,7 +70,7 @@
 2. Ubuntu Stage 0와 재생 결과(재생 screening, 감사)는 Ubuntu 수치로 그대로 보고한다.
 3. 모든 Vast 산출 디렉터리에는 `ENV_vast.json`(기계, torch, 커밋, `fill_hole_area`)을 남긴다.
 
-## 4. Ubuntu 작업 상태 (이전 시점)
+## 4. Ubuntu 작업 상태 (이전 시점; 이후 진행은 `outputs/milestone7/EXECUTION_STATUS.json`)
 
 | 작업 | 상태 |
 |---|---|
@@ -136,3 +136,18 @@
 - J/F 채점은 전체의 약 12%라 별도 평가 worker로 분리하지 않았다. 효과 대비 복잡도가 크다.
 
 **기계 간 SGGL 차이 (같은 64객체):** 객체 평균 최대 0.0017(queen_car obj1)이고, 1e-4를 넘는 객체는 3개다. crop 궤적이 미세하게 갈라지는 경우다.
+
+## 9. 이전 이후 실행 위치 기록 (사후 정리)
+
+| 결과 | 기계 | 코드 커밋 | ENV 파일 |
+|---|---|---|---|
+| runs/F1-blend.7, M3-vel, M1-always (DEV + REP) | Vast | 4c63eb1 | runs/ENV_vast.json |
+| runs/SGGL (같은 기계 기준선) | Vast | 1–16번 4c63eb1 (32 thread). 17–32번 4c63eb1 + 미커밋 학습 데이터 변경(rollout과 무관, 이후 c27f450), 4 thread. 33–64번 c27f450, 2 shard × 3 thread | runs/ENV_vast_SGGL.json |
+| heads T0–T3 / T4 | Vast | 4c63eb1 / c27f450 (GPU 상주 데이터) | heads/ENV_vast.json |
+| teval (DEV) | Vast | c27f450 | teval/ENV_vast.json |
+| rec_vk, runs/SGGL-V·M3-vel의 VK | Vast | 732afcd | rec_vk/ENV_vast.json |
+| runs/M3-vel-r | 0–39번 Ubuntu (6077884), 40–63번 Vast (732afcd) | | runs/M3-vel-r/PROVENANCE.json |
+
+- 사이 커밋들은 정책, 지표, 모델 코드를 바꾸지 않았다. 바뀐 것은 sharding, 데이터 적재 위치, 새 정책 추가뿐이다.
+- 예외 1: 4c63eb1의 `fill_hole_area = 0`은 모든 Vast 실행에 적용돼 있다.
+- 예외 2: SGGL 기준선은 처음 16객체를 32 thread로, 나머지를 3–4 thread로 실행했다. 출력은 thread 수에 대해 비트 동일함을 확인했다.

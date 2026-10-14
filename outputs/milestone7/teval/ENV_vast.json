@@ -1,0 +1,10 @@
+{
+ "machine": "vast-rtx5090",
+ "torch": "2.11.0+cu128",
+ "cuda": "12.8",
+ "fill_hole_area": 0,
+ "written": "retrospectively (review correction 8) from the launch log",
+ "commit": "c27f450",
+ "threads": 3,
+ "shards": 2
+}

@@ -1,0 +1,8 @@
+{
+ "machine": "vast-rtx5090",
+ "torch": "2.11.0+cu128",
+ "cuda": "12.8",
+ "fill_hole_area": 0,
+ "written": "retrospectively (review correction 8) from the launch log",
+ "commit": "units 1-16: 4c63eb1, 32 threads; units 17-32: 4c63eb1 + uncommitted training-data change in scripts/m7.py (later c27f450; no effect on rollout), 4 threads; units 33-64: c27f450, 2 shards x 3 threads"
+}

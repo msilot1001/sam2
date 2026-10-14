@@ -1,7 +1,7 @@
 """S family evidence: tracking state, global observability, cross-view support and target identity (M7).
 
 Everything here is causal: it reads only frame-t observations and a running history of earlier frames' model
-outputs/decisions. No GT. Thresholds are fixed constants (pre-registered in scripts/m7.py PREREG_S1).
+outputs/decisions. No GT. Thresholds are fixed constants defined here and frozen in commit 274e4d7 before any replay output.
 """
 from collections import deque
 

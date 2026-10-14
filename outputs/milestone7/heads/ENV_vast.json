@@ -2,6 +2,7 @@
  "machine": "vast-rtx5090",
  "torch": "2.11.0+cu128",
  "cuda": "12.8",
- "commit": "4c63eb19c4a558de58b814ca53bf8a51537ed377",
- "fill_hole_area": 0
+ "fill_hole_area": 0,
+ "written": "retrospectively (review correction 8) from the launch log",
+ "commit": "T0-T3: 4c63eb1 (CPU batch path, 32 threads); T4: c27f450 (GPU-resident batches, 4 threads; batches value-identical)"
 }

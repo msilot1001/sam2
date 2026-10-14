@@ -2,19 +2,41 @@
 
 ## FINAL_DECISION: KEEP_SGGL
 
+**M3-vel vs SGGL: INSUFFICIENT_EVIDENCE. 다음 확인 단계의 지정 도전자다.**
+
 **결정 요지:**
-- 18개 후보 계열을 모두 screening했다. 실제로 실행한 prototype은 32종이다(재생 20, 인과 3 + 개정 1, 학습 head 5, 조합 4).
+- 18개 후보 계열을 모두 screening했다.
+- 실제로 실행한 prototype은 33종이다: 재생 정책 19(SGGL 제외), 인과 3 + 개정 1, 학습 head 5, 조합 4, R1 진단 probe 1. 기준선 SGGL, SGGL-V와 시각화는 세지 않았다.
 - **SGGL을 사전 등록한 최종 규칙(DEV + REP 영상 CI 하한 > 0)으로 이긴 방법은 없다.**
-- 가장 가까운 후보는 M3-vel(crop 중심 속도 예측)이다. +0.0046 [−0.000, +0.012]이고, 영상 하나씩 빼기 최솟값이 +0.0017이다. 그러나 이득이 2개 영상에 몰려 있고, 개정판도 실패했다. VK에서는 +0.0013이다.
-- 반대로 **SGGL 자체는 처음 적용한 세트(VKITTI2, 합성, 28객체 / scene 2개)에서 P5 대비 +0.017 [+0.009, +0.025]로 재현됐다.** 22개 객체가 오르고 1개가 내렸다.
+- **가장 가까운 후보 M3-vel (crop 중심 속도 예측):**
+  - +0.0046 [−0.0001, +0.0115], 영상 하나씩 빼기 최솟값 +0.0017.
+  - CI 하한이 bootstrap 잡음 수준(−0.0001)에서 0에 걸려 최종 규칙을 통과하지 못했다. bootstrap seed에 따라 부호가 바뀔 수 있는 수준이다.
+  - 더 중요한 것은 이득이 2개 영상(skate-park, sheep)에 몰려 있다는 점이다. 사전 pilot 규칙은 영상 3개를 요구했다.
+  - 이득의 형태는 '대상이 사라졌다 다시 나타날 때 10–18 frame 빨리 재획득'이다(`outputs/milestone7/viz/20_M3vel_timelines.png`).
+  - 개정판(M3-vel-r)도 표적 회귀를 줄이지 못했다. VK에서는 +0.0013이다.
+- **SGGL 자체의 VK 결과:**
+  - VKITTI2 Scene01/06(합성, 28객체)은 M2–M4의 개발 scene이었다. SGGL에는 처음 적용했지만 프로젝트 전체로는 새 데이터가 아니다.
+  - 여기서 SGGL은 P5 대비 +0.017이다. 두 scene 모두 양수(+0.017, +0.020)이고, 22개 객체가 오르고 1개가 내렸다.
+  - 실질 표본은 scene 2개다. 그래서 객체 군집 CI [+0.009, +0.025]는 서술용이다. '독립 재현'이 아니라 '개발 세트와 같은 방향, 같은 크기의 효과'라고만 말할 수 있다.
+  - 유일한 큰 손실(obj57, −0.073)은 crop이 이웃 차량으로 넘어간 오대상 추적이다(`viz/21_VK_examples.png`).
 - 따라서 더 복잡한 알고리즘으로 교체하지 않는다. SGGL을 주 알고리즘으로 유지한다.
-- SGGL-V의 거부권은 개발 데이터에서 miami-surf 하나에만 효과가 있다. VK에서는 발동하지 않았다. 그래서 선택 사항(ablation)으로 내린다.
+- **SGGL-V 거부권:** 개발 데이터에서 miami-surf 하나에만 효과가 있다. VK에서는 1객체 5 frame에서만 발동했고 효과는 −0.00002다. 그래서 선택 사항(ablation)으로 내린다.
 - PUMaVOS C는 최종 규칙을 통과한 방법이 없어 **봉인을 유지한다.**
 
 **정직한 범위:**
-- DEV와 REP는 여러 번 본 개발 데이터다. 모든 Stage 1–3 결과는 탐색적이다.
-- VK는 합성이고 scene이 2개라 독립 확인이라기보다 '새 영상에서의 서술적 재현'이다.
-- 극소 대상(< 0.1%)은 여전히 7객체뿐이다.
+- DEV와 REP는 여러 번 본 개발 데이터라 모든 Stage 1–3 결과는 탐색적이다.
+- VK도 이전 milestone에서 본 합성 scene 2개다.
+- 극소 대상(< 0.1%)은 여전히 7객체뿐이다(VK에는 없음).
+- 프로젝트 규칙상 VKITTI 보류 scene(02, 18, 20)은 쓰지 않았다.
+
+**사전 등록에서 벗어난 점 (모두 출력 전에 결정했거나 결과 영향이 없음을 검증):**
+1. **인과 pilot 교체:** 사전 등록한 S2-observe를 M3-vel로 바꿨다(`preregistration_r2_amend.json`, 11:45 KST. 첫 pilot 출력은 12:19).
+   - 사유: 재생에서 S2가 SGGL-V와 같다. 정정: 정확히는 1 frame이 다르다.
+   - 그 결과 **S 계열은 인과 확인이 없다.**
+2. **M3-vel-r 실행 위치:** 사전 등록은 Ubuntu였다. 처리량 때문에 객체 40–63번은 Vast에서 실행했다.
+   - 각 객체를 같은 기계의 SGGL과 짝지었다(P5 일치 확인, `runs/M3-vel-r/PROVENANCE.json`).
+3. **재생 CSV 11개가 정책 고정 커밋보다 먼저 생성됐다(pipeline 시험).**
+   - 고정된 코드로 다시 실행하니 비트 단위로 같았다(독립 검토 확인).
 
 ## 1. 최종 비교 (작은 객체, J&F)
 
@@ -23,42 +45,44 @@
 | 공식 SAM 2 (B0) | — (M6.1: gate set 전체 −0.016, 극소 −0.242 vs P5) | — | J −0.034 vs SGGL | J +0.001 vs P5 | 0 (전체 frame 1회) |
 | P5 (B1) | −0.011 [−0.027, +0.010] | 0 | −0.017 | 0 | 0 |
 | **SGGL (= A2x)** | **0** | **+0.011 [−0.010, +0.027]** (miami-surf obj5 −0.477 포함) | **0** | **+0.017 [+0.009, +0.025]** | +1 상태 (crop) |
-| SGGL-V | +0.0069 [−0.003, +0.024], miami-surf 제외 −0.0019 | +0.018 | −0.00002 | +0.017 | +1 |
+| SGGL-V (재생) | +0.0069 [−0.003, +0.024], miami-surf 제외 −0.0019 | +0.018 | −0.00002 (거부권 5 frame 발동) | +0.017 | +1 |
 | M6.1 flip 2× 대조 (F2) | M6.1: SGGL이 +0.018 우세 | | — | | +1 |
 | M6.1 CTU식 gate | M6.1: SGGL이 +0.008 우세 | | — | | +1 |
-| M3-vel (최선 도전자) | +0.0046 [−0.000, +0.012] | +0.016 | +0.0013 [−0.000, +0.003] | +0.019 | +1 (SGGL과 같음) |
-| M3-vel-r | +0.0044 [−0.000, +0.011] | | — | | +1 |
-| F1-blend.7 | +0.0043 [−0.007, +0.021] | | — | | +1 |
-| T2 (최선 attention head) | DEV만 −0.0013 [−0.003, +0.001] | | — | | +1 + head 15 ms |
+| M3-vel (최선 도전자, 인과) | +0.0046 [−0.0001, +0.0115] | +0.016 | +0.0013 [−0.0001, +0.0029] | +0.019 | +1 (SGGL과 같음) |
+| M3-vel-r (인과) | +0.0044 [−0.0001, +0.0114] | | — | | +1 |
+| F1-blend.7 (인과) | +0.0043 [−0.007, +0.021] | | — | | +1 |
+| T2 (최선 attention head, SGGL 궤적 출력 전용) | DEV만 −0.0013 [−0.003, +0.001] | | — | | +1 + head 15 ms |
 
 ## 2. 18개 후보 결과표
 
 **표기 규칙:**
+- 실행 방식: 재생(SGGL 궤적, 출력만 변경), 인과(중심이 자기 출력을 따름), 학습(head).
+- F1(F1-blend)과 M1(M1-trusted)은 사전 pilot 규칙상 INCONCLUSIVE였다. 그러나 실질 효과가 음수이거나 0이라 계열 판정은 REJECTED로 덮어썼다(근거는 각 Track 문서).
 - 독립 영상 수는 그 후보 평가에 쓴 작은 객체 영상 수다.
 - 지연 시간은 같은 부하에서 비교할 수 없어 '추가 SAM 2 호출 수'로 적었다. 측정한 벽시계 시간은 §4에 있다.
 - VRAM은 모두 production 경로 최대 1.25 GB(RTX 5090)다. head를 쓰면 +0.5 GB다.
 
 | ID | 메커니즘 | 구현 | 테스트 | 영상 | Δ vs SGGL | Δ vs P5 | 주 개선 | 주 회귀 | 추가 비용 | 가장 가까운 선행연구 | 새로움 위험 | 판정 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| S1 | 재획득 상태에서만 교차 view 확인 (+ K-지속 대조) | 정책 (재생) | 재생 동등성 | 34 | −0.0000 / K3: −0.0005 | +0.011 | — (miami-surf에서 G도 방해물을 잡아 거짓 확인) | dog-gooses obj5 −0.051 | 0 | SatSAM2, KeepTrack, DeepSORT | 높음 | REJECT |
-| S2 | G 관측 가능성 거부권 | 정책 (재생) | 같음 | 34 | +0.0070 (miami-surf 제외 −0.0019) | +0.018 | miami-surf obj5 | dog-gooses obj5 −0.056 | 0 | Küppers 2020 (크기별 보정), CTU | 중간 | REJECT (규칙이 손해 객체에서 한 번도 발동하지 않음) |
-| S3 | frame-0 참조 신원 (절대 / 상대 margin) | 정책 (재생) | 같음 | 34 | +0.0003 / +0.0007 | +0.012 | miami-surf 일부 | dog-gooses −0.056 | 무시 가능 | SAMOSA, LTMU, SPLT, TLD | 높음 | REJECT |
-| S4 | 양성 / 신뢰 음성 / 충돌 / 불충분 증거 | 정책 (재생) | 같음 | 34 | −0.0010 | +0.010 | — | dog-gooses −0.056 | 0 | (S2 + S3 조합) | 중간 | REJECT |
-| F1 | 픽셀 logit 혼합 (0.5 / 0.7) | 정책 (재생 + 인과) | 경계 테스트 | 34 | +0.0013 / +0.0043 (인과) | +0.016 | miami-surf obj5 (연속값 거부권) | dog-gooses −0.058, 회귀 30객체 | 0 | Tao 2020, CGFSeg | 높음 | REJECT |
-| F2 | 경계 띠 보정 | 정책 (재생) | 같음 | 34 | −0.0062 | +0.005 | — | 회귀 9 영상 | 0 | PointRend, BPR, CascadePSP | 높음 | REJECT |
-| F3 | 비대칭 추가 / 삭제 편집 | 정책 (재생) | 경계 테스트 | 34 | −0.0023 (대칭 −0.0110) | +0.009 | 잘못 지운 TP가 대칭 대비 1/39 | 추가 FP > TP (27만 vs 17.5만 px) | 0 | MiVOS, hysteresis | 중간 | REJECT (비대칭성 효과는 측정됨) |
-| F4 | 성분 단위 같은 instance 합집합 | 정책 (재생) | 경계 테스트 | 34 | −0.0105 | +0.001 | — | FP / TP 1.74 | 0 | DAM4SAM 성분, panoptic merge | 중상 | REJECT |
-| M1 | 보호 / 신뢰 메모리 반사실 | probe + 정책 (재생 + 인과) | **격리 테스트**, 재생 동등성 | 34 | +0.0003 (인과) | +0.011 | 거의 없음 (26 frame) | lady-running −0.043 | +1 메모리 attention | Matthews 2003 (직접 선례) | 중간 | REJECT |
-| M2 | 메모리 허용 분리 | planner 구현 (`Dual.excluded`) | — | — | 측정 안 함 | — | — | — | 0 | DAM4SAM, SAMURAI, SAM2Long | 높음 | IMPLEMENTED_NOT_EVALUATED (인과 근거 없음: 범주 9가 영상 2개) |
+| S1 | 재획득 상태에서만 교차 view 확인 (+ K-지속 대조) | 정책 (재생) | 재생 동등성 | 34 | −0.0000 / K3: −0.0005 | +0.011 | — (miami-surf에서 G도 방해물을 잡아 거짓 확인) | dog-gooses obj5 −0.051 | 0 | SatSAM2, KeepTrack, DeepSORT | 높음 | REJECTED |
+| S2 | G 관측 가능성 거부권 | 정책 (재생) | 같음 | 34 | +0.0070 (miami-surf 제외 −0.0019) | +0.018 | miami-surf obj5 | dog-gooses obj5 −0.056 | 0 | Küppers 2020 (크기별 보정), CTU | 중간 | REJECTED (규칙이 손해 객체에서 한 번도 발동하지 않음) |
+| S3 | frame-0 참조 신원 (절대 / 상대 margin) | 정책 (재생) | 같음 | 34 | +0.0003 / +0.0007 | +0.012 | miami-surf 일부 | dog-gooses −0.056 | 무시 가능 | SAMOSA, LTMU, SPLT, TLD | 높음 | REJECTED |
+| S4 | 양성 / 신뢰 음성 / 충돌 / 불충분 증거 | 정책 (재생) | 같음 | 34 | −0.0010 | +0.010 | — | dog-gooses −0.056 | 0 | (S2 + S3 조합) | 중간 | REJECTED |
+| F1 | 픽셀 logit 혼합 (0.5 / 0.7) | 정책 (재생 + 인과) | 경계 테스트 | 34 | +0.0013 / +0.0043 (인과) | +0.016 | miami-surf obj5 (연속값 거부권) | dog-gooses −0.058, 회귀 30객체 | 0 | Tao 2020, CGFSeg | 높음 | REJECTED |
+| F2 | 경계 띠 보정 | 정책 (재생) | 같음 | 34 | −0.0062 | +0.005 | — | 회귀 9 영상 | 0 | PointRend, BPR, CascadePSP | 높음 | REJECTED |
+| F3 | 비대칭 추가 / 삭제 편집 | 정책 (재생) | 경계 테스트 | 34 | −0.0023 (대칭 −0.0110) | +0.009 | 잘못 지운 TP가 대칭 대비 1/39 | 추가 FP > TP (27만 vs 17.5만 px) | 0 | MiVOS, hysteresis | 중간 | REJECTED (비대칭성 효과는 측정됨) |
+| F4 | 성분 단위 같은 instance 합집합 | 정책 (재생) | 경계 테스트 | 34 | −0.0105 | +0.001 | — | FP / TP 1.74 | 0 | DAM4SAM 성분, panoptic merge | 중상 | REJECTED |
+| M1 | 보호 / 신뢰 메모리 반사실 | probe + 정책 (재생 + 인과) | **격리 테스트**, 재생 동등성 | 34 | +0.0003 (인과) | +0.011 | 거의 없음 (26 frame) | lady-running −0.043 | +1 메모리 attention | Matthews 2003 (직접 선례) | 중간 | REJECTED |
+| M2 | 메모리 허용 분리 | 허용 hook만 있음 (`Dual.excluded`, `planners.backfill`). M2 정책은 없음 | — | — | 측정 안 함 | — | — | — | 0 | DAM4SAM, SAMURAI, SAM2Long | 높음 | NOT_IMPLEMENTED (인과 근거 없음: 범주 9가 영상 2개) |
 | M3 | crop 중심 제어 (속도 예측; 개정판) | 정책 (인과 전용) | 기계 간 동일 | 34 | **+0.0046** / 개정판 +0.0044 | +0.016 | skate-park +0.169, sheep +0.060 | lab-coat obj2 −0.014 ~ −0.018 | 0 | DaSiamRPN, KeepTrack (search region) | 높음 | **INCONCLUSIVE** (가장 강한 도전자, 영상 2개) |
-| R1 | 같은 crop·메모리에서 해상도만 낮춤 | probe | 격리 | 39 (DEV + REP 전체) | (진단) | — | 원인 발견: G 실패는 화소가 아니라 특징 격자 점유 문제 | 맞는 / 틀린 후보 구별 불가 (4.3% vs 2.3%) | 사건 frame +encoder | Rottmann & Schubert 2019 | 낮음–중간 | DIAGNOSTIC_ONLY |
-| R2 | 2× crop 상태 일치 (재획득 확인) | 상태 + 정책 (재생) | 재생 | 34 | +0.0009 | +0.012 | — | — | +1 상태 | multi-scale 일관성 | 낮음–중간 | REJECT |
-| T1 | 정렬 특징 CNN 결합 | head + 학습 | 항등 초기화, 기울기, 정렬, PC | 12 (DEV) | −0.0134 | — | — | −0.125 | +head 14 ms | SAM2Refiner, GLNet | 높음 | REJECT |
-| T2 | 목표 token cross-attention | head + 학습 | 같음 | 12 | −0.0013 | — | T1 대비 +0.012 | — | +16 ms | SAM2Refiner + Cutie 조합 | 중간 | REJECT |
-| T3 | 기권 gate | head + 학습 | gate 범위 테스트 | 12 | −0.0008 | — | T2 대비 +0.0005 | — | 같음 | Flamingo gate, Tao | 중간 | REJECT |
-| T4 | 신원 제약 attention | head + 학습 | 같음 | 12 | −0.0081 | — | — | T3 대비 −0.007 | 같음 | OSTrack 후보 제거 | 중간 | REJECT |
+| R1 | 같은 crop·메모리에서 해상도만 낮춤 | probe | 격리 | 39 (DEV + REP 전체) | (진단) | — | 원인 가설: 화소 상세만으로는 설명되지 않음 (특징 격자 점유, 시야, 메모리와 일치; G 쪽 개입 없음) | 맞는 / 틀린 후보 구별 불가 (4.3% vs 2.3%) | 사건 frame +encoder | Rottmann & Schubert 2019 | 낮음–중간 | DIAGNOSTIC_ONLY |
+| R2 | 2× crop 상태 일치 (재획득 확인) | 상태 + 정책 (재생) | 재생 | 34 | +0.0009 | +0.012 | — | — | +1 상태 | multi-scale 일관성 | 낮음–중간 | REJECTED |
+| T1 | 정렬 특징 CNN 결합 | head + 학습 | 항등 초기화, 기울기, 정렬, PC | 12 (DEV) | −0.0134 | — | — | −0.125 | +head 14 ms | SAM2Refiner, GLNet | 높음 | REJECTED |
+| T2 | 목표 token cross-attention | head + 학습 | 같음 | 12 | −0.0013 | — | T1 대비 +0.012 | — | +16 ms | SAM2Refiner + Cutie 조합 | 중간 | REJECTED |
+| T3 | 기권 gate | head + 학습 | gate 범위 테스트 | 12 | −0.0008 | — | T2 대비 +0.0005 | — | 같음 | Flamingo gate, Tao | 중간 | REJECTED |
+| T4 | 신원 제약 attention | head + 학습 | 같음 | 12 | −0.0081 | — | — | T3 대비 −0.007 | 같음 | OSTrack 후보 제거 | 중간 | REJECTED |
 | O1 | 사건 기반 실행 | 비용 분석 | — | — | — | — | 사건 frame 4.8% → 검증 비용 약 5%로 줄일 수 있음 | 검증 자체에 이득이 없음 | 절감 | Viola–Jones 계열 | 높음 | DIAGNOSTIC_ONLY |
-| K1–K5 | 조합 4종 | 정책 (재생) | 같음 | 34 | −0.0005 ~ −0.0011 | | — | dog-gooses −0.056 | — | | | REJECT |
+| K1–K5 | 조합 4종 | 정책 (재생) | 같음 | 34 | −0.0005 ~ −0.0011 | | — | dog-gooses −0.056 | — | | | REJECTED |
 
 ## 3. 최종 알고리즘: SGGL
 
@@ -119,7 +143,21 @@ for t = 1 .. T-1:
 - `a2v`: SGGL-V 거부권.
 - `M3-vel`: crop 중심 속도 예측. `Policy.center` 한 줄 교체로 바꿀 수 있다.
 
-## 4. 측정 조건 메모 (공정성)
+## 4. 시각 증거 (`outputs/milestone7/viz/`, 성공과 실패를 함께)
+
+| 파일 | 내용 |
+|---|---|
+| 00, 01 miami-surf obj5 | 거짓 재획득: L이 비슷한 surfer를 잡고, G도 frame 31에 같은 방해물을 잡는다. SGGL-V 거부권 |
+| 02 dog-gooses obj5 t82 | G 지지 없이 일어난 올바른 재획득 (거부권의 비용) |
+| 03 drone obj1 | 두 view 모두 틀림: 대상이 crop 밖으로 나가고 G도 부재 |
+| 04 kite-surf obj2 | G 부재: 누적 상태 실패 (G-보호는 찾음) |
+| 05 skate-park obj2 | 두 view 모두 부재, 2× crop L2는 찾음 |
+| 06 lab-coat obj1 | 상보적 마스크 |
+| 07 dog-gooses obj5 t40 | 결합 실패: G 확률이 배경으로 번짐 |
+| 20 M3-vel timelines | M3-vel의 이득(skate-park, sheep: 재등장 시 빠른 재획득)과 손실(lab-coat obj2) |
+| 21 VK examples | VK에서 SGGL이 P5를 크게 이긴 frame과, 최악 객체(obj57: crop이 이웃 차량으로 넘어감) |
+
+## 5. 측정 조건 메모 (공정성)
 
 - 벽시계 지연 시간은 실행 시점의 동시 부하에 따라 0.24–0.49 s/frame(RTX 5090)로 달라진다. 그래서 후보 간 비교에 쓰지 않았다.
 - 같은 부하에서 측정한 profile(SGGL 1 process, 4 thread): SAM 2 GPU 133 ms, JPEG decode·crop 65 ms, J/F 채점 28 ms.
