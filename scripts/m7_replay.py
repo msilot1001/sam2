@@ -55,9 +55,9 @@ def _metrics(m, g):
     return j_measure(m, g), f_measure(m, g)
 
 
-def replay_unit(f):
+def replay_unit(f, pol_list=None, out_dir=None):
     torch.set_num_threads(1)
-    out = RR / f.name
+    out = (out_dir or RR) / f.name
     if out.exists():
         return
     df = pd.read_csv(f)
@@ -68,7 +68,7 @@ def replay_unit(f):
         pool = davis_units("train")[0] if df.set.iloc[0] == "REP" else vkitti_units()[0]
         u = next(x for x in pool if x.name == df.unit.iloc[0])
     g0 = m7.gt(u, 0)
-    pols = [P(g0) for P in policies.ALL]
+    pols = [P(g0) for P in (pol_list or policies.ALL)]
     rows = []
     for o in observations(df, Z, g0.shape):
         t = o["t"]
@@ -101,6 +101,29 @@ def replay_unit(f):
         rows.append(r)
     atomic_csv(pd.DataFrame(rows), out)
     print(f.name, flush=True)
+
+
+def _combo_unit(f):
+    replay_unit(f, [policies.Policy] + policies.COMBOS, m7.OUT / "rec_replay_combos")
+
+
+def combos(n_proc="6"):
+    """Stage-3 combinations replayed on the recorded SGGL trajectory (same machinery as stage 1)."""
+    (m7.OUT / "rec_replay_combos").mkdir(parents=True, exist_ok=True)
+    with Pool(int(n_proc)) as p:
+        list(p.imap_unordered(_combo_unit, sorted(REC.glob("*.csv"))))
+    parts = [pd.read_csv(f) for f in sorted((m7.OUT / "rec_replay_combos").glob("*.csv"))]
+    F = pd.concat(parts, ignore_index=True)
+    meta = pd.concat([pd.read_csv(f, usecols=["set", "unit", "video", "video_idx", "JF_G"]) for f in sorted(REC.glob("*.csv"))])
+    F = F.merge(meta, on=["unit", "video_idx"])
+    for c in [c for c in F.columns if c.startswith("J|")]:
+        F["JF|" + c[2:]] = (F[c] + F["F|" + c[2:]]) / 2
+    U = units_table(F, [c for c in F.columns if c.startswith("JF|")] + ["JF_G"])
+    rep = {P.name: pilot(U, f"JF|{P.name}") for P in policies.COMBOS}
+    atomic_json(rep, m7.OUT / "combos_report.json")
+    for k, x in rep.items():
+        print(f"{k:12s} {x['dJF_vs_SGGL']:+.4f} {[round(v, 4) for v in x['CI_video']]} up{x['videos_up_0.01']} dn{x['videos_down_0.01']} "
+              f"noMiami {x['without_miami']:+.4f} worst {x['worst_unit'][1]:+.3f} {x['verdict']}")
 
 
 def frames(n_proc="8"):

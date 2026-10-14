@@ -282,6 +282,60 @@ class M3VelocityR(M3Velocity):
         return (c[0] + dy, c[1] + dx)
 
 
+# ----------------------------------------------------------------------------- K: targeted combinations (stage 3)
+def _id_ok(pol, o):
+    s, margin = evidence.identity(o["simL"], o["mL_view"])
+    return s is not None and pol.h.id_z(s) >= evidence.Z_MIN and margin >= 0
+
+
+class K1ObsId(Policy):
+    """K1 = S2 + S3: global absence vetoes the local candidate only if G could observe the target AND the candidate's
+    own identity evidence is weak."""
+    name = "K1-obs+id"
+
+    def accept(self, o):
+        if not selfok(o):
+            return False
+        return o["sG"] > 0 or not self.h.g_observable(o["hw"]) or _id_ok(self, o)
+
+
+class K2StateId(Policy):
+    """K2 = S1 + S3: an unconfirmed re-acquisition is accepted with G support OR identity support."""
+    name = "K2-state+id"
+
+    def accept(self, o):
+        if not selfok(o):
+            return False
+        return True if not (self.h.lost or self.h.reacq) else (g_support(o) or _id_ok(self, o))
+
+    def _confirm(self, o):
+        return _id_ok(self, o)
+
+
+class K3AsymId(F3Asym):
+    """K3 = F3 + S3: asymmetric edits only when the selected local candidate passes the identity check."""
+    name = "K3-asym+id"
+
+    def output(self, o, acc):
+        return super().output(o, acc) if acc and _id_ok(self, o) else (o["mL"] if acc else o["mG"])
+
+
+class K5MemObs(Policy):
+    """K5 = M1 + S2: the protected-memory disagreement can reject the local candidate only when G is observable and
+    absent (memory dependence used only where global negative evidence is reliable)."""
+    name, needs = "K5-mem+obs", ("Lp",)
+
+    def accept(self, o):
+        if not selfok(o):
+            return False
+        if o["sG"] > 0 or not self.h.g_observable(o["hw"]):
+            return True
+        return bool(o["sLp"] > 0 and _iou(o["mL"], o["mLp"]) > 0.1)
+
+
+COMBOS = [K1ObsId, K2StateId, K3AsymId, K5MemObs]
+
+
 # ----------------------------------------------------------------------------- R family
 class R2Scale(Policy):
     """R2: an unconfirmed re-acquisition needs G support OR agreement of the 2x-wider crop state (cross-scale

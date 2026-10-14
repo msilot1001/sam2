@@ -1,0 +1,22 @@
+/root/sam2-m7-test/scripts/m7.py:530: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  curve.append({"step": it, "train_loss": float(loss), "grad_norm": gn, "val_loss": vl, "val_J": vj, "val_J_input": vj0,
+T1 {'step': 1, 'train_loss': 0.15868662297725677, 'grad_norm': 0.964158296585083, 'val_loss': 0.20902694575488567, 'val_J': 0.8710725920973346, 'val_J_input': 0.8693242519511841, 'lr': 0.0009999989033776897}
+T1 {'step': 250, 'train_loss': 0.07064398378133774, 'grad_norm': 0.06435833871364594, 'val_loss': 0.1648291079327464, 'val_J': 0.9254236128181219, 'val_J_input': 0.8693242519511841, 'lr': 0.0009330127018922198}
+T1 {'step': 500, 'train_loss': 0.0810520350933075, 'grad_norm': 0.13443966209888458, 'val_loss': 0.13144822604954243, 'val_J': 0.9334583086892962, 'val_J_input': 0.8693242519511841, 'lr': 0.000749999999999999}
+T1 {'step': 750, 'train_loss': 0.035964302718639374, 'grad_norm': 0.0939469113945961, 'val_loss': 0.07532660476863384, 'val_J': 0.9513122031930834, 'val_J_input': 0.8693242519511841, 'lr': 0.0004999999999999993}
+T1 {'step': 1000, 'train_loss': 0.024759018793702126, 'grad_norm': 0.015490357764065266, 'val_loss': 0.050008703488856554, 'val_J': 0.960234023630619, 'val_J_input': 0.8693242519511841, 'lr': 0.00024999999999999984}
+T1 {'step': 1250, 'train_loss': 0.059625715017318726, 'grad_norm': 0.0100557217374444, 'val_loss': 0.04458713158965111, 'val_J': 0.9654876561835408, 'val_J_input': 0.8693242519511841, 'lr': 6.698729810778051e-05}
+T1 {'step': 1500, 'train_loss': 0.0326472632586956, 'grad_norm': 0.00674170907586813, 'val_loss': 0.044170929584652185, 'val_J': 0.966043091379106, 'val_J_input': 0.8693242519511841, 'lr': 0.0}
+T1_pc fit J 0.966 input 0.8693
+/root/sam2-m7-test/scripts/m7.py:530: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  curve.append({"step": it, "train_loss": float(loss), "grad_norm": gn, "val_loss": vl, "val_J": vj, "val_J_input": vj0,
+T4 {'step': 1, 'train_loss': 0.15868662297725677, 'grad_norm': 0.8759761452674866, 'val_loss': 0.20941788889467716, 'val_J': 0.870487125008367, 'val_J_input': 0.8693242519511841, 'lr': 0.0009999989033776897}
+T4 {'step': 250, 'train_loss': 0.06928059458732605, 'grad_norm': 0.06119322404265404, 'val_loss': 0.16581617388874292, 'val_J': 0.9252428468316793, 'val_J_input': 0.8693242519511841, 'lr': 0.0009330127018922198}
+T4 {'step': 500, 'train_loss': 0.07482843846082687, 'grad_norm': 0.09198891371488571, 'val_loss': 0.15140032209455967, 'val_J': 0.9439226165413857, 'val_J_input': 0.8693242519511841, 'lr': 0.000749999999999999}
+T4 {'step': 750, 'train_loss': 0.034528352320194244, 'grad_norm': 0.0403277762234211, 'val_loss': 0.10950180608779192, 'val_J': 0.9503416819497943, 'val_J_input': 0.8693242519511841, 'lr': 0.0004999999999999993}
+T4 {'step': 1000, 'train_loss': 0.023605193942785263, 'grad_norm': 0.030021950602531433, 'val_loss': 0.06844225246459246, 'val_J': 0.9608952514827251, 'val_J_input': 0.8693242519511841, 'lr': 0.00024999999999999984}
+T4 {'step': 1250, 'train_loss': 0.057998865842819214, 'grad_norm': 0.0072060152888298035, 'val_loss': 0.0560414451174438, 'val_J': 0.9645201875828207, 'val_J_input': 0.8693242519511841, 'lr': 6.698729810778051e-05}
+T4 {'step': 1500, 'train_loss': 0.03172384575009346, 'grad_norm': 0.005051624495536089, 'val_loss': 0.054906563833355904, 'val_J': 0.9650739468634129, 'val_J_input': 0.8693242519511841, 'lr': 0.0}
+T4_pc fit J 0.9651 input 0.8693

@@ -33,6 +33,30 @@
     {
       "id": "CAUSAL-PILOTS",
       "status": "running on Vast (started 2026-10-14 12:16 KST): F1-blend.7, M3-vel, M1-always on DEV+REP; outputs/milestone7/runs/<arm> + ENV_vast.json"
+    },
+    {
+      "id": "T-TRAIN+TEVAL",
+      "status": "done (Vast): PC T1/T4 pass; T0-T4 DEV all REJECT; teval_report.json"
+    },
+    {
+      "id": "CAUSAL-PILOTS",
+      "status": "done (Vast, machine-matched SGGL): F1-blend.7 REJECT, M3-vel INCONCLUSIVE, M1-always REJECT; causal_pilots_report.json"
+    },
+    {
+      "id": "STAGE2-M3-vel-r",
+      "status": "done (units 0-39 Ubuntu 2080, 40-63 Vast 5090, each vs same-machine SGGL): revision failed; m3r_report.json"
+    },
+    {
+      "id": "COMBOS-K1-K5",
+      "status": "done (CPU replay, Ubuntu): all REJECT; combos_report.json"
+    },
+    {
+      "id": "VK-FINALISTS",
+      "status": "done (Vast): SGGL vs P5 +0.017, SGGL-V ~0, M3-vel +0.0013; vk_report.json"
+    },
+    {
+      "id": "THROUGHPUT",
+      "status": "OMP threads 3-4/process, GPU-resident T data, sharding: Vast agg ~1 -> 8.8 frames/s, throttling 100% -> 0%"
     }
   ],
   "known_bugs": [
@@ -40,9 +64,10 @@
   ],
   "completed": [
     "stage0 rec DEV,REP",
-    "tcache REP every 2"
+    "tcache REP every 2",
+    "run M3-vel-r DEV,REP"
   ],
-  "next_scheduled": "T PC + train + teval on Vast after tcache transfer verification",
+  "next_scheduled": "independent review corrections; final report; PUMaVOS C stays sealed",
   "base_commit": "9d6f14bd1d12b9ec56b166992b4932a119dc33aa",
-  "updated_kst": "2026-10-14 12:19"
+  "updated_kst": "2026-10-14 14:27"
 }

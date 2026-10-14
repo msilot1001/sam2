@@ -1,0 +1,7 @@
+{
+ "machine": "ubuntu-rtx2080",
+ "torch": "2.14.1+cu130",
+ "cuda": "13.0",
+ "commit": "6077884460e15bfb4ed0c932797760f99fe4ac29",
+ "fill_hole_area": 0
+}

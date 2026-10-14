@@ -107,3 +107,32 @@
 1. `outputs/milestone7/runs`, `heads`, `teval`, `repro`, `logs`를 Ubuntu로 회수한다. 회수 명령: `ssh … 'cd /root/sam2-m7-test && tar cf - outputs/milestone7/{runs,heads,teval,logs}' | tar xf - --skip-old-files`
 2. 작은 결과는 Ubuntu에서 커밋하고 push한다.
 3. 그다음에 인스턴스를 중지하거나 삭제한다. 중지(stop)는 데이터를 보존하지만, 삭제(destroy)는 Vast의 모든 것을 지운다.
+
+## 8. 처리량 최적화 (13:30–14:00 KST)
+
+**문제 (cgroup 계측, 48초 구간):**
+- CPU quota는 12.29 vCPU이고, 측정 구간에서 12.27 vCPU를 썼다.
+- **throttling이 482 주기 중 482 주기(100%)**에서 발생했다. GPU 사용률은 15%였다.
+- 원인: torch 기본 thread 수가 32다. 64 CPU가 보이는데 quota는 12다. 학습 process가 783%, rollout process가 330% CPU를 썼다.
+
+**조치:** 모델, 데이터, 정책, 지표는 바꾸지 않았다.
+1. process별 `OMP_NUM_THREADS=3–4`.
+   - 출력 동일성을 확인했다. F1-blend.7과 SGGL에서 frame별 J&F와 score가 32 / 4 / 2 thread에서 repr까지 같았다.
+2. T 학습 데이터를 GPU에 상주시켰다(`_Stacked`). batch가 같은 값임을 실제 캐시로 확인했다.
+3. 객체 단위 sharding(`M7_SHARD=i/n`)으로 worker를 나눴다. worker끼리 겹치지 않고, 파일 충돌이 없다(테스트).
+
+**결과:**
+
+| 항목 | 전 | 후 |
+|---|---|---|
+| rollout 1 process | 1.06 s/frame | 0.24–0.28 s/frame (4 thread) |
+| Vast 집계 처리량 | 약 1 frame/s | 8.8 frame/s (4 worker × 3 thread; 1×4 = 3.6, 2×4 = 6.5, 5×2 ≈ 9.2) |
+| 이후 cgroup 상태 | | 5.2 vCPU, throttling 0/494, GPU 91% |
+| T 학습 | 3,000 step 5.4–6.6분 | 0.8분 |
+| RTX 2080 | — | GPU 제한(1–3 worker 모두 약 2.4 frame/s)이라 1 worker로 독립 작업(M3-vel-r 일부)을 맡겼다 |
+
+- 5 worker부터는 GPU 예측 시간 자체가 늘어 GPU가 병목이 된다. 그래서 4 worker를 택했다.
+- **처리 단계별 시간 (4 thread, frame당):** SAM 2 GPU 133 ms, JPEG decode·crop 65 ms, J/F 28 ms.
+- J/F 채점은 전체의 약 12%라 별도 평가 worker로 분리하지 않았다. 효과 대비 복잡도가 크다.
+
+**기계 간 SGGL 차이 (같은 64객체):** 객체 평균 최대 0.0017(queen_car obj1)이고, 1e-4를 넘는 객체는 3개다. crop 궤적이 미세하게 갈라지는 경우다.

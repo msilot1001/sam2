@@ -1,0 +1,43 @@
+{
+  "experiments": [
+    {
+      "id": "S0-REC",
+      "prereg": "outputs/milestone7/preregistration.json",
+      "code": "scripts/m7.py rec, src/spatial/sggl.py (uncommitted->see next commit)",
+      "units": "DEV(21)+REP(43)",
+      "start_kst": null,
+      "status": "scheduled"
+    },
+    {
+      "id": "S0-REC",
+      "status": "done (RTX 2080, Ubuntu)",
+      "units": "64/64 csv+npz pairs",
+      "end_kst": "2026-10-14 11:2x"
+    },
+    {
+      "id": "S1-REPLAY",
+      "status": "done (CPU, Ubuntu): 64/64 units, 20 policies; replay_report.json, fusion_pixels_*.csv"
+    },
+    {
+      "id": "T-CACHE",
+      "status": "done (RTX 2080, Ubuntu): 43 REP units every 2nd frame, 7.5 GB outputs/milestone7/tcache"
+    },
+    {
+      "id": "T-TRAIN+TEVAL, CAUSAL-PILOTS",
+      "status": "NOT STARTED: queued chain2/chain3 stopped with user approval (2026-10-14 ~11:50 KST) for migration to Vast.ai RTX 5090"
+    }
+  ],
+  "known_bugs": [
+    "m7_replay summary: pgrep-based wait loops self-matched their own command line (no data impact; loops killed)"
+  ],
+  "completed": [
+    "stage0 rec DEV,REP",
+    "tcache REP every 2",
+    "run M3-vel DEV,REP",
+    "run F1-blend.7 DEV,REP",
+    "run M1-always DEV,REP"
+  ],
+  "next_scheduled": "migration to Vast.ai RTX 5090; then T positive controls + training (cache transferred from Ubuntu), teval, causal pilots F1-blend.7, M3-vel, M1-always",
+  "base_commit": "9d6f14bd1d12b9ec56b166992b4932a119dc33aa",
+  "updated_kst": "2026-10-14 13:20"
+}

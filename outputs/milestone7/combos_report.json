@@ -1,0 +1,106 @@
+{
+  "K1-obs+id": {
+    "n_units": 57,
+    "n_videos": 34,
+    "dJF_vs_SGGL": -0.000937023133971475,
+    "CI_video": [
+      -0.0032625593867818587,
+      0.0009009925332779949
+    ],
+    "videos_up_0.01": 0,
+    "videos_down_0.01": 3,
+    "units_up_0.01": 2,
+    "units_down_0.01": 3,
+    "lovo_min": -0.0016156044290735483,
+    "lovo_max": 4.504209877626009e-05,
+    "without_miami": -0.0016156044290735483,
+    "worst_unit": [
+      "davis__davis/dog-gooses__obj5",
+      -0.05579754987151586
+    ],
+    "best_unit": [
+      "davis__davis/miami-surf__obj4",
+      0.01449275362318847
+    ],
+    "dJF_vs_P5": 0.010239965889651943,
+    "verdict": "REJECT"
+  },
+  "K2-state+id": {
+    "n_units": 57,
+    "n_videos": 34,
+    "dJF_vs_SGGL": -0.0010653937826756283,
+    "CI_video": [
+      -0.003040367252406303,
+      0.0003062089744708996
+    ],
+    "videos_up_0.01": 0,
+    "videos_down_0.01": 2,
+    "units_up_0.01": 1,
+    "units_down_0.01": 2,
+    "lovo_min": -0.0014749058673666515,
+    "lovo_max": -0.00017489182310346052,
+    "without_miami": -0.0014749058673666515,
+    "worst_unit": [
+      "davis__davis/dog-gooses__obj5",
+      -0.0514581789880274
+    ],
+    "best_unit": [
+      "davis__davis/miami-surf__obj5",
+      0.014492753623188415
+    ],
+    "dJF_vs_P5": 0.010111595240947792,
+    "verdict": "REJECT"
+  },
+  "K3-asym+id": {
+    "n_units": 57,
+    "n_videos": 34,
+    "dJF_vs_SGGL": -0.0008023045750735007,
+    "CI_video": [
+      -0.0012718501753098362,
+      -0.0003999004644287351
+    ],
+    "videos_up_0.01": 0,
+    "videos_down_0.01": 0,
+    "units_up_0.01": 0,
+    "units_down_0.01": 0,
+    "lovo_min": -0.0008793220314120245,
+    "lovo_max": -0.0006943805159510955,
+    "without_miami": -0.0007923834289038003,
+    "worst_unit": [
+      "davis__davis/mbike-trick__obj1",
+      -0.007315299487245408
+    ],
+    "best_unit": [
+      "davis__davis/drone__obj2",
+      0.0020645751052134065
+    ],
+    "dJF_vs_P5": 0.010374684448549916,
+    "verdict": "REJECT"
+  },
+  "K5-mem+obs": {
+    "n_units": 57,
+    "n_videos": 34,
+    "dJF_vs_SGGL": -0.0004763408022244497,
+    "CI_video": [
+      -0.0011599973917390347,
+      0.0
+    ],
+    "videos_up_0.01": 0,
+    "videos_down_0.01": 1,
+    "units_up_0.01": 0,
+    "units_down_0.01": 1,
+    "lovo_min": -0.0005323808966037967,
+    "lovo_max": -0.00025491550570332485,
+    "without_miami": -0.0005323808966037967,
+    "worst_unit": [
+      "davis__davis/lady-running__obj2",
+      -0.01287615740740744
+    ],
+    "best_unit": [
+      "davis__davis/dogs-jump__obj1",
+      0.0
+    ],
+    "dJF_vs_P5": 0.01070064822139897,
+    "verdict": "REJECT"
+  }
+}
