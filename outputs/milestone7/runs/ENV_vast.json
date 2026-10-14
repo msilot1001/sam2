@@ -1,0 +1,7 @@
+{
+ "machine": "vast-rtx5090",
+ "torch": "2.11.0+cu128",
+ "cuda": "12.8",
+ "commit": "4c63eb19c4a558de58b814ca53bf8a51537ed377",
+ "fill_hole_area": 0
+}

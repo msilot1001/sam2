@@ -53,14 +53,21 @@
 | 검사 | 범위 | 결과 |
 |---|---|---|
 | M7 테스트 | `tests/test_m7.py` 8개 | 양쪽 모두 8 passed. 기존에 건너뛰던 통합 테스트 2개도 M6/M6.1 기준 출력을 옮겨서 통과했다(첫 8 frame J&F가 소수 10자리까지 동일) |
-| Stage 0 기록 경로 (SGGL + 모든 probe), 전체 길이 | lab-coat obj1, kite-surf obj2, miami-surf obj5, dog-gooses obj5, drone obj1 (339 frame) | **J&F 모든 frame 동일, crop 결정과 box 동일.** 저장 logit 차이는 fp16 저장 수준(≤ 0.0625)이고, 부호가 뒤집힌 저해상도 픽셀은 객체당 0–2개로 마스크 영향이 없다 |
+| Stage 0 기록 경로 (SGGL + 모든 probe), 전체 길이 | lab-coat obj1, kite-surf obj2, miami-surf obj5, dog-gooses obj5, drone obj1 (339 frame) | **이 5객체에서는** J&F 모든 frame 동일, crop 결정과 box 동일(전체 세트는 아래 정정 참조). 저장 logit 차이는 fp16 저장 수준(≤ 0.0625)이고, 부호가 뒤집힌 저해상도 픽셀은 객체당 0–2개로 마스크 영향이 없다 |
 | 신규 후보 인과 rollout: M3-vel | lab-coat obj1, kite-surf obj2 | 모든 frame 동일 |
 | 신규 후보 인과 rollout: F1-blend.7 (연속 logit 가중합) | 같은 2객체 | 객체당 1 frame 차이, 객체 평균 Δ ≤ 6e-5. 가중합이 0 근처인 픽셀이 커널 수준 수치 차이에 민감하다 |
 | 속도 / VRAM | 5객체 | production 0.136–0.138 s/frame (2080: 0.437–0.622). 최대 VRAM 1.04–1.14 GB로 2080과 같다(+1 MB) |
 
-**운용 규칙:**
-1. SGGL과 선택형 후보는 기계 간 비트 동일로 확인했다. 그래서 Ubuntu Stage 0 결과와 Vast 결과를 같은 비교에 써도 된다.
-2. 연속 logit 결합형 후보(F 계열, T head)는 비트 동일이 아니다(1e-5 수준). 최종 비교는 **기준선(SGGL)을 같은 기계에서 다시 돌려** 짝지어 비교한다.
+**전체 세트 확인 (정정, 13:2x KST):**
+- 위 5객체 검사는 모든 frame이 동일했다. 그러나 Vast 인과 pilot 3종의 G 상태(P5, 정책과 무관)를 Ubuntu Stage 0 기록과 비교하니, **DEV + REP 5,082 frame 중 266 frame(5.2%, 41객체)에서 J&F가 달랐다.**
+  - frame 최대 차이: 0.004 (soapbox obj1)
+  - 객체 평균 최대 차이: 8e-5
+- Vast 3개 arm끼리는 G가 완전히 같다. 즉 Vast는 결정적이지만, 두 기계 사이는 긴 영상에서 비트 동일이 아니다. torch 2.14/cu130과 2.11/cu128 커널 수치 차이가 frame을 거치며 누적되는 것으로 보인다.
+- 크기는 결정 규칙의 임계값(0.005)보다 약 60배 작다. 그래도 '비트 동일'이라는 앞의 표현은 5객체에만 해당하며 전체 세트에는 성립하지 않는다.
+
+**운용 규칙 (정정 반영):**
+1. **모든 비교는 같은 기계의 기준선과 짝지어 계산한다.** Vast 실험의 SGGL 기준선은 Vast에서 다시 실행한다(`outputs/milestone7/runs/SGGL`). 이것은 짝 비교용 별도 결과이고, Stage 0 기록을 대체하지 않는다.
+2. Ubuntu Stage 0와 재생 결과(재생 screening, 감사)는 Ubuntu 수치로 그대로 보고한다.
 3. 모든 Vast 산출 디렉터리에는 `ENV_vast.json`(기계, torch, 커밋, `fill_hole_area`)을 남긴다.
 
 ## 4. Ubuntu 작업 상태 (이전 시점)
