@@ -517,7 +517,9 @@ def run_arm(pred, flow, s, u, A, rank, n=None):
                      "crop_side": y1 - y0, "gt_area": int(g.sum()),
                      "gt_in_crop": float(g[y0:y1, x0:x1].sum() / g.sum()) if g.any() else np.nan,
                      "gt_long_over_side": (max(np.ptp(np.nonzero(g)[0]), np.ptp(np.nonzero(g)[1])) + 1) / (y1 - y0) if g.any() else np.nan,
-                     "out_empty": not out.any(), "pc_dx": float(pc[0]), "pc_dy": float(pc[1])})
+                     "out_empty": not out.any(), "pc_dx": float(pc[0]), "pc_dy": float(pc[1]),
+                     "out_area": int(out.sum()), "out_inter_gt": int((out & g).sum()),
+                     "G_area": int(G.mask.sum()), "G_inter_gt": int((G.mask & g).sum())})
         trk.observe(t, vcam.bbox(out))
         if A.get("center") == "m3vel":
             c = m3_center(m3, out)

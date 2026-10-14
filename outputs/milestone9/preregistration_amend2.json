@@ -1,0 +1,10 @@
+{
+ "created_kst": "2026-10-15 02:50",
+ "type": "diagnostic (no new arm, no tuning)",
+ "observation": "SCALE-category misses (GT long side > 0.6 crop side or area > 4x prompt) are 44% (MOSEv2) / 36% (VOST) of SGGL missed loss, but SCALE (crop follows output size) recovers only 18% / 2% of them, and on MOSEv2 dev the full-frame G view alone has J&F 0.15 on those frames.",
+ "hypothesis_H_anchor": "In scale-category misses SAM 2 keeps segmenting a region the size of the (partial) prompt mask: the output is mostly inside the GT (precision >= 0.8) but covers a small part of it (recall < 0.5).",
+ "alternative_H_drift": "The output is mostly outside the GT (precision < 0.5): identity/position drift rather than under-segmentation.",
+ "measurement": "SGGL re-run on the pod (same code + 4 output-area columns; parity with the stage-1 diag rows must be exact on J&F) for all MOSEv2 and VOST units; per scale-category miss frame: precision = out_inter_gt/out_area, recall = out_inter_gt/gt_area, for the output and for G alone.",
+ "decision": "H_anchor if >= 50% of non-empty scale-category miss frames (and >= 3 videos per dataset) have precision >= 0.8 and recall < 0.5 -> next-research priority is memory/prompt refresh for growing targets, not crop geometry. Otherwise H_drift or MIXED.",
+ "no_arm": "No mechanism is built or tested on this in M9."
+}
