@@ -41,5 +41,13 @@
     "gate": "consensus",
     "why": "M9 presence/abstention (evidence-driven, one rule, no threshold): SGGL, except that when the L self gate fails, the G mask is output only if L also claims presence (score_L > 0); otherwise the output is empty and the crop centre is held. Designed from the MOSEv2 DEV-split replay only (157 FP frames removed vs 124 GT-present frames emptied, J 43.4); judged on MOSEv2 conf and VOST.",
     "frozen_kst": "2026-10-15 00:42"
+  },
+  "NULLJIT": {
+    "name": "NULLJIT",
+    "gens": [],
+    "center": "out",
+    "jitter": 0.15,
+    "why": "M9 null control (amend3): L crop side = SGGL side x U(0.85,1.15) per frame, seeded by unit; no information",
+    "frozen_kst": "2026-10-15 03:13"
   }
 }

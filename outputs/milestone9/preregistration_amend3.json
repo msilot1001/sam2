@@ -1,0 +1,9 @@
+{
+ "created_kst": "2026-10-15 03:25",
+ "type": "null control (calibration, not a candidate mechanism)",
+ "observation": "Every M9 arm moves many units by more than 0.05 in BOTH directions (MOSEv2: FLOWVEL 8 up/14 down, SCALE 10/10, CONSENSUS 13/24, PCCARRY 3/6; VOST SCALE 9/10), while machine float noise alone moves none (VOST SGGL 2080 vs 4090: max |dJ&F| 0.036). The worst SCALE VOST unit (1179_cut_onion/obj2, -0.70) switched to another onion piece after a 7% larger crop.",
+ "question": "How much of each arm's unit-level gain/loss is what any uninformative perturbation of the crop geometry of the same size would produce?",
+ "arm": "NULLJIT: SGGL, but each frame the L crop side is side0 * U(1-0.15, 1+0.15), i.i.d., rng seeded by sha256(unit name); centre = SGGL. 0.15 = median |side/side0 - 1| of the SCALE arm on MOSEv2 (measured from SCALE's crop_side column).",
+ "use": "Reference distribution for unit-level swings: compare counts of units > +0.05 / < -0.05 and the mean with SCALE/FLOWVEL/PCCARRY on the same units. If NULLJIT produces a similar number of < -0.05 units, the pre-registered 'no unit < -0.05' rule cannot separate mechanisms and next pre-registrations must use NULLJIT-relative criteria.",
+ "runs": "MOSEv2 all units on RunPod (after queue 5); VOST all units on the Ubuntu 2080 (vs the Ubuntu SGGL baseline)."
+}

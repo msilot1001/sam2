@@ -7,7 +7,7 @@
 
 ## 1. 추정값 일치 (오프라인, VOST 15단위 / 7영상, 연속 frame 1,634쌍)
 
-- **명령:** `M9_DATA=data/m9 uv run python scripts/m9_motion_agree.py vost 15`
+- **명령:** `M9_DATA=data uv run python scripts/m9_motion_agree.py vost 15`
 - **결과:** `outputs/milestone9/reports/motion_agree_vost.csv`
 - **기준:** RAFT 카메라 운동, 즉 이전 frame GT box를 2배로 넓힌 영역 밖 광류의 중앙값이다.
   - GT는 대상 영역을 빼는 데만 썼다. 오프라인 비교용이며 온라인 arm은 GT를 쓰지 않는다.

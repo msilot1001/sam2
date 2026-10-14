@@ -1,0 +1,15 @@
+{
+  "machine": "ubuntu-rtx2080",
+  "torch": "2.14.1+cu130",
+  "cuda": "13.0",
+  "gpu": "NVIDIA GeForce RTX 2080",
+  "fill_hole_area": 0,
+  "arm": {
+    "name": "FLOWVEL",
+    "gens": [],
+    "center": "flowvel",
+    "why": "C3: crop centre driven by RAFT flow displacement of the target region (damp 0.5); keeps following the flow-carried box while both views miss",
+    "frozen_kst": "2026-10-14 16:14"
+  },
+  "code": "ubuntu working tree"
+}

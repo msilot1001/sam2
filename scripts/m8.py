@@ -8,6 +8,7 @@ Sets are M7's (scripts/m7.py: DEV, REP, VK); PUMaVOS C is never touched. Paralle
 """
 import argparse
 import importlib.util
+import hashlib
 import json
 import os
 import time
@@ -460,6 +461,8 @@ def run_arm(pred, flow, s, u, A, rank, n=None):
     use_pc = A.get("center") == "pccarry"                   # M9 cheap motion (phase correlation, no RAFT)
     prev = R.frame_tensor(ps[0]).cuda() if (use_flow or use_pc) else None
     sctl = motion.ScaleCtl(d.side, hw, **A["scale"]) if A.get("scale") is not None else None   # M9 adaptive scale
+    side0 = d.side
+    jit = np.random.default_rng(int(hashlib.sha256(u.name.encode()).hexdigest()[:8], 16)) if A.get("jitter") else None
     m3, rows, held = {}, [], 0
     pc = np.zeros(2)
     for t in range(1, n):
@@ -542,6 +545,8 @@ def run_arm(pred, flow, s, u, A, rank, n=None):
         if sctl is not None:                            # M9: adapt the crop side from reliable output size
             reliable = (ok and L.score > 0) or ((not ok) and G.score > 0)
             d.set_side("L", sctl.update(vcam.bbox(out), reliable))
+        if jit is not None:                             # M9 null control: uninformative crop-side jitter around the SGGL side
+            d.set_side("L", side0 * jit.uniform(1 - A["jitter"], 1 + A["jitter"]))
         d.set_center(c)
         prev = frame
     peak = torch.cuda.max_memory_allocated()
