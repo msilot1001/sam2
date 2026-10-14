@@ -13,6 +13,7 @@ PUMaVOS C is never touched here.
 import argparse
 import importlib.util
 import json
+import os
 import time
 from pathlib import Path
 
@@ -159,6 +160,15 @@ def units(sets):
             raise ValueError(s)
         out += [(s, x, u) for x, u in us if vcam.crop_side(gt(u, 0)) is not None]
     return out
+
+
+def shard(us):
+    """Disjoint subset for parallel workers: M7_SHARD="i/n" keeps units with index % n == i (unit order is fixed)."""
+    sh = os.environ.get("M7_SHARD")
+    if not sh:
+        return us
+    i, n = map(int, sh.split("/"))
+    return [x for k, x in enumerate(us) if k % n == i]
 
 
 def stem(u):
@@ -377,7 +387,7 @@ def run(arm, sets="DEV,REP", head_name=""):
     tag = P.name + (f"+{head_name}" if head_name else "")
     dd = OUT / "runs" / tag
     dd.mkdir(parents=True, exist_ok=True)
-    for s, x, u in units(sets):
+    for s, x, u in shard(units(sets)):
         f = dd / f"{stem(u)}.csv"
         if f.exists():
             continue
@@ -385,7 +395,8 @@ def run(arm, sets="DEV,REP", head_name=""):
         df = run_policy(pred, s, u, P, head=head)
         atomic_csv(df.assign(subset=x, arm=tag), f)
         print(tag, u.name, round(df.JF.mean(), 4), flush=True)
-    status(completed=f"run {tag} {sets}")
+    if not os.environ.get("M7_SHARD"):
+        status(completed=f"run {tag} {sets}")
 
 
 # ----------------------------------------------------------------------------- T family: feature cache, training
@@ -471,7 +482,34 @@ def _tdata(split):
     return items
 
 
+_TKEYS = ("memL", "bbL", "lL", "memG", "bbG", "lG", "tok")
+
+
+class _Stacked:
+    """The same items as one stacked tensor per field, resident on `device` (throughput: no per-step CPU stacking or
+    host->GPU copies). Batches are value-identical to the list path (tested)."""
+
+    def __init__(self, items, device="cuda"):
+        self.n, self.videos = len(items), [it["video"] for it in items]
+        self.T = {k: torch.stack([it[k] for it in items]).to(device) for k in _TKEYS + ("gt",)}
+        self.sL = torch.tensor([float(it["sL"]) for it in items], device=device)
+        self.sG = torch.tensor([float(it["sG"]) for it in items], device=device)
+
+    def __len__(self):
+        return self.n
+
+
+def _videos(items):
+    return items.videos if isinstance(items, _Stacked) else [i["video"] for i in items]
+
+
 def _batch(items, idx):
+    if isinstance(items, _Stacked):
+        j = torch.as_tensor(np.asarray(list(idx)), device=items.sL.device)
+        x = {k: items.T[k][j] for k in _TKEYS}
+        x["lL"], x["lG"] = x["lL"].float(), x["lG"].float()
+        x["sL"], x["sG"] = items.sL[j], items.sG[j]
+        return x, items.T["gt"][j].float() / 255
     x = {k: torch.stack([items[i][k] for i in idx]).cuda() for k in ("memL", "bbL", "lL", "memG", "bbG", "lG", "tok")}
     x["lL"], x["lG"] = x["lL"].float(), x["lG"].float()
     x["sL"] = torch.tensor([float(items[i]["sL"]) for i in idx], device="cuda")
@@ -496,6 +534,9 @@ def ttrain(variant="T1", steps="3000", n_items="0", lr="1e-3", bs="8", tag=""):
         rng = np.random.default_rng(0)
         fit = [fit[i] for i in sorted(rng.choice(len(fit), int(n_items), replace=False))]
     val = _tdata("val") if not int(n_items) else fit
+    if os.environ.get("M7_TDATA_GPU", "1") == "1":
+        fit = _Stacked(fit)
+        val = fit if int(n_items) else _Stacked(val)
     head = FusionHead(variant).cuda()
     opt = torch.optim.AdamW(head.parameters(), lr=float(lr), weight_decay=1e-4)
     steps, bs = int(steps), int(bs)
@@ -532,7 +573,7 @@ def ttrain(variant="T1", steps="3000", n_items="0", lr="1e-3", bs="8", tag=""):
             print(variant, curve[-1], flush=True)
     fl, fj, fj0 = evaluate(fit)
     rep = {"variant": variant, "steps": steps, "bs": bs, "lr": float(lr), "schedule": "cosine", "n_fit": len(fit),
-           "n_val": len(val), "fit_videos": sorted({i["video"] for i in fit}), "val_videos": sorted({i["video"] for i in val}),
+           "n_val": len(val), "fit_videos": sorted(set(_videos(fit))), "val_videos": sorted(set(_videos(val))), "data_on_gpu": isinstance(fit, _Stacked),
            "params": n_params(head), "peak_vram_bytes": torch.cuda.max_memory_allocated(), "minutes": (time.time() - t0) / 60,
            "fit_J": fj, "fit_J_input": fj0, "curve": curve}
     HEADS.mkdir(parents=True, exist_ok=True)
@@ -557,7 +598,7 @@ def teval(names, sets="DEV"):
         heads[nm] = h
     dd = OUT / "teval"
     dd.mkdir(parents=True, exist_ok=True)
-    for s, x, u in units(sets):
+    for s, x, u in shard(units(sets)):
         f = dd / f"{stem(u)}.csv"
         if f.exists():
             continue
@@ -591,7 +632,8 @@ def teval(names, sets="DEV"):
         d.close()
         atomic_csv(pd.DataFrame(rows), f)
         print("teval", u.name, flush=True)
-    status(completed=f"teval {names} {sets}")
+    if not os.environ.get("M7_SHARD"):
+        status(completed=f"teval {names} {sets}")
 
 
 def main():

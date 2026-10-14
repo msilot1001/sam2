@@ -135,3 +135,13 @@ def test_causal_policy_rollout_reproduces_sggl_and_sgglv():
     assert b.JF.round(10).tolist() == v.JF.round(10).tolist()[:8]
     c = m.run_policy(pred, "DEV", u, policies.M1Verify, n=6)                      # probe-using policy runs causally
     assert len(c) == 5 and c.JF.notna().all()
+
+
+def test_shards_partition_units_disjointly(monkeypatch):
+    m = load()
+    us = list(range(23))
+    parts = []
+    for i in range(4):
+        monkeypatch.setenv("M7_SHARD", f"{i}/4")
+        parts.append(m.shard(us))
+    assert sorted(sum(parts, [])) == us and sum(map(len, parts)) == len(us)
