@@ -252,6 +252,36 @@ class M3Velocity(Policy):
         return nxt
 
 
+class M3VelocityR(M3Velocity):
+    """M3 revision (stage 2): M3-vel lost on tiny objects whose box centre jitters or jumps when the output source
+    switches between G and L. Velocity is used only when the last two outputs both came from the accepted local crop,
+    and the predicted step is capped at side/8 (side = crop side); otherwise the centre is the output's box centre."""
+    name = "M3-vel-r"
+
+    def __init__(self, gt0):
+        super().__init__(gt0)
+        self.prev_acc = False
+        self.side = None
+
+    def __call__(self, o):
+        out, acc = super().__call__(o)
+        self.side = o["box"][1] - o["box"][0]
+        self._acc_now, self._acc_prev = acc, self.prev_acc
+        self.prev_acc = acc
+        return out, acc
+
+    def center(self, out):
+        from spatial import vcam
+        c = vcam.center_of(out)
+        prev, self.prev_c = self.prev_c, c
+        if c is None or prev is None or not (self._acc_now and self._acc_prev):
+            return c
+        cap = self.side / 8.0
+        dy = max(-cap, min(cap, self.damp * (c[0] - prev[0])))
+        dx = max(-cap, min(cap, self.damp * (c[1] - prev[1])))
+        return (c[0] + dy, c[1] + dx)
+
+
 # ----------------------------------------------------------------------------- R family
 class R2Scale(Policy):
     """R2: an unconfirmed re-acquisition needs G support OR agreement of the 2x-wider crop state (cross-scale
@@ -271,4 +301,4 @@ class R2Scale(Policy):
 
 ALL = [Policy, SGGLV, S1Persist, S1State, S2Observe, S3Identity, S3Relative, S4Evidence,
        F1Blend, F1BlendL, F2Boundary, F3Asym, F3Sym, F4Instance, FUnion, FInter, M1Verify, M1Always, M1Trusted, R2Scale]
-CAUSAL_ONLY = [M3Velocity]
+CAUSAL_ONLY = [M3Velocity, M3VelocityR]

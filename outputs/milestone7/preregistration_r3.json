@@ -1,0 +1,9 @@
+{
+ "created": "2026-10-14 13:47:54",
+ "stage": "2 (failure-driven revision)",
+ "created_after": "causal pilots (Vast): M3-vel +0.0046 [-0.000,+0.012] small DEV+REP, LOVO min +0.0017, 2 videos up (INCONCLUSIVE); gains skate-park obj2 +0.169, sheep obj4 +0.060; losses lab-coat obj2 -0.015, scooter-board obj2 -0.011, lady-running obj2 -0.009 (tiny/jittery targets, G<->L source switches). F1-blend.7 REJECT, M1-always REJECT. T heads: all val J below input (image level).",
+ "revision": "M3-vel-r: velocity only when the last two outputs are both accepted-crop outputs; step capped at side/8; damp 0.5 unchanged",
+ "run": "Ubuntu RTX 2080, causal, DEV+REP, compared to the Ubuntu stage-0 SGGL (machine-matched); comparison to M3-vel (Vast) reported with cross-machine caveat (<=1e-4)",
+ "success": "pilot rule (ADVANCE) vs SGGL AND regressions on lab-coat obj2 / scooter-board obj2 / lady-running obj2 reduced vs M3-vel without losing >50% of the skate-park/sheep gain",
+ "no_tuning": "damp and cap fixed here; no further variants of M3 on DEV/REP"
+}
