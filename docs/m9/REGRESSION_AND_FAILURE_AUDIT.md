@@ -14,6 +14,8 @@
 | SCALE | VOST | 74 | −0.0073 | [−0.0389, +0.0199] | 9 | 10 | 1179_cut_onion/obj2 −0.695 | 236 / 275 |
 | CONSENSUS | MOSEv2 | 139 | −0.0278 | [−0.0585, −0.0010] | 13 | **24** | **8bex1hz5/obj1 −0.741** | 199 / 495 |
 | PCCARRY | MOSEv2 | 139 | −0.0031 | [−0.0102, +0.0037] | 3 | 6 | sjl7jcdm/obj1 −0.301 | 486 / 495 |
+| FLOWVEL | LVOS v2 | 32 | −0.0021 | [−0.0110, +0.0071] | — | 2 | pMntJwSQ/obj1 −0.060 | 93 / 104 |
+| SCALE | LVOS v2 | 32 | −0.0015 | [−0.0473, +0.0329] | — | 2 | D4AgqLQL/obj1 −0.524 | 89 / 104 |
 
 - **JOINT:** NOT_RUN. 위치 성분(FLOWVEL)이 단독으로 해로웠다.
 - **CONSENSUS·PCCARRY의 VOST 실행:** NOT_RUN. MOSEv2에서 반증되었거나 양수가 아니었다.
@@ -55,6 +57,7 @@
 | FLOWVEL | VOST | +0.0046 | [−0.0181, +0.0272] | 6 | 8 | 0.045 | 0.101 |
 | PCCARRY | MOSEv2 | −0.0031 | [−0.0102, +0.0037] | 3 | 6 | 0.011 | 0.042 |
 | CONSENSUS | MOSEv2 | −0.0278 | [−0.0585, −0.0010] | 13 | 24 | 0.070 | 0.156 |
+| NULLJIT | LVOS v2 | −0.0073 | [−0.0340, +0.0153] | — | 3 | — | — |
 
 **arm − NULLJIT (같은 단위, 같은 기계):**
 
@@ -65,6 +68,8 @@
 | FLOWVEL − NULLJIT (VOST, 2080) | −0.0038 | [−0.0229, +0.0142] | 0.645 |
 | PCCARRY − NULLJIT (MOSEv2) | −0.0020 | [−0.0136, +0.0094] | 0.833 |
 | CONSENSUS − NULLJIT (MOSEv2) | −0.0267 | [−0.0570, +0.0009] | 0.046 |
+| SCALE − NULLJIT (LVOS v2) | +0.0058 | [−0.0516, +0.0514] | 0.938 |
+| FLOWVEL − NULLJIT (LVOS v2) | +0.0052 | [−0.0178, +0.0316] | 0.700 |
 
 **해석:**
 - **아무 정보 없는 crop 흔들림도 ±0.05를 넘는 단위를 양쪽으로 8–9개씩 만든다.** SCALE·FLOWVEL의 단위 변동 수와 같은 수준이다.
@@ -88,7 +93,9 @@
 | arm 행과 기준 행 길이 | 모든 단위에서 frame 수가 같음 (`_unit_deltas`의 assert 통과) |
 | manifest | GT만으로 추론 전에 고정. 덮어쓰기 거부 로직 있음 (`m9_manifest.py`) |
 | 같은 기계 비교 | MOSEv2는 Pod diag 궤적, VOST 주 검정은 Pod SGGL. 2080 결과는 재현으로만 보고 |
-| 사전 등록 이후 변경 | 수정 1(CONSENSUS), 수정 2(면적 진단), 수정 3(NULLJIT). 모두 출력 전에 고정하고 공개 |
+| 사전 등록 이후 변경 | 수정 1(CONSENSUS), 수정 2(면적 진단), 수정 3(NULLJIT), 수정 4(LVOS v2). 모두 해당 출력 전에 고정하고 공개 |
 | 실패 분류 범주 추가 | PARTIAL_SEGMENTATION (사후, 공개) |
 | PUMaVOS C | Pod의 `data/pumavos/clips`는 15개이고, M8 worker manifest의 A/B 목록 밖 clip은 0개다. 이름은 출력하지 않고 개수만 비교했다. C는 전송·열람·실행하지 않았다 |
-| LVOS v2 | Google Drive 할당량 거부. 1차 6회와 2차 재시도 모두 실패 → BLOCKED_USER_ACTION |
+| LVOS v2 | 1차 자동 재시도 6회는 Google Drive 할당량으로 실패. 2차 재시도 1회차(02:26 KST)에 수신, sha256 `beb48804…d4e2` 기록. 압축은 Pod 볼륨 `/workspace/m9data/lvosv2/`에 보관(Ubuntu에는 manifest와 결과만) |
+| 동기화 감사 | `gpu_sync.py audit outputs/milestone9/runpod` exit 0 (06:24 KST). Pod 파일 1,804개 모두 Ubuntu에서 sha256 검증, 충돌 0. 동기화 디렉터리 밖의 Pod 파일 14개(manifest, gtbox, arms, 사전 등록)도 sha256 일치 |
+| Pod 정지 | 06:27 KST `runpodctl stop pod` (정지만, 삭제 안 함). API 키는 Pod 환경에서 읽기만 하고 출력하지 않음 |

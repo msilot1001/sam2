@@ -1,0 +1,73 @@
+{
+ "dataset": "lvosv2",
+ "frames": 8822,
+ "gt_present_frames": 8256,
+ "missed_frames": 924,
+ "missed_loss": 758.7988543267129,
+ "categories": [
+  {
+   "category": "SCALE",
+   "frames": 305,
+   "loss": 248.4489082194344,
+   "loss_share": 0.32742393692711186,
+   "units": 8,
+   "videos": 8,
+   "coabs_frames": 12,
+   "top_video_share": 0.37519031013486487
+  },
+  {
+   "category": "PRESENCE_WRONG_TARGET",
+   "frames": 228,
+   "loss": 201.8423258374525,
+   "loss_share": 0.26600241247932366,
+   "units": 10,
+   "videos": 10,
+   "coabs_frames": 0,
+   "top_video_share": 0.3540841546149349
+  },
+  {
+   "category": "POSITION",
+   "frames": 164,
+   "loss": 160.98058527255048,
+   "loss_share": 0.21215185599534095,
+   "units": 14,
+   "videos": 13,
+   "coabs_frames": 63,
+   "top_video_share": 0.21120559316165868
+  },
+  {
+   "category": "PARTIAL_SEGMENTATION",
+   "frames": 145,
+   "loss": 78.8787005355406,
+   "loss_share": 0.10395205539092463,
+   "units": 17,
+   "videos": 16,
+   "coabs_frames": 0,
+   "top_video_share": 0.46840271335415196
+  },
+  {
+   "category": "OBSERVABILITY",
+   "frames": 64,
+   "loss": 50.64833446173494,
+   "loss_share": 0.06674803760302925,
+   "units": 16,
+   "videos": 15,
+   "coabs_frames": 20,
+   "top_video_share": 0.2788897250046763
+  },
+  {
+   "category": "PRESENCE_ABSENT_CLAIM",
+   "frames": 18,
+   "loss": 18.0,
+   "loss_share": 0.023721701604269705,
+   "units": 5,
+   "videos": 5,
+   "coabs_frames": 16,
+   "top_video_share": 0.3888888888888889
+  }
+ ],
+ "dominant": "MIXED",
+ "false_reacq_frames": 104,
+ "gt_empty_frames": 566,
+ "sggl_small_unit_JF_mean": 0.8469024155693045
+}

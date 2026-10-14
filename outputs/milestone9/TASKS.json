@@ -1,5 +1,5 @@
 {
- "updated_kst": "2026-10-15 05:20",
+ "updated_kst": "2026-10-15 06:40",
  "note": "M9 live task ledger (agent-maintained); progress = result files / expected units.",
  "tasks": [
   {
@@ -201,13 +201,20 @@
   {
    "id": "M9-LVOS-RUNS",
    "title": "LVOS v2 — SGGL/FLOWVEL/SCALE/NULLJIT",
-   "description": "사전 등록 수정 4. 09:00 전에 끝나지 않은 arm은 NOT_RUN",
+   "description": "사전 등록 수정 4. 09:00 전에 끝나지 않은 arm은 NOT_RUN — FLOWVEL −0.0021, SCALE −0.0015 (dev 통과, conf 불통과), NULLJIT −0.0073",
    "machine": "RunPod 4090",
-   "status": "RUNNING",
+   "status": "DONE",
    "progress": {
     "glob": "outputs/milestone9/runpod/runs/*/lvosv2*.csv",
     "total": 128
    }
+  },
+  {
+   "id": "M9-CLOSE",
+   "title": "최종 동기화 감사·Pod 정지",
+   "description": "audit exit 0 (1,804 파일), 06:27 Pod 정지(삭제 안 함)",
+   "machine": "Ubuntu",
+   "status": "DONE"
   }
  ]
 }

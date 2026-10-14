@@ -1,0 +1,41 @@
+{
+  "machine": "runpod-rtx4090",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "fill_hole_area": 0,
+  "arm": {
+    "name": "SCALE",
+    "gens": [],
+    "center": "out",
+    "scale": {
+      "alpha": 0.3,
+      "lo": 0.8,
+      "hi": 1.25,
+      "k": 4.0,
+      "max_zoom": 4.0
+    },
+    "why": "M9 scale-only: crop side follows 4x the long side of the latest reliable output box (EMA 0.3, per-frame x[0.8,1.25], floor min(H,W)/4 = the SGGL floor, ceiling min(H,W)); held while output empty/unreliable; centre = SGGL",
+    "frozen_kst": "2026-10-14 23:13"
+  },
+  "code": {
+    "ubuntu_head": "550f7c5fb1f4a3a0739251ac274a91ca39f7e9d4",
+    "uncommitted_paths": 17,
+    "pushed": "2026-10-15 00:42:32",
+    "items": [
+      "src",
+      "scripts",
+      "tests",
+      "configs",
+      "pyproject.toml",
+      "outputs/milestone8/preregistration.json",
+      "outputs/milestone8/preregistration_vk.json",
+      "outputs/milestone8/arms.json",
+      "outputs/milestone8/preregistration_vk_amend1.json",
+      "outputs/milestone8/preregistration_amend1.json",
+      "outputs/milestone8/preregistration_amend2.json",
+      "outputs/milestone9/arms.json",
+      "outputs/milestone9/preregistration_amend1.json"
+    ]
+  }
+}

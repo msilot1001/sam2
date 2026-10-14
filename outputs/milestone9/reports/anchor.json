@@ -136,5 +136,74 @@
     "PART_OF_TARGET": 106.94909381048885
    }
   }
+ },
+ "lvosv2": {
+  "dataset": "lvosv2",
+  "parity_vs_reference": {
+   "frames": 8822,
+   "max_abs_dJF": 0.0
+  },
+  "scale_miss_frames": 305,
+  "scale_miss_nonempty": 287,
+  "anchor_frac": 0.29965156794425085,
+  "anchor_videos": 3,
+  "drift_frac(prec<0.5)": 0.6829268292682927,
+  "median_prec": 0.35600415574407773,
+  "median_rec": 0.036925960637300845,
+  "G_anchor_frac": 0.01056338028169014,
+  "G_median_prec": 0.39910454114840277,
+  "G_median_rec": 0.9966185418809121,
+  "verdict": "H_drift",
+  "miss_loss_by_output_relation": {
+   "ELSEWHERE": 517.8885379500861,
+   "EMPTY": 138.0,
+   "OVERLAP_OTHER": 14.083004162616037,
+   "PART_OF_TARGET": 88.8273122140108
+  },
+  "miss_loss_share_by_output_relation": {
+   "ELSEWHERE": 0.6825109645290804,
+   "EMPTY": 0.18186637896606775,
+   "OVERLAP_OTHER": 0.018559601246514765,
+   "PART_OF_TARGET": 0.117063055258337
+  },
+  "elsewhere_videos": 18,
+  "category_x_relation": {
+   "OBSERVABILITY": {
+    "ELSEWHERE": 14.591053723593829,
+    "EMPTY": 33.0,
+    "OVERLAP_OTHER": 1.7686268765721824,
+    "PART_OF_TARGET": 1.2886538615689287
+   },
+   "PARTIAL_SEGMENTATION": {
+    "ELSEWHERE": 58.18409127655431,
+    "EMPTY": 0.0,
+    "OVERLAP_OTHER": 7.215208460933074,
+    "PART_OF_TARGET": 13.479400798053216
+   },
+   "POSITION": {
+    "ELSEWHERE": 90.42563670858407,
+    "EMPTY": 69.0,
+    "OVERLAP_OTHER": 0.8708096385273646,
+    "PART_OF_TARGET": 0.6841389254390481
+   },
+   "PRESENCE_ABSENT_CLAIM": {
+    "ELSEWHERE": 0.0,
+    "EMPTY": 18.0,
+    "OVERLAP_OTHER": 0.0,
+    "PART_OF_TARGET": 0.0
+   },
+   "PRESENCE_WRONG_TARGET": {
+    "ELSEWHERE": 201.8423258374525,
+    "EMPTY": 0.0,
+    "OVERLAP_OTHER": 0.0,
+    "PART_OF_TARGET": 0.0
+   },
+   "SCALE": {
+    "ELSEWHERE": 152.84543040390136,
+    "EMPTY": 18.0,
+    "OVERLAP_OTHER": 4.2283591865834165,
+    "PART_OF_TARGET": 73.37511862894961
+   }
+  }
  }
 }

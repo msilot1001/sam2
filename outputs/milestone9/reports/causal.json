@@ -437,26 +437,26 @@
  "SCALE": {
   "pooled": {
    "label": "pooled",
-   "n_units": 213,
-   "n_videos": 146,
-   "dJF": 0.005008047779415792,
-   "dJF_video_mean": 0.0036055656170667313,
-   "perm_p_video": 0.6182381761823817,
-   "dJ": 0.0054494094084288226,
-   "dF": 0.0045666861504027505,
+   "n_units": 245,
+   "n_videos": 173,
+   "dJF": 0.004160301896482653,
+   "dJF_video_mean": 0.002670564778825983,
+   "perm_p_video": 0.712928707129287,
+   "dJ": 0.004632838239094127,
+   "dF": 0.0036877655538711737,
    "CI_video": [
-    -0.008380635497310298,
-    0.017928862093631117
+    -0.008814112746449701,
+    0.016585702459635657
    ],
-   "videos_up_0.01": 30,
-   "videos_down_0.01": 38,
+   "videos_up_0.01": 37,
+   "videos_down_0.01": 43,
    "videos_pos_neg": [
-    62,
-    69
+    77,
+    79
    ],
-   "sign_test_p": 0.6002946177102675,
-   "lovo_min": 0.0029753482603334267,
-   "top2_share_of_net_gain": 0.7358186550549676,
+   "sign_test_p": 0.9362204013023133,
+   "lovo_min": 0.002388305640135964,
+   "top2_share_of_net_gain": 0.7700659668455576,
    "worst_unit": [
     "vost__vost/1179_cut_onion__obj2",
     -0.6953500026857296
@@ -465,18 +465,148 @@
     "mosev2__mosev2/006e6b64__obj2",
     0.43916477844086677
    ],
-   "n_units_lt_-0.05": 20,
-   "tiny_dJF": 0.016690312619700158,
-   "n_tiny": 62,
-   "base_JF": 0.6429081576051489,
-   "coabs_frames_base": 4324,
-   "coabs_dJF_per_frame": -0.0015666556410000886,
+   "n_units_lt_-0.05": 22,
+   "tiny_dJF": 0.02041606332204012,
+   "n_tiny": 73,
+   "base_JF": 0.6695523055841405,
+   "coabs_frames_base": 4851,
+   "coabs_dJF_per_frame": -0.001398363516644819,
    "false_reacq_arm_vs_base": [
-    733,
-    770
+    822,
+    874
    ],
-   "latency_s": 0.2651601363382676,
-   "peak_vram_gb": 1.230814208
+   "latency_s": 0.27914975964711114,
+   "peak_vram_gb": 1.345234432
+  },
+  "lvosv2": {
+   "label": "lvosv2",
+   "n_units": 32,
+   "n_videos": 27,
+   "dJF": -0.0014825066367910537,
+   "dJF_video_mean": -0.0023853656798091733,
+   "perm_p_video": 0.9595040495950405,
+   "dJ": -0.0008024636067899618,
+   "dF": -0.002162549666792156,
+   "CI_video": [
+    -0.04732119051550709,
+    0.03286274533003442
+   ],
+   "videos_up_0.01": 7,
+   "videos_down_0.01": 5,
+   "videos_pos_neg": [
+    15,
+    10
+   ],
+   "sign_test_p": 0.42435622215270996,
+   "lovo_min": -0.009432727528263081,
+   "top2_share_of_net_gain": NaN,
+   "worst_unit": [
+    "lvosv2__lvosv2/D4AgqLQL__obj1",
+    -0.5235355654180893
+   ],
+   "best_unit": [
+    "lvosv2__lvosv2/wM4lbQ4I__obj1",
+    0.24497434099884186
+   ],
+   "n_units_lt_-0.05": 2,
+   "tiny_dJF": 0.04141574909886532,
+   "n_tiny": 11,
+   "base_JF": 0.8469024155693045,
+   "coabs_frames_base": 527,
+   "coabs_dJF_per_frame": -1.753781320613684e-05,
+   "false_reacq_arm_vs_base": [
+    89,
+    104
+   ],
+   "latency_s": 0.37226818979660087,
+   "peak_vram_gb": 1.345234432,
+   "holm_p": 0.9595040495950405
+  },
+  "lvosv2:conf": {
+   "label": "lvosv2:conf",
+   "n_units": 16,
+   "n_videos": 15,
+   "dJF": -0.018381482553619155,
+   "dJF_video_mean": -0.019862923660232852,
+   "perm_p_video": 0.8316168383161684,
+   "dJ": -0.01769656868634077,
+   "dF": -0.019066396420897604,
+   "CI_video": [
+    -0.09628327311688442,
+    0.04019311642023658
+   ],
+   "videos_up_0.01": 5,
+   "videos_down_0.01": 3,
+   "videos_pos_neg": [
+    8,
+    6
+   ],
+   "sign_test_p": 0.79052734375,
+   "lovo_min": -0.031251865303023284,
+   "top2_share_of_net_gain": NaN,
+   "worst_unit": [
+    "lvosv2__lvosv2/D4AgqLQL__obj1",
+    -0.5235355654180893
+   ],
+   "best_unit": [
+    "lvosv2__lvosv2/vqD4tiYh__obj1",
+    0.1746742586874428
+   ],
+   "n_units_lt_-0.05": 2,
+   "tiny_dJF": 0.05813156578635933,
+   "n_tiny": 3,
+   "base_JF": 0.8589570850723679,
+   "coabs_frames_base": 99,
+   "coabs_dJF_per_frame": -0.0007602085739634,
+   "false_reacq_arm_vs_base": [
+    49,
+    61
+   ],
+   "latency_s": 0.373064486409584,
+   "peak_vram_gb": 1.345234432
+  },
+  "lvosv2:dev": {
+   "label": "lvosv2:dev",
+   "n_units": 16,
+   "n_videos": 12,
+   "dJF": 0.015416469280037048,
+   "dJF_video_mean": 0.01946158179572043,
+   "perm_p_video": 0.6039396060393961,
+   "dJ": 0.016091641472760845,
+   "dF": 0.014741297087313292,
+   "CI_video": [
+    -0.004401153604516634,
+    0.053826489973565574
+   ],
+   "videos_up_0.01": 2,
+   "videos_down_0.01": 2,
+   "videos_pos_neg": [
+    7,
+    4
+   ],
+   "sign_test_p": 0.548828125,
+   "lovo_min": 0.00011261116545006056,
+   "top2_share_of_net_gain": 1.0489863477296466,
+   "worst_unit": [
+    "lvosv2__lvosv2/8lxxCA5h__obj1",
+    -0.02402456989126911
+   ],
+   "best_unit": [
+    "lvosv2__lvosv2/wM4lbQ4I__obj1",
+    0.24497434099884186
+   ],
+   "n_units_lt_-0.05": 0,
+   "tiny_dJF": 0.03514731784105507,
+   "n_tiny": 8,
+   "base_JF": 0.834847746066241,
+   "coabs_frames_base": 428,
+   "coabs_dJF_per_frame": 0.00015424818052042636,
+   "false_reacq_arm_vs_base": [
+    40,
+    43
+   ],
+   "latency_s": 0.37147189318361773,
+   "peak_vram_gb": 1.345179648
   },
   "mosev2": {
    "label": "mosev2",
@@ -520,7 +650,7 @@
    ],
    "latency_s": 0.26728953695181806,
    "peak_vram_gb": 1.18510592,
-   "holm_p": 0.22817718228177183
+   "holm_p": 0.34226577342265774
   },
   "mosev2:conf": {
    "label": "mosev2:conf",
@@ -650,7 +780,7 @@
    ],
    "latency_s": 0.2611603162668688,
    "peak_vram_gb": 1.230814208,
-   "holm_p": 0.2685731426857314
+   "holm_p": 0.5371462853714628
   },
   "vost:conf": {
    "label": "vost:conf",
@@ -1137,26 +1267,26 @@
  "NULLJIT": {
   "pooled": {
    "label": "pooled",
-   "n_units": 213,
-   "n_videos": 146,
-   "dJF": 0.0024141776585622898,
-   "dJF_video_mean": 0.0014808956410029437,
-   "perm_p_video": 0.7883211678832117,
-   "dJ": 0.0039215638528430075,
-   "dF": 0.0009067914642815579,
+   "n_units": 245,
+   "n_videos": 173,
+   "dJF": 0.0011449928832571851,
+   "dJF_video_mean": 0.001409550199896916,
+   "perm_p_video": 0.7656234376562344,
+   "dJ": 0.0024242277183147997,
+   "dF": -0.00013424195180043372,
    "CI_video": [
-    -0.007312439453947706,
-    0.01206178172126894
+    -0.008039784165943857,
+    0.010355955317293235
    ],
-   "videos_up_0.01": 26,
-   "videos_down_0.01": 31,
+   "videos_up_0.01": 30,
+   "videos_down_0.01": 33,
    "videos_pos_neg": [
-    70,
-    72
+    83,
+    86
    ],
-   "sign_test_p": 0.9331607923848083,
-   "lovo_min": 0.0006016290995338679,
-   "top2_share_of_net_gain": 1.4993741386586563,
+   "sign_test_p": 0.8777899471847899,
+   "lovo_min": -0.00043504596628925164,
+   "top2_share_of_net_gain": 2.748463501710994,
    "worst_unit": [
     "mosev2__mosev2/ulb262d8__obj1",
     -0.3346036106723087
@@ -1165,18 +1295,148 @@
     "mosev2__mosev2/8ef303eb__obj1",
     0.38667447217258777
    ],
-   "n_units_lt_-0.05": 15,
-   "tiny_dJF": -0.005044483841605116,
-   "n_tiny": 62,
-   "base_JF": 0.6427462166453547,
-   "coabs_frames_base": 4324,
-   "coabs_dJF_per_frame": -0.00813365156806625,
+   "n_units_lt_-0.05": 18,
+   "tiny_dJF": -0.006592135249633569,
+   "n_tiny": 73,
+   "base_JF": 0.669411516096646,
+   "coabs_frames_base": 4851,
+   "coabs_dJF_per_frame": -0.009723749614578121,
    "false_reacq_arm_vs_base": [
-    798,
-    770
+    927,
+    874
    ],
-   "latency_s": 0.33257104350599664,
-   "peak_vram_gb": 1.229765632
+   "latency_s": 0.3381088325054231,
+   "peak_vram_gb": 1.345234432
+  },
+  "lvosv2": {
+   "label": "lvosv2",
+   "n_units": 32,
+   "n_videos": 27,
+   "dJF": -0.00730301827736742,
+   "dJF_video_mean": 0.001023756333175432,
+   "perm_p_video": 0.8913108689131087,
+   "dJ": -0.007542415927138581,
+   "dF": -0.00706362062759619,
+   "CI_video": [
+    -0.03402298433164595,
+    0.015270569146394294
+   ],
+   "videos_up_0.01": 4,
+   "videos_down_0.01": 2,
+   "videos_pos_neg": [
+    13,
+    14
+   ],
+   "sign_test_p": 1.0,
+   "lovo_min": -0.011947026192838103,
+   "top2_share_of_net_gain": NaN,
+   "worst_unit": [
+    "lvosv2__lvosv2/7K7WVzGG__obj2",
+    -0.306102722000391
+   ],
+   "best_unit": [
+    "lvosv2__lvosv2/MKnlVo6x__obj1",
+    0.13666122710222373
+   ],
+   "n_units_lt_-0.05": 3,
+   "tiny_dJF": -0.015315261367612106,
+   "n_tiny": 11,
+   "base_JF": 0.8469024155693045,
+   "coabs_frames_base": 527,
+   "coabs_dJF_per_frame": -0.022770398481973434,
+   "false_reacq_arm_vs_base": [
+    129,
+    104
+   ],
+   "latency_s": 0.3749697405328557,
+   "peak_vram_gb": 1.345234432,
+   "holm_p": 1.0
+  },
+  "lvosv2:conf": {
+   "label": "lvosv2:conf",
+   "n_units": 16,
+   "n_videos": 15,
+   "dJF": 0.016419936509840347,
+   "dJF_video_mean": 0.01740192798149896,
+   "perm_p_video": 0.09559044095590441,
+   "dJ": 0.015739944277896375,
+   "dF": 0.01709992874178441,
+   "CI_video": [
+    0.0011435733861401543,
+    0.03796760028388008
+   ],
+   "videos_up_0.01": 4,
+   "videos_down_0.01": 0,
+   "videos_pos_neg": [
+    9,
+    6
+   ],
+   "sign_test_p": 0.60723876953125,
+   "lovo_min": 0.00840385047034812,
+   "top2_share_of_net_gain": 0.8269301121344341,
+   "worst_unit": [
+    "lvosv2__lvosv2/q6XSXdvq__obj1",
+    -0.00883541140480848
+   ],
+   "best_unit": [
+    "lvosv2__lvosv2/MKnlVo6x__obj1",
+    0.13666122710222373
+   ],
+   "n_units_lt_-0.05": 0,
+   "tiny_dJF": 0.006386266338341014,
+   "n_tiny": 3,
+   "base_JF": 0.8589570850723679,
+   "coabs_frames_base": 99,
+   "coabs_dJF_per_frame": 0.0,
+   "false_reacq_arm_vs_base": [
+    57,
+    61
+   ],
+   "latency_s": 0.375083467620611,
+   "peak_vram_gb": 1.345234432
+  },
+  "lvosv2:dev": {
+   "label": "lvosv2:dev",
+   "n_units": 16,
+   "n_videos": 12,
+   "dJF": -0.031025973064575187,
+   "dJF_video_mean": -0.019448958227228978,
+   "perm_p_video": 0.30216978302169784,
+   "dJ": -0.030824776132173538,
+   "dF": -0.03122716999697679,
+   "CI_video": [
+    -0.07236141218875929,
+    0.0008889493025053258
+   ],
+   "videos_up_0.01": 0,
+   "videos_down_0.01": 2,
+   "videos_pos_neg": [
+    4,
+    8
+   ],
+   "sign_test_p": 0.3876953125,
+   "lovo_min": -0.038635804280313255,
+   "top2_share_of_net_gain": NaN,
+   "worst_unit": [
+    "lvosv2__lvosv2/7K7WVzGG__obj2",
+    -0.306102722000391
+   ],
+   "best_unit": [
+    "lvosv2__lvosv2/raql9H7f__obj3",
+    0.0068914693449457776
+   ],
+   "n_units_lt_-0.05": 3,
+   "tiny_dJF": -0.023453334257344527,
+   "n_tiny": 8,
+   "base_JF": 0.834847746066241,
+   "coabs_frames_base": 428,
+   "coabs_dJF_per_frame": -0.028037383177570093,
+   "false_reacq_arm_vs_base": [
+    72,
+    43
+   ],
+   "latency_s": 0.37485601344510033,
+   "peak_vram_gb": 1.345179648
   },
   "mosev2": {
    "label": "mosev2",

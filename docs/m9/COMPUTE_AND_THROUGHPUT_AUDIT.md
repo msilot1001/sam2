@@ -53,11 +53,13 @@
 | PCCARRY MOSEv2 | 02:37 → 03:01 | 24분 | 10,459 |
 | FLOWVEL VOST | 03:01 → 03:27 | 26분 | 8,396 |
 | SGGL 면적 진단 MOSEv2 / VOST | 03:27 → 04:12 | 45분 | 18,855 |
-| NULLJIT MOSEv2 | 04:12 → (아래 FINAL 참고) | ~23분 | 10,459 |
+| NULLJIT MOSEv2 | 04:12 → 04:35 | 23분 | 10,459 |
+| LVOS v2 추출 + manifest | 05:08 → 05:12 | 4분 | (정답 140영상, JPEG 7,654) |
+| SGGL / FLOWVEL / SCALE / NULLJIT LVOS v2 | 05:12 → 06:20 | 각 17–19분 | 8,822 × 4 |
 
 - **처리량:** SGGL 계열 arm은 약 7.3–7.9 frame/s, RAFT를 쓰는 FLOWVEL은 약 5.4–6.7 frame/s다. 4 worker 합산이며, 지연 열의 0.26–0.35 s/frame은 동시 실행 중 단일 worker 기준이다.
 - **최대 VRAM (단일 worker):** SGGL 계열 1.19–1.23 GB, FLOWVEL 1.32–1.39 GB.
-- **GPU 사용 시간:** Pod 가동은 23:02부터 종료까지(FINAL에 기록). 실제 연산은 약 5.5시간이다.
+- **GPU 사용 시간:** Pod 가동 23:02 → 06:27 (**7.4시간**, RTX 4090 1대). 실제 연산은 약 6.6시간이다. Pod는 06:27에 정지했다(삭제 안 함).
 
 ## Ubuntu RTX 2080 (1 worker)
 
