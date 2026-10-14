@@ -149,7 +149,7 @@ def classify(r):
 def taxonomy(ds):
     F, _ = load_diag(ds)
     box = pd.read_csv(OUT / "gtbox" / f"{ds}.csv")          # unit, video_idx, gt_long, prompt_area, crop_side
-    X = F.merge(box, on=["unit", "video_idx"], how="left")
+    X = F.drop(columns=[c for c in ("crop_side", "gt_long_over_side") if c in F]).merge(box, on=["unit", "video_idx"], how="left")
     X["area_ratio"] = X.gt_area / X.prompt_area
     X["gt_long_over_side"] = X.gt_long / X.crop_side
     X["out_empty"] = ~X.acc.astype(bool) & (X.score_G <= 0)    # SGGL output empty: L rejected by the gate and G absent
@@ -287,6 +287,24 @@ def pair(a, b):
     prev = json.loads((OUT / "reports" / "pairs.json").read_text()) if (OUT / "reports" / "pairs.json").exists() else {}
     prev[f"{a}-{b}"] = res
     (OUT / "reports" / "pairs.json").write_text(json.dumps(prev, indent=1, default=float))
+
+
+def catmiss(arm, ds):
+    """Per-category recovery: SGGL missed frames (taxonomy) that the arm no longer misses (J >= GOOD), by split."""
+    T = pd.read_csv(OUT / "reports" / f"taxonomy_frames_{ds}.csv")
+    rd = next(p / "runs" / arm for p in MACH.values() if (p / "runs" / arm / f"{T.stem.iloc[0]}.csv").exists())
+    A = pd.concat([pd.read_csv(rd / f"{s}.csv")[["video_idx", "J", "JF"]].assign(stem=s) for s in T.stem.unique()])
+    M = T.merge(A, on=["stem", "video_idx"], suffixes=("", "_arm"))
+    res = {}
+    for sp, d in [("all", M)] + list(M.groupby("subset")):
+        g = d.groupby("cat")
+        res[sp] = {c: {"sggl_missed": int(len(x)), "still_missed": int((x.J_arm < GOOD).sum()),
+                       "reduction": float(1 - (x.J_arm < GOOD).mean()), "dJF_sum": float((x.JF_arm - x.JF).sum())} for c, x in g}
+    for sp, r in res.items():
+        print(arm, ds, sp, {c: f"{v['sggl_missed']}->{v['still_missed']} ({v['reduction']:.0%}, {v['dJF_sum']:+.1f})" for c, v in r.items()})
+    prev = json.loads((OUT / "reports" / "catmiss.json").read_text()) if (OUT / "reports" / "catmiss.json").exists() else {}
+    prev[f"{arm}:{ds}"] = res
+    (OUT / "reports" / "catmiss.json").write_text(json.dumps(prev, indent=1))
 
 
 if __name__ == "__main__":

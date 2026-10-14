@@ -1,0 +1,90 @@
+{
+ "SCALE-FLOWVEL": {
+  "pooled": {
+   "label": "pooled",
+   "n_units": 139,
+   "n_videos": 102,
+   "dJF": 0.025732739598010725,
+   "dJF_video_mean": 0.02899081848595637,
+   "perm_p_video": 0.0012998700129987,
+   "dJ": 0.02363991545925235,
+   "dF": 0.0278255637367691,
+   "CI_video": [
+    0.011126231945880081,
+    0.04380961396984586
+   ],
+   "videos_up_0.01": 34,
+   "videos_down_0.01": 18,
+   "videos_pos_neg": [
+    51,
+    48
+   ],
+   "sign_test_p": 0.8408215252256425,
+   "lovo_min": 0.021050133886133405,
+   "top2_share_of_net_gain": 0.29150361050949214,
+   "worst_unit": [
+    "mosev2__mosev2/f6f8b4a6__obj3",
+    -0.14798208624780307
+   ],
+   "best_unit": [
+    "mosev2__mosev2/381hg4vf__obj1",
+    0.6719323278370813
+   ],
+   "n_units_lt_-0.05": 10,
+   "tiny_dJF": 0.029126712983353,
+   "n_tiny": 51,
+   "base_JF": 0.7257072228632785,
+   "coabs_frames_base": 3460,
+   "coabs_dJF_per_frame": -0.002871488940344286,
+   "false_reacq_arm_vs_base": [
+    497,
+    495
+   ],
+   "latency_s": 0.26728953695181806,
+   "peak_vram_gb": 1.18510592
+  },
+  "mosev2": {
+   "label": "mosev2",
+   "n_units": 139,
+   "n_videos": 102,
+   "dJF": 0.025732739598010725,
+   "dJF_video_mean": 0.02899081848595637,
+   "perm_p_video": 0.0012998700129987,
+   "dJ": 0.02363991545925235,
+   "dF": 0.0278255637367691,
+   "CI_video": [
+    0.011126231945880081,
+    0.04380961396984586
+   ],
+   "videos_up_0.01": 34,
+   "videos_down_0.01": 18,
+   "videos_pos_neg": [
+    51,
+    48
+   ],
+   "sign_test_p": 0.8408215252256425,
+   "lovo_min": 0.021050133886133405,
+   "top2_share_of_net_gain": 0.29150361050949214,
+   "worst_unit": [
+    "mosev2__mosev2/f6f8b4a6__obj3",
+    -0.14798208624780307
+   ],
+   "best_unit": [
+    "mosev2__mosev2/381hg4vf__obj1",
+    0.6719323278370813
+   ],
+   "n_units_lt_-0.05": 10,
+   "tiny_dJF": 0.029126712983353,
+   "n_tiny": 51,
+   "base_JF": 0.7257072228632785,
+   "coabs_frames_base": 3460,
+   "coabs_dJF_per_frame": -0.002871488940344286,
+   "false_reacq_arm_vs_base": [
+    497,
+    495
+   ],
+   "latency_s": 0.26728953695181806,
+   "peak_vram_gb": 1.18510592
+  }
+ }
+}

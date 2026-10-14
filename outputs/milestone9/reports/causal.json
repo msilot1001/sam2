@@ -173,5 +173,180 @@
    "latency_s": 0.34342874221866987,
    "peak_vram_gb": 1.23038464
   }
+ },
+ "SCALE": {
+  "pooled": {
+   "label": "pooled",
+   "n_units": 139,
+   "n_videos": 102,
+   "dJF": 0.011577459200688598,
+   "dJF_video_mean": 0.01263451044912518,
+   "perm_p_video": 0.11408859114088592,
+   "dJ": 0.011028228291990254,
+   "dF": 0.01212669010938693,
+   "CI_video": [
+    -0.00028488134197872145,
+    0.02580676643649672
+   ],
+   "videos_up_0.01": 16,
+   "videos_down_0.01": 23,
+   "videos_pos_neg": [
+    40,
+    47
+   ],
+   "sign_test_p": 0.5202915935750737,
+   "lovo_min": 0.008542709013215357,
+   "top2_share_of_net_gain": 0.4877427266665688,
+   "worst_unit": [
+    "mosev2__mosev2/z6kk712z__obj1",
+    -0.1297907751386569
+   ],
+   "best_unit": [
+    "mosev2__mosev2/006e6b64__obj2",
+    0.43916477844086677
+   ],
+   "n_units_lt_-0.05": 10,
+   "tiny_dJF": 0.019354860579596723,
+   "n_tiny": 51,
+   "base_JF": 0.7257072228632785,
+   "coabs_frames_base": 3460,
+   "coabs_dJF_per_frame": -0.002871488940344286,
+   "false_reacq_arm_vs_base": [
+    497,
+    495
+   ],
+   "latency_s": 0.26728953695181806,
+   "peak_vram_gb": 1.18510592
+  },
+  "mosev2": {
+   "label": "mosev2",
+   "n_units": 139,
+   "n_videos": 102,
+   "dJF": 0.011577459200688598,
+   "dJF_video_mean": 0.01263451044912518,
+   "perm_p_video": 0.11408859114088592,
+   "dJ": 0.011028228291990254,
+   "dF": 0.01212669010938693,
+   "CI_video": [
+    -0.00028488134197872145,
+    0.02580676643649672
+   ],
+   "videos_up_0.01": 16,
+   "videos_down_0.01": 23,
+   "videos_pos_neg": [
+    40,
+    47
+   ],
+   "sign_test_p": 0.5202915935750737,
+   "lovo_min": 0.008542709013215357,
+   "top2_share_of_net_gain": 0.4877427266665688,
+   "worst_unit": [
+    "mosev2__mosev2/z6kk712z__obj1",
+    -0.1297907751386569
+   ],
+   "best_unit": [
+    "mosev2__mosev2/006e6b64__obj2",
+    0.43916477844086677
+   ],
+   "n_units_lt_-0.05": 10,
+   "tiny_dJF": 0.019354860579596723,
+   "n_tiny": 51,
+   "base_JF": 0.7257072228632785,
+   "coabs_frames_base": 3460,
+   "coabs_dJF_per_frame": -0.002871488940344286,
+   "false_reacq_arm_vs_base": [
+    497,
+    495
+   ],
+   "latency_s": 0.26728953695181806,
+   "peak_vram_gb": 1.18510592,
+   "holm_p": 0.11408859114088592
+  },
+  "mosev2:conf": {
+   "label": "mosev2:conf",
+   "n_units": 77,
+   "n_videos": 54,
+   "dJF": 0.011919335937809904,
+   "dJF_video_mean": 0.012516166125202673,
+   "perm_p_video": 0.270972902709729,
+   "dJ": 0.009818585046720656,
+   "dF": 0.01402008682889912,
+   "CI_video": [
+    -0.0053766046001699425,
+    0.03219986600523937
+   ],
+   "videos_up_0.01": 10,
+   "videos_down_0.01": 12,
+   "videos_pos_neg": [
+    20,
+    24
+   ],
+   "sign_test_p": 0.651587827208914,
+   "lovo_min": 0.006384975641682023,
+   "top2_share_of_net_gain": 0.7249379731266852,
+   "worst_unit": [
+    "mosev2__mosev2/z6kk712z__obj1",
+    -0.1297907751386569
+   ],
+   "best_unit": [
+    "mosev2__mosev2/006e6b64__obj2",
+    0.43916477844086677
+   ],
+   "n_units_lt_-0.05": 5,
+   "tiny_dJF": 0.025157008685868638,
+   "n_tiny": 30,
+   "base_JF": 0.7227854421324843,
+   "coabs_frames_base": 2120,
+   "coabs_dJF_per_frame": -0.0007938987957863268,
+   "false_reacq_arm_vs_base": [
+    171,
+    175
+   ],
+   "latency_s": 0.26442039160059233,
+   "peak_vram_gb": 1.18510592
+  },
+  "mosev2:dev": {
+   "label": "mosev2:dev",
+   "n_units": 62,
+   "n_videos": 48,
+   "dJF": 0.011152870349747617,
+   "dJF_video_mean": 0.012767647813537996,
+   "perm_p_video": 0.29887011298870114,
+   "dJ": 0.012530527161115404,
+   "dF": 0.009775213538379858,
+   "CI_video": [
+    -0.00483295406476597,
+    0.03224592476824701
+   ],
+   "videos_up_0.01": 6,
+   "videos_down_0.01": 11,
+   "videos_pos_neg": [
+    20,
+    23
+   ],
+   "sign_test_p": 0.7607916425613439,
+   "lovo_min": 0.005492356264875935,
+   "top2_share_of_net_gain": 0.9871234869214189,
+   "worst_unit": [
+    "mosev2__mosev2/vilfkzpg__obj1",
+    -0.082589797259084
+   ],
+   "best_unit": [
+    "mosev2__mosev2/a3c56751__obj1",
+    0.3564442295269203
+   ],
+   "n_units_lt_-0.05": 5,
+   "tiny_dJF": 0.011066077570636847,
+   "n_tiny": 21,
+   "base_JF": 0.7293358860289422,
+   "coabs_frames_base": 1340,
+   "coabs_dJF_per_frame": -0.0061584226018837444,
+   "false_reacq_arm_vs_base": [
+    326,
+    320
+   ],
+   "latency_s": 0.2708528303718887,
+   "peak_vram_gb": 1.131528192
+  }
  }
 }

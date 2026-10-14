@@ -1,0 +1,15 @@
+{
+  "machine": "ubuntu-rtx2080",
+  "torch": "2.14.1+cu130",
+  "cuda": "13.0",
+  "gpu": "NVIDIA GeForce RTX 2080",
+  "fill_hole_area": 0,
+  "arm": {
+    "name": "SGGL",
+    "gens": [],
+    "center": "out",
+    "why": "machine-matched SGGL baseline for every worker that runs arms (== diag trajectory on Ubuntu)",
+    "frozen_kst": "2026-10-14 17:06"
+  },
+  "code": "ubuntu working tree"
+}
