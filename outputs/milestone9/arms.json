@@ -1,0 +1,37 @@
+{
+  "SCALE": {
+    "name": "SCALE",
+    "gens": [],
+    "center": "out",
+    "scale": {
+      "alpha": 0.3,
+      "lo": 0.8,
+      "hi": 1.25,
+      "k": 4.0,
+      "max_zoom": 4.0
+    },
+    "why": "M9 scale-only: crop side follows 4x the long side of the latest reliable output box (EMA 0.3, per-frame x[0.8,1.25], floor min(H,W)/4 = the SGGL floor, ceiling min(H,W)); held while output empty/unreliable; centre = SGGL",
+    "frozen_kst": "2026-10-14 23:13"
+  },
+  "JOINT": {
+    "name": "JOINT",
+    "gens": [],
+    "center": "flowvel",
+    "scale": {
+      "alpha": 0.3,
+      "lo": 0.8,
+      "hi": 1.25,
+      "k": 4.0,
+      "max_zoom": 4.0
+    },
+    "why": "M9 translation (frozen M8 FLOWVEL) + scale (SCALE controller, identical parameters)",
+    "frozen_kst": "2026-10-14 23:13"
+  },
+  "PCCARRY": {
+    "name": "PCCARRY",
+    "gens": [],
+    "center": "pccarry",
+    "why": "M9 cheap motion: while SGGL output is empty, move the crop by the global phase-correlation shift between frames t-1 and t (4x down-sampled gray, FFT; no learned model); else SGGL centre. Mirrors M8 CAMCARRY without RAFT",
+    "frozen_kst": "2026-10-14 23:13"
+  }
+}

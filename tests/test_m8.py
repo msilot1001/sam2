@@ -128,3 +128,34 @@ def test_shared_view_backbone_is_bit_identical_to_recomputing():
     finally:
         m.R.probe = orig
     assert a.score.tolist() == b.score.tolist() and a.J.tolist() == b.J.tolist() and np.array_equal(va, vb)
+
+
+def test_m9_phase_correlation_and_scale_controller():
+    x = torch.rand(1, 3, 240, 320)
+    y = torch.roll(x, (8, -12), (2, 3))
+    dx, dy = motion.phase_shift(x, y)
+    assert abs(dx + 12) < 1.0 and abs(dy - 8) < 1.0
+    c = motion.ScaleCtl(120, (480, 640))                                                # side0 >= floor, as in SGGL
+    assert c.update(None, True) == 120 and c.update((0, 10, 0, 10), False) == 120       # held: empty / unreliable
+    assert c.update((0, 10, 0, 10), True) == 120                                         # tiny target: stays at the floor
+    big = [c.update((0, 300, 0, 300), True) for _ in range(30)]
+    assert all(b2 <= 1.25 * b1 + 1e-6 for b1, b2 in zip(big, big[1:])) and big[-1] <= 480    # bounded growth, ceiling
+
+
+@pytest.mark.realdata
+def test_m9_scale_and_pc_arms_run_and_sggl_path_unchanged():
+    if not torch.cuda.is_available():
+        pytest.skip("no CUDA")
+    from memint import controlled
+    m = load()
+    pred = m.m55.build_predictor()
+    controlled.install(pred, None, {})
+    u = m.m7.m6._UNITS()["davis__davis/lab-coat__obj1"]
+    base = m.run_arm(pred, None, "DEV", u, {"name": "SGGL", "gens": []}, None, n=8)
+    a = m.arms()
+    sc = m.run_arm(pred, None, "DEV", u, a["SCALE"], None, n=8)
+    pc = m.run_arm(pred, None, "DEV", u, a["PCCARRY"], None, n=8)
+    assert len(sc) == len(pc) == len(base) == 7 and sc.crop_side.min() > 0
+    ref = pd.read_csv(ROOT / "outputs/milestone8/diag/davis__davis_lab-coat__obj1.csv") if (ROOT / "outputs/milestone8/diag/davis__davis_lab-coat__obj1.csv").exists() else None
+    if ref is not None:
+        assert np.allclose(base.JF.to_numpy(), ref.JF.to_numpy()[:7], atol=1e-9)              # set_side refactor is inert

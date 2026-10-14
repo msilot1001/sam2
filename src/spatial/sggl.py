@@ -113,8 +113,19 @@ class Dual:
         if store:
             s.od["non_cond_frame_outputs"][t] = out
         pix, self.pred._m7_pix = getattr(self.pred, "_m7_pix", None), None
-        return View(name, out, out["pred_masks"].float().cpu(), mask, score, self._iou[0],
-                    None if s.side is None else s.frames.box, pix)
+        box = None if s.side is None else s.frames.box
+        if box is not None and mask.shape != (box[1] - box[0], box[3] - box[2]):
+            # M9 adaptive scale: the state's video resolution is fixed at init, the crop box is not -> resample the
+            # low-res logits to the actual box size (identical to the fixed-side path when the box is unchanged)
+            lg = out["pred_masks"].float().cpu()
+            mask = Fn.interpolate(lg, size=(box[1] - box[0], box[3] - box[2]), mode="bilinear", align_corners=False)[0, 0].numpy() > 0
+        return View(name, out, out["pred_masks"].float().cpu(), mask, score, self._iou[0], box, pix)
+
+    def set_side(self, name, side):
+        """M9: change the crop side of crop state `name` for the NEXT frame (clipped to the frame)."""
+        s = self.S[name]
+        s.side = int(max(16, min(side, min(self.hw))))
+        s.frames.box = vcam.place(self.center, s.side, self.hw)
 
     def probe(self, name, t, kind, trusted=None, image=None) -> View:
         """Non-storing diagnostic prediction of frame t on state `name` (after its production `view`).

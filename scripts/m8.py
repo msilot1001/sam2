@@ -369,8 +369,14 @@ ARMS_FILE = OUT / "arms.json"
 RANKERS = OUT / "rankers"
 
 
+ARMS9_FILE = Path("outputs/milestone9/arms.json")
+
+
 def arms():
-    return json.loads(ARMS_FILE.read_text()) if ARMS_FILE.exists() else {}
+    a = json.loads(ARMS_FILE.read_text()) if ARMS_FILE.exists() else {}
+    if ARMS9_FILE.exists():
+        a.update(json.loads(ARMS9_FILE.read_text()))
+    return a
 
 
 def freeze_arm(name, spec_json):
@@ -382,9 +388,11 @@ def freeze_arm(name, spec_json):
             raise SystemExit(f"arm {name} is frozen and differs")
         return
     assert not any((d / name).exists() for d in (OUT / "runs", OUT / "runpod" / "runs")), "arm already has outputs"
-    a[name] = spec
-    atomic_json(a, ARMS_FILE)
-    print("froze arm", name)
+    a9 = json.loads(ARMS9_FILE.read_text()) if ARMS9_FILE.exists() else {}     # M8 arms.json is closed; new arms -> M9
+    a9[name] = spec
+    ARMS9_FILE.parent.mkdir(parents=True, exist_ok=True)
+    atomic_json(a9, ARMS9_FILE)
+    print("froze arm", name, "->", ARMS9_FILE)
 
 
 class Rank:
@@ -449,15 +457,20 @@ def run_arm(pred, flow, s, u, A, rank, n=None):
     refs_t = {"fg": rf.fg.cpu(), "bg": rf.bg.cpu()}
     trk = motion.Track(vcam.bbox(g0))
     use_flow = flow is not None
-    prev = R.frame_tensor(ps[0]).cuda() if use_flow else None
+    use_pc = A.get("center") == "pccarry"                   # M9 cheap motion (phase correlation, no RAFT)
+    prev = R.frame_tensor(ps[0]).cuda() if (use_flow or use_pc) else None
+    sctl = motion.ScaleCtl(d.side, hw, **A["scale"]) if A.get("scale") is not None else None   # M9 adaptive scale
     m3, rows, held = {}, [], 0
+    pc = np.zeros(2)
     for t in range(1, n):
         t0 = time.perf_counter()
         G, L = d.view("G", t), d.view("L", t)
         out, ok = sggl.a2x(G, L, hw)
-        frame = R.frame_tensor(ps[t]).cuda() if (use_flow or A["gens"]) else None
+        frame = R.frame_tensor(ps[t]).cuda() if (use_flow or use_pc or A["gens"]) else None
         if use_flow:
             trk.step_flow(flow(prev, frame), hw)
+        if use_pc:
+            pc = motion.phase_shift(prev, frame)
         trig = G.score <= 0 and L.score <= 0
         res = {"rescued": False, "gen": None, "rscore": np.nan, "calls": 2}
         if trig and A["gens"]:
@@ -494,9 +507,15 @@ def run_arm(pred, flow, s, u, A, rank, n=None):
         torch.cuda.synchronize()
         lat = time.perf_counter() - t0
         g = m7.gt(u, t)
+        y0, y1, x0, x1 = L.box
         rows.append({"set": s, "unit": u.name, "video": u.video, "arm": A["name"], "video_idx": t, "acc": ok, "trig": trig,
                      "latency_s": lat, "score_G": G.score, "score_L": L.score, "gt_empty": not g.any(),
-                     "area0": float(g0.mean()), **m55.jf(out, g), "JF_G": m55.jf(G.mask, g)["JF"], **res})
+                     "area0": float(g0.mean()), **m55.jf(out, g), "JF_G": m55.jf(G.mask, g)["JF"], **res,
+                     # offline diagnostics (GT used only after every decision for frame t was made)
+                     "crop_side": y1 - y0, "gt_area": int(g.sum()),
+                     "gt_in_crop": float(g[y0:y1, x0:x1].sum() / g.sum()) if g.any() else np.nan,
+                     "gt_long_over_side": (max(np.ptp(np.nonzero(g)[0]), np.ptp(np.nonzero(g)[1])) + 1) / (y1 - y0) if g.any() else np.nan,
+                     "out_empty": not out.any(), "pc_dx": float(pc[0]), "pc_dy": float(pc[1])})
         trk.observe(t, vcam.bbox(out))
         if A.get("center") == "m3vel":
             c = m3_center(m3, out)
@@ -512,8 +531,13 @@ def run_arm(pred, flow, s, u, A, rank, n=None):
             c = vcam.center_of(out) or trk.flow_center()
         elif A.get("center") == "camcarry":            # ablation (C3): while absent shift the crop by CAMERA motion only
             c = vcam.center_of(out) or (d.center[0] + trk.cam[1], d.center[1] + trk.cam[0])
+        elif A.get("center") == "pccarry":             # M9: while absent shift the crop by phase-correlation motion
+            c = vcam.center_of(out) or (d.center[0] + pc[1], d.center[1] + pc[0])
         else:
             c = vcam.center_of(out)
+        if sctl is not None:                            # M9: adapt the crop side from reliable output size
+            reliable = (ok and L.score > 0) or ((not ok) and G.score > 0)
+            d.set_side("L", sctl.update(vcam.bbox(out), reliable))
         d.set_center(c)
         prev = frame
     peak = torch.cuda.max_memory_allocated()

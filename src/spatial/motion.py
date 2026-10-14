@@ -111,3 +111,52 @@ class Track:
 
     def flow_center(self):
         return self._c(self.fbox)
+
+
+def _gray_small(frame, f=4):
+    """1x3xHxW SAM 2-normalised frame -> float32 numpy gray image down-sampled by f (area)."""
+    import torch.nn.functional as F_
+    g = frame.mean(1, keepdim=True)
+    g = F_.avg_pool2d(g, f) if min(g.shape[-2:]) >= 4 * f else g
+    return g[0, 0].float().cpu().numpy()
+
+
+def phase_shift(a, b, f=4):
+    """M9 cheap motion: global translation a -> b by phase correlation on f-times down-sampled gray frames.
+    Returns (dx, dy) in full-resolution px. No learned model; a few ms on CPU."""
+    A, B = _gray_small(a, f), _gray_small(b, f)
+    h, w = A.shape
+    win = np.outer(np.hanning(h), np.hanning(w)).astype(np.float32)
+    FA, FB = np.fft.fft2((A - A.mean()) * win), np.fft.fft2((B - B.mean()) * win)
+    R = FB * np.conj(FA)
+    R /= np.abs(R) + 1e-9
+    r = np.fft.ifft2(R).real
+    py, px = np.unravel_index(np.argmax(r), r.shape)
+    # sub-pixel refinement (parabolic) on the wrapped peak
+    def sub(c, n, m1, m0, p1):
+        den = m1 - 2 * m0 + p1
+        return c + (0.5 * (m1 - p1) / den if abs(den) > 1e-12 else 0.0)
+    y = sub(py, h, r[(py - 1) % h, px], r[py, px], r[(py + 1) % h, px])
+    x = sub(px, w, r[py, (px - 1) % w], r[py, px], r[py, (px + 1) % w])
+    y = y - h if y > h / 2 else y
+    x = x - w if x > w / 2 else x
+    return np.array([x * f, y * f])
+
+
+class ScaleCtl:
+    """M9 conservative crop-scale controller. side tracks 4 x (long side of the latest reliable output box), floored
+    at the M6 minimum (min(H, W) / MAX_ZOOM) so tiny targets keep the SGGL crop; bounded EMA (alpha) and bounded
+    per-frame change [lo, hi]; held while the output is empty or unreliable."""
+
+    def __init__(self, side0, hw, alpha=0.3, lo=0.8, hi=1.25, k=4.0, max_zoom=4.0):
+        self.side, self.hw = float(side0), hw
+        self.alpha, self.lo, self.hi, self.k = alpha, lo, hi, k
+        self.floor = min(hw) / max_zoom
+
+    def update(self, out_box, reliable):
+        if out_box is not None and reliable:
+            b = max(out_box[1] - out_box[0], out_box[3] - out_box[2])
+            target = min(max(self.k * b, self.floor), min(self.hw))
+            new = self.side + self.alpha * (target - self.side)
+            self.side = float(np.clip(new, self.lo * self.side, self.hi * self.side))
+        return self.side

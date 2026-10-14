@@ -116,6 +116,12 @@ def status(**kw):
 
 # ----------------------------------------------------------------------------- data
 _VK = {}
+_X = ("mosev2", "lvosv2", "vost")
+
+
+def _xd():
+    from rfeas import xdata
+    return xdata
 
 
 def _vk(u):
@@ -126,6 +132,8 @@ def _vk(u):
 
 
 def gt(u, t):
+    if u.dataset in _X:
+        return _xd().gt(u, t)
     if u.dataset == "vkitti":
         from vkitti.dataset import track_mask
         return track_mask(_vk(u).load_instance(u.frames[t]), u.obj_id)
@@ -134,6 +142,8 @@ def gt(u, t):
 
 def other(u, t):
     """Union of every OTHER annotated object at frame t (offline attribution only)."""
+    if u.dataset in _X:
+        return _xd().other(u, t)
     if u.dataset == "vkitti":
         inst = _vk(u).load_instance(u.frames[t])
         return (inst != 0) & (inst != u.obj_id + 1)
@@ -141,6 +151,8 @@ def other(u, t):
 
 
 def paths(u):
+    if u.dataset in _X:
+        return _xd().paths(u)
     if u.dataset == "vkitti":
         return [_vk(u).rgb_path(f) for f in u.frames]
     return m6.paths(u)
@@ -156,6 +168,10 @@ def units(sets):
             us = [("DAVIS_train", u) for u in davis_units("train")[0]]
         elif s == "VK":
             us = [("VK", u) for u in vkitti_units()[0]]
+        elif s.split(":")[0].lower() in _X:            # M9: MOSEV2[:dev|conf], LVOSV2, VOST (frozen manifests)
+            ds, _, part = s.partition(":")
+            out += [(s, sp, u) for sp, u in _xd().units(ds.lower(), part or None) if vcam.crop_side(gt(u, 0)) is not None]
+            continue
         else:
             raise ValueError(s)
         out += [(s, x, u) for x, u in us if vcam.crop_side(gt(u, 0)) is not None]

@@ -1,0 +1,69 @@
+{
+ "created_kst": "2026-10-14 23:18",
+ "created_before_any_m9_sam2_output_on_new_data": true,
+ "branch_start": "exp/m8-diverse-algorithm-portfolio @ e0c1b44473b979034db38bb0e94ee272ecd5163c",
+ "sources": [
+  "docs (M8)",
+  "deep-research report 'M8 Expansion to Broader Datasets: Twelve-Hour Experimental Plan'",
+  "user prompt M9"
+ ],
+ "datasets": {
+  "mosev2": "train split (full GT; valid GT is first-frame only). 180 videos pre-sampled from meta only (seed 9, 40-200 frames) -> manifest by GT rule. Released 2025 -> not in SAM 2.1 (2024) training; overlap with MOSEv1 videos UNVERIFIED",
+  "vost": "val split (70 videos, 5 fps annotated frames = JPEGImages), all scanned -> manifest by GT rule",
+  "lvosv2": "valid; BLOCKED (Google Drive quota) at 14:11 UTC, automatic retries",
+  "pumavos_C": "sealed; never transferred, inspected or run"
+ },
+ "unit_rule": "scripts/m9_manifest.py docstring: first visible frame prompt, >=10 frames, crop unit, small (<1%) only, <=3 per video (seed 9), video-hash dev/conf split",
+ "arms": {
+  "SGGL": "M8 frozen",
+  "FLOWVEL": "M8 frozen (16:14 KST 2026-10-14), unchanged",
+  "FLOWCARRY": "M8 post-hoc ablation, unchanged (secondary)",
+  "PCCARRY": "M9 frozen: phase-correlation carry during absence",
+  "SCALE": "M9 frozen scale-only controller",
+  "JOINT": "M9 frozen FLOWVEL + SCALE"
+ },
+ "use_of_splits": "FLOWVEL/FLOWCARRY/SGGL are frozen from M8 -> evaluated on ALL units (dev+conf), reported per split and per dataset. SCALE/JOINT/PCCARRY parameters are frozen now; at most ONE evidence-based revision per mechanism, developed on dev only and judged on conf only.",
+ "stage1_minimal_generators": [
+  "A_cos#0",
+  "A_cos#1",
+  "A_cos#2",
+  "B_att#0",
+  "B_att#1",
+  "B_att#2",
+  "C_flowcrop",
+  "C_flowbox",
+  "F_oclr8_L",
+  "Gp",
+  "Lp"
+ ],
+ "stage1_gates": {
+  "search": "GT-present co-absence recall >= 0.25 AND hits in >= 4 videos",
+  "attention": "B_att must beat A_cos on paired recall/hit@1 (video-cluster CI > 0), else stop attention",
+  "ranking": "held-out (cross-fitted by dataset/video) net benefit > 0, else not used causally",
+  "R3_attention_ranker": "only if candidate hits span >= 20 independent videos"
+ },
+ "failure_taxonomy": {
+  "unit_of_analysis": "missed frames of the machine-matched SGGL causal run: GT present and SGGL J < 0.5 (plus co-absence subset)",
+  "order": [
+   "OBSERVABILITY: GT area < 0.25 x prompt area or < 64 px",
+   "SCALE: GT long side > 0.6 x crop side, or GT area > 4 x prompt area",
+   "POSITION: GT inside crop fraction < 0.5 (at usable scale)",
+   "PRESENCE_IDENTITY: otherwise (observable, in crop, usable scale) -> split absent-claim (output empty) vs wrong-target (output non-empty, J < 0.1)"
+  ],
+  "false_reacquisition": "GT empty and output non-empty",
+  "dominant": "a category with >= 50% of missed-frame loss (sum of 1 - J&F) spanning >= 3 videos; otherwise MIXED"
+ },
+ "primary_endpoint": "per dataset: small-unit paired dJ&F (arm - machine-matched SGGL), unit mean over frames 1..n-1, video-mean",
+ "statistics": "video-cluster bootstrap 95% CI (2000), leave-one-video-out min, exact sign test over videos with |d|>0, top-1/top-2 video share of gain, worst unit, # units < -0.05; Holm across the per-dataset FLOWVEL tests",
+ "flowvel_generalizes_if": [
+  "pooled new-data video-cluster CI lower bound > 0",
+  "mean > 0 in >= 2 datasets (or in the only available dataset with Holm-adjusted CI > 0)",
+  ">= 5 videos with d > +0.01 spanning >= 2 datasets when >= 2 datasets exist",
+  "top-2 video share of the gain < 50%",
+  "at most 1 unit < -0.05"
+ ],
+ "scale_success_if": "SCALE reduces SCALE-category missed frames by >= 30% vs SGGL AND dJ&F >= 0 (dev) AND no new unit < -0.05; then confirmed on conf",
+ "joint_synergy_if": "JOINT - max(SCALE, FLOWVEL) > 0 with video-cluster CI lower > 0",
+ "cheap_motion_success_if": "PCCARRY dJ&F >= 0.7 x FLOWVEL dJ&F on the same units AND latency below FLOWVEL",
+ "kill_rules": "negative mean, worse than simpler parent, material false reacquisition, unit < -0.05, gain from <= 2 videos, or no mechanism evidence -> stop; one justified revision max; no threshold fishing"
+}
