@@ -174,5 +174,93 @@
    "latency_s": 0.26892507461388104,
    "peak_vram_gb": 1.18510592
   }
+ },
+ "PCCARRY-FLOWVEL": {
+  "pooled": {
+   "label": "pooled",
+   "n_units": 139,
+   "n_videos": 102,
+   "dJF": 0.011078042726745715,
+   "dJF_video_mean": 0.014769166858503678,
+   "perm_p_video": 0.0683931606839316,
+   "dJ": 0.009563897374605895,
+   "dF": 0.012592188078885532,
+   "CI_video": [
+    -0.0004287902393165729,
+    0.024765821842028243
+   ],
+   "videos_up_0.01": 22,
+   "videos_down_0.01": 12,
+   "videos_pos_neg": [
+    49,
+    45
+   ],
+   "sign_test_p": 0.7571890741424051,
+   "lovo_min": 0.00612677146464525,
+   "top2_share_of_net_gain": 0.6213598977845111,
+   "worst_unit": [
+    "mosev2__mosev2/g04fk8oj__obj1",
+    -0.2820648594066769
+   ],
+   "best_unit": [
+    "mosev2__mosev2/381hg4vf__obj1",
+    0.69435347689661
+   ],
+   "n_units_lt_-0.05": 7,
+   "tiny_dJF": 0.004172003893017482,
+   "n_tiny": 51,
+   "base_JF": 0.7257072228632785,
+   "coabs_frames_base": 3460,
+   "coabs_dJF_per_frame": 0.004183591261939997,
+   "false_reacq_arm_vs_base": [
+    486,
+    495
+   ],
+   "latency_s": 0.2810782179819767,
+   "peak_vram_gb": 1.20501248
+  },
+  "mosev2": {
+   "label": "mosev2",
+   "n_units": 139,
+   "n_videos": 102,
+   "dJF": 0.011078042726745715,
+   "dJF_video_mean": 0.014769166858503678,
+   "perm_p_video": 0.0683931606839316,
+   "dJ": 0.009563897374605895,
+   "dF": 0.012592188078885532,
+   "CI_video": [
+    -0.0004287902393165729,
+    0.024765821842028243
+   ],
+   "videos_up_0.01": 22,
+   "videos_down_0.01": 12,
+   "videos_pos_neg": [
+    49,
+    45
+   ],
+   "sign_test_p": 0.7571890741424051,
+   "lovo_min": 0.00612677146464525,
+   "top2_share_of_net_gain": 0.6213598977845111,
+   "worst_unit": [
+    "mosev2__mosev2/g04fk8oj__obj1",
+    -0.2820648594066769
+   ],
+   "best_unit": [
+    "mosev2__mosev2/381hg4vf__obj1",
+    0.69435347689661
+   ],
+   "n_units_lt_-0.05": 7,
+   "tiny_dJF": 0.004172003893017482,
+   "n_tiny": 51,
+   "base_JF": 0.7257072228632785,
+   "coabs_frames_base": 3460,
+   "coabs_dJF_per_frame": 0.004183591261939997,
+   "false_reacq_arm_vs_base": [
+    486,
+    495
+   ],
+   "latency_s": 0.2810782179819767,
+   "peak_vram_gb": 1.20501248
+  }
  }
 }

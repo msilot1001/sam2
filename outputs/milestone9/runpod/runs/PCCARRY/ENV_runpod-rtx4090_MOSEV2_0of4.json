@@ -1,0 +1,34 @@
+{
+  "machine": "runpod-rtx4090",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "fill_hole_area": 0,
+  "arm": {
+    "name": "PCCARRY",
+    "gens": [],
+    "center": "pccarry",
+    "why": "M9 cheap motion: while SGGL output is empty, move the crop by the global phase-correlation shift between frames t-1 and t (4x down-sampled gray, FFT; no learned model); else SGGL centre. Mirrors M8 CAMCARRY without RAFT",
+    "frozen_kst": "2026-10-14 23:13"
+  },
+  "code": {
+    "ubuntu_head": "550f7c5fb1f4a3a0739251ac274a91ca39f7e9d4",
+    "uncommitted_paths": 17,
+    "pushed": "2026-10-15 00:42:32",
+    "items": [
+      "src",
+      "scripts",
+      "tests",
+      "configs",
+      "pyproject.toml",
+      "outputs/milestone8/preregistration.json",
+      "outputs/milestone8/preregistration_vk.json",
+      "outputs/milestone8/arms.json",
+      "outputs/milestone8/preregistration_vk_amend1.json",
+      "outputs/milestone8/preregistration_amend1.json",
+      "outputs/milestone8/preregistration_amend2.json",
+      "outputs/milestone9/arms.json",
+      "outputs/milestone9/preregistration_amend1.json"
+    ]
+  }
+}

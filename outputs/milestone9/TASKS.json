@@ -1,5 +1,5 @@
 {
- "updated_kst": "2026-10-15 01:58",
+ "updated_kst": "2026-10-15 03:05",
  "note": "M9 live task ledger (agent-maintained); progress = result files / expected units.",
  "tasks": [
   {
@@ -111,9 +111,9 @@
   {
    "id": "M9-PCCARRY-MOSE",
    "title": "PCCARRY vs SGGL — MOSEv2",
-   "description": "값싼 운동: 부재 중 위상 상관 전역 이동만큼 crop 이동 (RAFT 없음) — 우선순위 최하위, Pod q3 마지막",
+   "description": "값싼 운동: 부재 중 위상 상관 전역 이동만큼 crop 이동 (RAFT 없음) — 우선순위 최하위, Pod q3 마지막 — 결과: −0.0031 [−0.0102,+0.0037], −0.05 미만 6단위 → 중단",
    "machine": "RunPod 4090",
-   "status": "QUEUED",
+   "status": "DONE",
    "progress": {
     "glob": "outputs/milestone9/runpod/runs/PCCARRY/mosev2*.csv",
     "total": 139
@@ -154,9 +154,9 @@
   {
    "id": "M9-VOST-POD",
    "title": "VOST — Pod SGGL/SCALE/CONSENSUS",
-   "description": "Pod SGGL 기준선과 SCALE을 VOST 74단위에서 (CONSENSUS는 MOSE 반증으로 취소)",
+   "description": "Pod SGGL 기준선과 SCALE을 VOST 74단위에서 (CONSENSUS는 MOSE 반증으로 취소) — SCALE VOST −0.0073 [−0.0389,+0.0199], 스케일 회복 2% → 불통과",
    "machine": "RunPod 4090",
-   "status": "RUNNING",
+   "status": "DONE",
    "progress": {
     "glob": "outputs/milestone9/runpod/runs/SCALE/vost*.csv",
     "total": 74
@@ -168,6 +168,28 @@
    "description": "VOST 1,634쌍: 위상 상관 vs RAFT 끝점 오차 중앙값 3.1 px, 지연 14배 적음",
    "machine": "Ubuntu 2080",
    "status": "DONE"
+  },
+  {
+   "id": "M9-FLOWVEL-VOST-POD",
+   "title": "FLOWVEL vs SGGL — VOST (Pod)",
+   "description": "VOST 주 검정(같은 기계 Pod SGGL). 2080 결과는 재현",
+   "machine": "RunPod 4090",
+   "status": "RUNNING",
+   "progress": {
+    "glob": "outputs/milestone9/runpod/runs/FLOWVEL/vost*.csv",
+    "total": 74
+   }
+  },
+  {
+   "id": "M9-AREA-DIAG",
+   "title": "스케일 실패 진단 (고착 vs 이탈)",
+   "description": "사전 등록 수정 2: SGGL 재실행에 출력 면적·교집합 열 추가, 스케일 범주 놓친 frame의 precision/recall 측정",
+   "machine": "RunPod 4090",
+   "status": "QUEUED",
+   "progress": {
+    "glob": "outputs/milestone9/runpod/runs_area/SGGL/*.csv",
+    "total": 213
+   }
   }
  ]
 }
