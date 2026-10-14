@@ -1,0 +1,117 @@
+{
+  "variant": "T1",
+  "steps": 1500,
+  "bs": 8,
+  "lr": 0.001,
+  "schedule": "cosine",
+  "n_fit": 64,
+  "n_val": 64,
+  "fit_videos": [
+    "davis/classic-car",
+    "davis/disc-jockey",
+    "davis/dog-gooses",
+    "davis/drone",
+    "davis/longboard",
+    "davis/miami-surf",
+    "davis/motocross-bumps",
+    "davis/motorbike",
+    "davis/night-race",
+    "davis/paragliding",
+    "davis/rallye",
+    "davis/schoolgirls",
+    "davis/scooter-board",
+    "davis/skate-park",
+    "davis/swing",
+    "davis/tennis",
+    "davis/tractor-sand"
+  ],
+  "val_videos": [
+    "davis/classic-car",
+    "davis/disc-jockey",
+    "davis/dog-gooses",
+    "davis/drone",
+    "davis/longboard",
+    "davis/miami-surf",
+    "davis/motocross-bumps",
+    "davis/motorbike",
+    "davis/night-race",
+    "davis/paragliding",
+    "davis/rallye",
+    "davis/schoolgirls",
+    "davis/scooter-board",
+    "davis/skate-park",
+    "davis/swing",
+    "davis/tennis",
+    "davis/tractor-sand"
+  ],
+  "params": 155489,
+  "peak_vram_bytes": 330758656,
+  "minutes": 13.021979697545369,
+  "fit_J": 0.966043091379106,
+  "fit_J_input": 0.8693242519511841,
+  "curve": [
+    {
+      "step": 1,
+      "train_loss": 0.15868662297725677,
+      "grad_norm": 0.964158296585083,
+      "val_loss": 0.20902694575488567,
+      "val_J": 0.8710725920973346,
+      "val_J_input": 0.8693242519511841,
+      "lr": 0.0009999989033776897
+    },
+    {
+      "step": 250,
+      "train_loss": 0.07064398378133774,
+      "grad_norm": 0.06435833871364594,
+      "val_loss": 0.1648291079327464,
+      "val_J": 0.9254236128181219,
+      "val_J_input": 0.8693242519511841,
+      "lr": 0.0009330127018922198
+    },
+    {
+      "step": 500,
+      "train_loss": 0.0810520350933075,
+      "grad_norm": 0.13443966209888458,
+      "val_loss": 0.13144822604954243,
+      "val_J": 0.9334583086892962,
+      "val_J_input": 0.8693242519511841,
+      "lr": 0.000749999999999999
+    },
+    {
+      "step": 750,
+      "train_loss": 0.035964302718639374,
+      "grad_norm": 0.0939469113945961,
+      "val_loss": 0.07532660476863384,
+      "val_J": 0.9513122031930834,
+      "val_J_input": 0.8693242519511841,
+      "lr": 0.0004999999999999993
+    },
+    {
+      "step": 1000,
+      "train_loss": 0.024759018793702126,
+      "grad_norm": 0.015490357764065266,
+      "val_loss": 0.050008703488856554,
+      "val_J": 0.960234023630619,
+      "val_J_input": 0.8693242519511841,
+      "lr": 0.00024999999999999984
+    },
+    {
+      "step": 1250,
+      "train_loss": 0.059625715017318726,
+      "grad_norm": 0.0100557217374444,
+      "val_loss": 0.04458713158965111,
+      "val_J": 0.9654876561835408,
+      "val_J_input": 0.8693242519511841,
+      "lr": 6.698729810778051e-05
+    },
+    {
+      "step": 1500,
+      "train_loss": 0.0326472632586956,
+      "grad_norm": 0.00674170907586813,
+      "val_loss": 0.044170929584652185,
+      "val_J": 0.966043091379106,
+      "val_J_input": 0.8693242519511841,
+      "lr": 0.0
+    }
+  ]
+}

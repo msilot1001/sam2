@@ -1,0 +1,17 @@
+{
+ "created": "2026-10-14 13:56:11",
+ "stage": "3 (finalists on VK, fresh for SGGL)",
+ "created_after": "stage-1 replay (all S/F/M/R REJECT/INCONCLUSIVE), causal pilots (machine-matched on Vast): M3-vel +0.0046 [-0.0001,+0.0115] INCONCLUSIVE (LOVO min +0.0017), F1-blend.7 REJECT, M1-always REJECT; T0-T4 all REJECT on DEV (positive controls passed). M3-vel-r pending on Ubuntu.",
+ "finalists": [
+  "M3-vel (frozen, damp 0.5)",
+  "M3-vel-r ONLY if it passes its stage-2 rule on DEV+REP (preregistration_r3.json)"
+ ],
+ "controls": [
+  "SGGL via `rec VK` (also records official SAM 2 = B0 and P5 = G, plus probes)",
+  "SGGL-V"
+ ],
+ "machine": "Vast RTX 5090, all VK arms on the same machine",
+ "units": "28 VKITTI2 Scene01/06 clone crop units (2 scenes); CIs clustered by unit with the scene count stated; descriptive",
+ "rule": "final_rule of preregistration.json: VK dJF vs SGGL >= -0.005 for the final method; reported per scene",
+ "C": "PUMaVOS C stays sealed unless a single method meets the final rule (needs DEV+REP video-CI lower bound > 0, which no candidate has)"
+}
