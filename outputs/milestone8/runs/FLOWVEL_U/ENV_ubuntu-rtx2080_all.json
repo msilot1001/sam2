@@ -1,0 +1,15 @@
+{
+  "machine": "ubuntu-rtx2080",
+  "torch": "2.14.1+cu130",
+  "cuda": "13.0",
+  "gpu": "NVIDIA GeForce RTX 2080",
+  "fill_hole_area": 0,
+  "arm": {
+    "name": "FLOWVEL_U",
+    "gens": [],
+    "center": "flowvel",
+    "why": "cross-machine replication of FLOWVEL (identical spec) on the Ubuntu RTX 2080, matched to the Ubuntu diag SGGL trajectory; frozen after FLOWVEL PROMISING on RunPod",
+    "frozen_kst": "2026-10-14 20:50"
+  },
+  "code": "ubuntu working tree"
+}

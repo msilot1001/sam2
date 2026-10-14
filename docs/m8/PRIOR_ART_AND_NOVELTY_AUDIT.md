@@ -37,4 +37,16 @@
 
 ## 3. 주장 가능 범위 (결과 반영)
 
-(실험 결과 후 작성: `FINAL_PORTFOLIO_ASSESSMENT.md` §5에도 요약)
+| 결과 | 가장 가까운 선행연구 | 새로움 판단 |
+|---|---|---|
+| **부재 중 crop 운반 (FLOWCARRY / CAMCARRY / FLOWVEL)**: 두 view가 대상을 놓친 동안 crop을 장면(카메라) 운동에 맞춰 옮기면, 놓친 frame이 131 → 62로 줄고 SGGL 대비 +0.014 | 카메라 운동 보정(MOT의 CMC, 예: BoT-SORT 계열 — 표준 인용, 이번 세션에서 원문 미확인). SAMURAI·MoSAM의 운동 기반 탐색 영역. DaSiamRPN류 탐색창 이동 | **연산은 새롭지 않다.** 고전적인 카메라 운동 보정이다. 남는 기여는 측정이다: 'object-relative crop을 쓰는 dual-view frozen SAM 2에서 동시 부재 손실의 절반이 부재 중 crop이 카메라에 끌려가는 데서 온다'. 그리고 ablation으로 속도 외삽이 아니라 부재 중 운반이 원인임을 분리했다 |
+| 동시 부재 rescue는 생성은 되지만 존재 판정이 병목 (recall 0.51, present-vs-absent AUC 0.6–0.7) | DAM4SAM, SENTRY, SAMITE, PerSAM | 측정 결과. 선행연구들이 '검증 후 기록'을 다루는 이유를 이 설정에서 정량화했다 |
+| 같은 배율에서 문맥 보존 foveation은 회수 이득이 없고 방해물 거짓 양성을 키움 | ZoomTrack, FOVEA, LZU (모두 box 추적·검출) | 메모리 전파 VOS에서 이 방향을 쓰지 말라는 음성 결과. 새로움이 있다면 이 음성 결과다 |
+| attention(대조 token)은 frozen SAM 2 특징 위 전역 탐색에서 단일 prototype과 같음 | VideoMatch, FEELVOS, PerSAM | 음성 결과 |
+| ORACLE 분해: 완벽한 순위화의 rescue 상한 +0.0136(기록 시 +0.0169) ≈ 운동 보정 단독 | — | 측정 |
+
+**새 알고리즘이라는 주장은 할 수 없다.** M7과 같다. 주장할 수 있는 것은 실험 설계와 측정이다.
+- 실패 분류
+- 상한 분해
+- 생성·순위·인과를 나눈 진단
+- 메커니즘 ablation

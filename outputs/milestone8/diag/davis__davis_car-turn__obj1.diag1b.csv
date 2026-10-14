@@ -1,0 +1,8 @@
+unit,video_idx,loc1_H_s8,loc3_H_s8,peak_H_s8,heat_gt_H_s8
+davis__davis/car-turn__obj1,10,False,False,0.5664141178131104,0.5295059680938721
+davis__davis/car-turn__obj1,20,False,True,0.5777730941772461,0.529564619064331
+davis__davis/car-turn__obj1,30,False,False,0.5725101232528687,0.5098264217376709
+davis__davis/car-turn__obj1,40,True,True,0.5841546654701233,0.5841546654701233
+davis__davis/car-turn__obj1,50,True,True,0.525618314743042,0.525618314743042
+davis__davis/car-turn__obj1,60,False,True,0.5652066469192505,0.5328267216682434
+davis__davis/car-turn__obj1,70,True,True,0.5491812229156494,0.5491812229156494

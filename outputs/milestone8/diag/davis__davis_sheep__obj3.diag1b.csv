@@ -1,0 +1,7 @@
+unit,video_idx,loc1_H_s8,loc3_H_s8,peak_H_s8,heat_gt_H_s8
+davis__davis/sheep__obj3,10,False,True,0.6955937147140503,0.6819435358047485
+davis__davis/sheep__obj3,20,False,True,0.6761528253555298,0.6759945154190063
+davis__davis/sheep__obj3,30,True,True,0.7118848562240601,0.7118848562240601
+davis__davis/sheep__obj3,40,True,True,0.7019238471984863,0.7019238471984863
+davis__davis/sheep__obj3,50,True,True,0.6844427585601807,0.6844427585601807
+davis__davis/sheep__obj3,60,False,False,0.6625981330871582,0.6432198882102966

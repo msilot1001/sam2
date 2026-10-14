@@ -50,3 +50,50 @@
 - Stage 1은 한 번의 GPU 통과로 **모든 생성기를 같은 trigger frame에서** 비저장 probe로 실행한다. 생성기 간 비교는 같은 frame에서 짝을 짓는다.
 - 인과 단계로는 사전 등록 규칙(`outputs/milestone8/preregistration.json` `advance_to_causal`)을 통과한 생성기만 간다. 통과 수가 4 미만이면 그 사실을 보고하고, 계열 다양성을 위해 가장 정보가 큰 탈락 후보 1–2개를 '진단적 인과 실행'으로 명시해 돌릴 수 있다(판정에 쓰지 않음).
 - M7에서 재현 가능한 음성 결과가 있는 것(B6, I2, S 계열)은 재실행하지 않는다.
+
+## 3. 최종 상태 (실험 후, 2026-10-14)
+
+| 후보 | 상태 |
+|---|---|
+| A1 A_cos | REJECTED (stage1: recall 0.39 but presence judgement fails; rankers net<=0) |
+| A2 A_cos_crop | REJECTED (stage1 score>0 net -38) |
+| A3 global top-k hypothesis states | NOT_RUN (component ranking failed) |
+| A4 sliding template stride-4 | NOT_RUN (H1 worse than A1) |
+| B1 B_att | REJECTED (== A_cos frame by frame) |
+| B2 B_att_crop | REJECTED (net -30) |
+| B3 R3 set ranker | REJECTED (held-out net <= 0; best attention direction) |
+| B4 D_ref | REJECTED (== B_att#0) |
+| B5 learned localisation | NOT_RUN (data) |
+| B6 M7 T2 | REJECTED (M7) |
+| B7 memory-write attention | NOT_RUN (data) |
+| C1 C_flowcrop | REJECTED (recall 0.015) |
+| C2 C_flowbox | REJECTED (recall 0.046, raw FP 0.80) |
+| C3 camera-motion compensation (CAMCARRY) | PROMISING (+0.0137 [+0.0017,+0.0294]) |
+| C3' FLOWVEL | PROMISING (+0.0130 [+0.0010,+0.0285]; replicated on 2080 +0.0161) |
+| C3'' FLOWCARRY | PROMISING (+0.0141 [+0.0020,+0.0296]) |
+| C3''' FV_PRESENT | REJECTED (+0.0016) |
+| C4 point tracking | BLOCKED (CC-BY-NC weights, download approval) |
+| C5 cycle consistency | NOT_RUN |
+| D1 Gp/Lp | DIAGNOSTIC_COMPLETE (reference) |
+| D2 memory admission | REVISE (RESC_OCLR_ADMIT +0.0046 INCONCLUSIVE, tail -0.116; oracle +0.0169) |
+| D3 distractor bank | NOT_RUN |
+| E1 E_beam | REJECTED (recall 0) |
+| E2 delayed commitment | NOT_RUN |
+| E3 forked hypotheses | NOT_RUN (cost; no generator passed) |
+| F1 OCLR | REJECTED (RESC_OCLR -0.0001) |
+| F2 CPFR | REJECTED (RESC_CPFR -0.0070, worst -0.330) |
+| F3 L2 | reference (M7) |
+| F4 event trigger | built into all arms |
+| G1 G_neg | REJECTED (-0.053 vs B_att#0) |
+| G2 iterative prompt | NOT_RUN |
+| H1 H_s8 | REJECTED (loc -0.44) |
+| H2 DINOv2 | NOT_RUN |
+| H3 learned adapter | NOT_RUN |
+| I1 flow/size ranking features | REJECTED (inside rankers) |
+| I2 mask fusion | REJECTED (M7) |
+| K_OCLR_M3 | INCONCLUSIVE (+0.0071; no synergy) |
+| K_OCLR_FLOWVEL | INCONCLUSIVE (+0.0121; < FLOWVEL) |
+| K_ADMIT_FLOWVEL | INCONCLUSIVE (+0.0103; tail -0.127) |
+| ORACLE_POOL | DIAGNOSTIC_COMPLETE (+0.0136, not deployable) |
+| ORACLE_POOL_ADMIT | DIAGNOSTIC_COMPLETE (+0.0169, not deployable) |
+| M3vel | INCONCLUSIVE (+0.0046, replicated across Vast/RunPod) |

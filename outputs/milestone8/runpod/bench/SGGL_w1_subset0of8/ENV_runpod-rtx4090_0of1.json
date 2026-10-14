@@ -1,0 +1,30 @@
+{
+  "machine": "runpod-rtx4090",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "fill_hole_area": 0,
+  "arm": {
+    "name": "SGGL",
+    "gens": [],
+    "center": "out",
+    "why": "machine-matched SGGL baseline for every worker that runs arms (== diag trajectory on Ubuntu)",
+    "frozen_kst": "2026-10-14 17:06"
+  },
+  "code": {
+    "ubuntu_head": "b5c5091ffc25c6eb31f5362873bb66e6e6a88dc6",
+    "uncommitted_paths": 12,
+    "pushed": "2026-10-14 17:52:09",
+    "items": [
+      "src",
+      "scripts",
+      "tests",
+      "configs",
+      "pyproject.toml",
+      "outputs/milestone8/preregistration.json",
+      "outputs/milestone8/arms.json",
+      "outputs/milestone8/preregistration_amend1.json",
+      "outputs/milestone8/preregistration_amend2.json"
+    ]
+  }
+}

@@ -114,9 +114,14 @@ def stage1():
                                  for k in ("A_cos", "B_att", "H_s8")}
     # paired falsification tests (video-clustered)
     tests = {}
+    # single-candidate generators are compared with the single top-1 candidate (B_att#0), not the top-3 family
+    T1 = per_frame(C.assign(fam=C.gen))
+    P1 = T1[~T1.gt_empty]
+
     def paired(a, b, metric="hit", frame_set=P):
-        x = frame_set[frame_set.fam == a].set_index(["unit", "video", "video_idx"])[metric].astype(float)
-        y = frame_set[frame_set.fam == b].set_index(["unit", "video", "video_idx"])[metric].astype(float)
+        fs = P1 if "#" in a or "#" in b else frame_set
+        x = fs[fs.fam == a].set_index(["unit", "video", "video_idx"])[metric].astype(float)
+        y = fs[fs.fam == b].set_index(["unit", "video", "video_idx"])[metric].astype(float)
         d = (x - y).dropna().reset_index(name="d")
         return {"delta": float(d.d.mean()), "CI": boot_mean(d, "d"), "n_frames": len(d), "n_videos": int(d.video.nunique())}
     tests["B_att_vs_A_cos_recall"] = paired("B_att", "A_cos")
@@ -125,8 +130,11 @@ def stage1():
         tests[f"cpfr8_vs_oclr8_{st}_recall"] = paired(f"F_cpfr8_{st}", f"F_oclr8_{st}")
         tests[f"cpfr8_vs_oclr8_{st}_bestJ"] = paired(f"F_cpfr8_{st}", f"F_oclr8_{st}", "best_J")
     tests["cpfr4_vs_oclr4_G_recall"] = paired("F_cpfr4_G", "F_oclr4_G")
-    tests["G_neg_vs_B_att#0_recall"] = paired("G_neg", "B_att")
-    tests["D_ref_vs_B_att_recall"] = paired("D_ref", "B_att")
+    tests["G_neg_vs_B_att#0_recall"] = paired("G_neg", "B_att#0")
+    tests["D_ref_vs_B_att#0_recall"] = paired("D_ref", "B_att#0")
+    for st in ("G", "L"):                                     # amendment 1: prompted F variants = primary F test
+        tests[f"cpfr8pt_vs_oclr8pt_{st}_recall"] = paired(f"F_cpfr8_{st}_pt", f"F_oclr8_{st}_pt")
+    tests["cpfr4pt_vs_oclr4pt_G_recall"] = paired("F_cpfr4_G_pt", "F_oclr4_G_pt")
     tests["C_flowcrop_vs_Lp_recall"] = paired("C_flowcrop", "Lp")
     tests["E_beam1_vs_Lp_recall"] = paired("E_beam1", "Lp")
     for k in ("A_cos", "B_att", "H_s8"):
@@ -404,6 +412,21 @@ def causal(*names):
     if rows_all:
         pd.concat(rows_all).to_csv(OUT / "causal_per_unit.csv", index=False)
     return out
+
+def pairwise(*pairs):
+    """Paired arm-vs-arm difference on small units, same machine (RunPod), video-clustered CI. pairs: 'A-B' strings."""
+    U = pd.read_csv(OUT / "causal_per_unit.csv")
+    U = U[U.small & (U.machine == "runpod")]
+    res = {}
+    for pr in pairs or ("FLOWCARRY-FLOWVEL", "CAMCARRY-FLOWVEL", "FLOWCARRY-CAMCARRY", "FLOWVEL-FV_PRESENT", "FLOWVEL-M3vel",
+                        "K_OCLR_FLOWVEL-FLOWVEL", "K_ADMIT_FLOWVEL-FLOWVEL", "K_OCLR_M3-M3vel", "K_OCLR_M3-RESC_OCLR",
+                        "RESC_OCLR_ADMIT-RESC_OCLR", "RESC_CPFR-RESC_OCLR"):
+        a, b = pr.split("-", 1)
+        m = U[U.arm == a][["unit", "video", "d"]].merge(U[U.arm == b][["unit", "d"]], on="unit", suffixes=("_a", "_b"))
+        m["x"] = m.d_a - m.d_b
+        res[pr] = {"delta": float(m.x.mean()), "CI": cluster_bootstrap(m, "video", lambda d: d.x.mean(), n=2000), "n": len(m)}
+        print(f"{pr:28s} n={len(m)} delta={m.x.mean():+.4f} CI=[{res[pr]['CI'][0]:+.4f},{res[pr]['CI'][1]:+.4f}]")
+    (OUT / "pairwise_report.json").write_text(json.dumps(res, indent=1))
 
 
 if __name__ == "__main__":

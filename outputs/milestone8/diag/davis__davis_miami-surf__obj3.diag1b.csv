@@ -1,0 +1,15 @@
+unit,video_idx,loc1_H_s8,loc3_H_s8,peak_H_s8,heat_gt_H_s8
+davis__davis/miami-surf__obj3,10,False,True,0.7384193539619446,0.7357864379882812
+davis__davis/miami-surf__obj3,20,False,True,0.7385423183441162,0.6933077573776245
+davis__davis/miami-surf__obj3,30,False,True,0.69342041015625,0.655739963054657
+davis__davis/miami-surf__obj3,40,True,True,0.7228776216506958,0.7228776216506958
+davis__davis/miami-surf__obj3,50,False,False,0.7383652329444885,0.6767833232879639
+davis__davis/miami-surf__obj3,60,False,False,0.6806000471115112,0.6342082023620605
+davis__davis/miami-surf__obj3,62,,,0.6721354722976685,
+davis__davis/miami-surf__obj3,63,,,0.6529322862625122,
+davis__davis/miami-surf__obj3,64,,,0.7065548896789551,
+davis__davis/miami-surf__obj3,65,,,0.6891850233078003,
+davis__davis/miami-surf__obj3,66,,,0.6536001563072205,
+davis__davis/miami-surf__obj3,67,,,0.6694291830062866,
+davis__davis/miami-surf__obj3,68,,,0.7005895376205444,
+davis__davis/miami-surf__obj3,69,,,0.6792163848876953,

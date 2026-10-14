@@ -1,0 +1,3 @@
+workers=1 threads=6 frames=733 wall_s=285 fps=2.57
+workers=2 threads=6 frames=733 wall_s=225 fps=3.26
+workers=4 threads=3 frames=733 wall_s=215 fps=3.41

@@ -1,0 +1,7 @@
+unit,video_idx,loc1_H_s8,loc3_H_s8,peak_H_s8,heat_gt_H_s8
+davis__davis/dogs-jump__obj1,10,False,False,0.717130184173584,0.6908992528915405
+davis__davis/dogs-jump__obj1,20,False,False,0.7134009599685669,0.5715879201889038
+davis__davis/dogs-jump__obj1,30,False,True,0.6608994007110596,0.6573187112808228
+davis__davis/dogs-jump__obj1,40,True,True,0.7022691965103149,0.7022691965103149
+davis__davis/dogs-jump__obj1,50,False,True,0.7227771282196045,0.687562882900238
+davis__davis/dogs-jump__obj1,60,True,True,0.7192814350128174,0.7192814350128174

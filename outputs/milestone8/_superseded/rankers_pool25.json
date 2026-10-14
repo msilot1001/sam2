@@ -1,0 +1,251 @@
+{
+ "gens": [
+  "A_cos",
+  "A_cos_crop",
+  "B_att",
+  "B_att_crop",
+  "C_flowbox",
+  "C_flowcrop",
+  "D_ref",
+  "E_beam1",
+  "E_beam2",
+  "F_cpfr4_G",
+  "F_cpfr4_G_pt",
+  "F_cpfr8_G",
+  "F_cpfr8_G_pt",
+  "F_cpfr8_L",
+  "F_cpfr8_L_pt",
+  "F_oclr4_G",
+  "F_oclr4_G_pt",
+  "F_oclr8_G",
+  "F_oclr8_G_pt",
+  "F_oclr8_L",
+  "F_oclr8_L_pt",
+  "G_neg",
+  "Gp",
+  "H_s8",
+  "Lp"
+ ],
+ "fit_data": "coabs+disagree+regular candidates of the fit split",
+ "threshold": "max net_dJ_frames on the fit split's coabs frames s.t. fp_rate_empty <= 0.10 (R3: out-of-fold)",
+ "R0_score": {
+  "fitREP": {
+   "thr": 21.19245147705078,
+   "fit_eval": {
+    "frames_present": 94,
+    "frames_empty": 244,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   },
+   "heldout_eval": {
+    "frames_present": 25,
+    "frames_empty": 47,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   }
+  },
+  "fitDEV": {
+   "thr": 19.439966201782227,
+   "fit_eval": {
+    "frames_present": 25,
+    "frames_empty": 47,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   },
+   "heldout_eval": {
+    "frames_present": 94,
+    "frames_empty": 244,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.10638297872340426,
+    "fp_rate_empty": 0.05327868852459016,
+    "mean_J_gain_present": 0.00031149222409614997,
+    "videos_rescued": 0,
+    "net_dJ_frames": -12.970719730934961
+   }
+  },
+  "pooled_heldout": {
+   "net_dJ_frames": -12.970719730934961,
+   "frames_present": 119,
+   "frames_empty": 291,
+   "rescued_frames": 0.0,
+   "fp_frames": 13.0
+  }
+ },
+ "R1_trainfree": {
+  "fitREP": {
+   "thr": 0.9354344978928566,
+   "fit_eval": {
+    "frames_present": 94,
+    "frames_empty": 244,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   },
+   "heldout_eval": {
+    "frames_present": 25,
+    "frames_empty": 47,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   }
+  },
+  "fitDEV": {
+   "thr": 0.6729443520307542,
+   "fit_eval": {
+    "frames_present": 25,
+    "frames_empty": 47,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.2,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.05122238142106454,
+    "videos_rescued": 0,
+    "net_dJ_frames": 1.2805595355266135
+   },
+   "heldout_eval": {
+    "frames_present": 94,
+    "frames_empty": 244,
+    "rescue_rate_present": 0.02127659574468085,
+    "wrong_rescue_present": 0.1276595744680851,
+    "fp_rate_empty": 0.04918032786885246,
+    "mean_J_gain_present": 0.03682004785844095,
+    "videos_rescued": 1,
+    "net_dJ_frames": -8.538915501306551
+   }
+  },
+  "pooled_heldout": {
+   "net_dJ_frames": -8.538915501306551,
+   "frames_present": 119,
+   "frames_empty": 291,
+   "rescued_frames": 2.0,
+   "fp_frames": 12.0
+  }
+ },
+ "R2_logistic": {
+  "fitREP": {
+   "thr": 3.1219353675842285,
+   "fit_eval": {
+    "frames_present": 94,
+    "frames_empty": 244,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   },
+   "heldout_eval": {
+    "frames_present": 25,
+    "frames_empty": 47,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   }
+  },
+  "fitDEV": {
+   "thr": 2.3244614601135254,
+   "fit_eval": {
+    "frames_present": 25,
+    "frames_empty": 47,
+    "rescue_rate_present": 0.32,
+    "wrong_rescue_present": 0.04,
+    "fp_rate_empty": 0.02127659574468085,
+    "mean_J_gain_present": 0.2375801474461966,
+    "videos_rescued": 1,
+    "net_dJ_frames": 4.939503686154915
+   },
+   "heldout_eval": {
+    "frames_present": 94,
+    "frames_empty": 244,
+    "rescue_rate_present": 0.2765957446808511,
+    "wrong_rescue_present": 0.18085106382978725,
+    "fp_rate_empty": 0.319672131147541,
+    "mean_J_gain_present": 0.22560690394013952,
+    "videos_rescued": 3,
+    "net_dJ_frames": -56.792951029626884
+   }
+  },
+  "pooled_heldout": {
+   "net_dJ_frames": -56.792951029626884,
+   "frames_present": 119,
+   "frames_empty": 291,
+   "rescued_frames": 26.0,
+   "fp_frames": 78.0
+  }
+ },
+ "R3_set": {
+  "fitREP": {
+   "thr": 52.294166564941406,
+   "fit_eval": {
+    "frames_present": 94,
+    "frames_empty": 244,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   },
+   "heldout_eval": {
+    "frames_present": 25,
+    "frames_empty": 47,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   }
+  },
+  "fitDEV": {
+   "thr": 42.13412857055664,
+   "fit_eval": {
+    "frames_present": 25,
+    "frames_empty": 47,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   },
+   "heldout_eval": {
+    "frames_present": 94,
+    "frames_empty": 244,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.02127659574468085,
+    "fp_rate_empty": 0.02459016393442623,
+    "mean_J_gain_present": 0.0006079027355623095,
+    "videos_rescued": 0,
+    "net_dJ_frames": -5.942857142857143
+   }
+  },
+  "pooled_heldout": {
+   "net_dJ_frames": -5.942857142857143,
+   "frames_present": 119,
+   "frames_empty": 291,
+   "rescued_frames": 0.0,
+   "fp_frames": 6.0
+  }
+ }
+}

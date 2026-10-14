@@ -1,0 +1,36 @@
+{
+  "machine": "runpod-rtx4090",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "fill_hole_area": 0,
+  "arm": {
+    "name": "RESC_OCLR",
+    "gens": [
+      "F_oclr8_L"
+    ],
+    "ranker": {
+      "kind": "score",
+      "thr": 0.0
+    },
+    "center": "out",
+    "why": "stage-2 diagnostic causal arm (no family met advance_to_causal): on co-absence, L memory probed on a plain crop with target long side = 8 stride-16 cells at the flow-carried centre; accept iff SAM 2 object score > 0 (train-free, no fitted parameter -> evaluable on DEV+REP); output + re-centre. Stage-1 replay: 23 rescued / 5 FP frames, gains in 2 videos.",
+    "frozen_kst": "2026-10-14 18:34"
+  },
+  "code": {
+    "ubuntu_head": "718e618ff945d77d067bf7d333adebb0c0a31dba",
+    "uncommitted_paths": 6,
+    "pushed": "2026-10-14 18:38:37",
+    "items": [
+      "src",
+      "scripts",
+      "tests",
+      "configs",
+      "pyproject.toml",
+      "outputs/milestone8/preregistration.json",
+      "outputs/milestone8/arms.json",
+      "outputs/milestone8/preregistration_amend1.json",
+      "outputs/milestone8/preregistration_amend2.json"
+    ]
+  }
+}

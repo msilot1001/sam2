@@ -37,3 +37,22 @@ Policy summary: see [`../AGENTS.md`](../AGENTS.md) §1. Ubuntu is the only sourc
 3. **Runs:** launch each job in a worker tmux window, writing to `outputs/milestone8/runpod/<experiment>/`.
 4. **Results:** an Ubuntu tmux window runs `gpu_sync.py loop 300 outputs/milestone8/runpod`. It writes to the ledger and the status file.
 5. **Shutdown:** `gpu_sync.py audit outputs/milestone8/runpod` must exit 0 before the pod is stopped or deleted.
+
+## Research site (dashboard)
+
+- tmux `m8:dashboard`, `http://192.168.1.21:8765` (internal network, user decision 2026-10-14). Token auth: `dashboard/.token` (mode 600, gitignored); open `/?token=<token>` once.
+- Default bind without `DASH_HOST` is 127.0.0.1; a non-loopback bind refuses to start without `DASH_TOKEN`. See `dashboard/README.md`.
+- Current launch (tmux `m8:dashboard`): `DASH_HOST=192.168.1.21 DASH_TOKEN=$(cat dashboard/.token) uv run python dashboard/server.py`.
+
+### External access: Cloudflare Tunnel (set up by the user, 2026-10-14)
+
+| Item | Value |
+|---|---|
+| Public URL | https://research.sojak.io (the same token auth applies: open `/?token=<token>` once; without it → 401, verified) |
+| Tunnel | `dash`, ID `8f2e9b77-a7bc-4980-91a8-3770f33dc924` |
+| Config | `/etc/cloudflared/config.yml` (copied from `~/.cloudflared/config.yml`) |
+| Ingress | `research.sojak.io` → `http://192.168.1.21:8765`; everything else → `http_status:404`. The dashboard listens on 192.168.1.21 only, so `127.0.0.1:8765` would NOT work as an ingress target |
+| Service | systemd `cloudflared` (installed with `sudo cloudflared service install`); `systemctl status cloudflared` |
+| Secrets (paths only, never copy contents into docs or git) | tunnel credentials `/etc/cloudflared/8f2e9b77-a7bc-4980-91a8-3770f33dc924.json` (root, mode 400), origin cert `~/.cloudflared/cert.pem`, dashboard token `dashboard/.token` |
+
+If the dashboard is restarted with a different `DASH_HOST` or port, update the ingress `service:` line and restart: `sudo systemctl restart cloudflared`.

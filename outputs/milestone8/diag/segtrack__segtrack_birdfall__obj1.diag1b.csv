@@ -1,0 +1,3 @@
+unit,video_idx,loc1_H_s8,loc3_H_s8,peak_H_s8,heat_gt_H_s8
+segtrack__segtrack/birdfall__obj1,10,False,False,0.7793123722076416,0.7116427421569824
+segtrack__segtrack/birdfall__obj1,20,False,False,0.7691061496734619,0.7202070951461792

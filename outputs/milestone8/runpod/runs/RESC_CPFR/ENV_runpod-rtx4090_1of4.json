@@ -1,0 +1,37 @@
+{
+  "machine": "runpod-rtx4090",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "fill_hole_area": 0,
+  "arm": {
+    "name": "RESC_CPFR",
+    "gens": [
+      "F_cpfr8_L"
+    ],
+    "ranker": {
+      "kind": "score",
+      "thr": 0.0
+    },
+    "center": "out",
+    "why": "matched-magnification context-preserving foveation counterpart of RESC_OCLR (F family mechanism test under causal feedback). Stage-1 replay: 22 rescued / 39 FP frames.",
+    "frozen_kst": "2026-10-14 18:34"
+  },
+  "code": {
+    "ubuntu_head": "718e618ff945d77d067bf7d333adebb0c0a31dba",
+    "uncommitted_paths": 9,
+    "pushed": "2026-10-14 19:11:02",
+    "items": [
+      "src",
+      "scripts",
+      "tests",
+      "configs",
+      "pyproject.toml",
+      "outputs/milestone8/preregistration.json",
+      "outputs/milestone8/preregistration_vk.json",
+      "outputs/milestone8/arms.json",
+      "outputs/milestone8/preregistration_amend1.json",
+      "outputs/milestone8/preregistration_amend2.json"
+    ]
+  }
+}

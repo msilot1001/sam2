@@ -1,0 +1,15 @@
+unit,video_idx,loc1_H_s8,loc3_H_s8,peak_H_s8,heat_gt_H_s8
+davis__davis/night-race__obj1,10,True,True,0.6313928961753845,0.6313928961753845
+davis__davis/night-race__obj1,20,False,True,0.6686756014823914,0.6236795783042908
+davis__davis/night-race__obj1,30,False,False,0.6467171311378479,0.5405717492103577
+davis__davis/night-race__obj1,33,,,0.6390320062637329,
+davis__davis/night-race__obj1,34,,,0.6740288734436035,
+davis__davis/night-race__obj1,35,,,0.6972991228103638,
+davis__davis/night-race__obj1,36,,,0.6370975375175476,
+davis__davis/night-race__obj1,37,,,0.6419036388397217,
+davis__davis/night-race__obj1,38,,,0.6439071893692017,
+davis__davis/night-race__obj1,39,,,0.627294659614563,
+davis__davis/night-race__obj1,40,,,0.6697165966033936,
+davis__davis/night-race__obj1,41,,,0.622510552406311,
+davis__davis/night-race__obj1,42,False,True,0.6110372543334961,0.6042507886886597
+davis__davis/night-race__obj1,45,False,True,0.655025064945221,0.6017441749572754

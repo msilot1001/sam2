@@ -1,0 +1,7 @@
+[2026-10-14T08:35:45Z] START /workspace/.venvs/m7/bin/python -m pytest -q -ra tests/test_m7.py tests/test_m8.py
+...s...s..........                                                       [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_m7.py:51: no CUDA / M6 runs
+SKIPPED [1] tests/test_m7.py:122: no CUDA / M6 runs
+16 passed, 2 skipped in 162.52s (0:02:42)
+[2026-10-14T08:38:40Z] EXIT 0

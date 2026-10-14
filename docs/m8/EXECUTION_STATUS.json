@@ -1,0 +1,78 @@
+{
+ "milestone": "M8",
+ "branch": "exp/m8-diverse-algorithm-portfolio",
+ "updated_kst": "2026-10-14 21:35",
+ "decision": {
+  "CURRENT_INCUMBENT": "SGGL",
+  "BEST_CAUSAL_CHALLENGER": "FLOWCARRY ~ CAMCARRY ~ FLOWVEL (absence-time crop carry / camera-motion compensation)",
+  "SEALED_TEST_STATUS": "PUMaVOS C sealed"
+ },
+ "candidates": {
+  "A1 A_cos": "REJECTED (stage1: recall 0.39 but presence judgement fails; rankers net<=0)",
+  "A2 A_cos_crop": "REJECTED (stage1 score>0 net -38)",
+  "A3 global top-k hypothesis states": "NOT_RUN (component ranking failed)",
+  "A4 sliding template stride-4": "NOT_RUN (H1 worse than A1)",
+  "B1 B_att": "REJECTED (== A_cos frame by frame)",
+  "B2 B_att_crop": "REJECTED (net -30)",
+  "B3 R3 set ranker": "REJECTED (held-out net <= 0; best attention direction)",
+  "B4 D_ref": "REJECTED (== B_att#0)",
+  "B5 learned localisation": "NOT_RUN (data)",
+  "B6 M7 T2": "REJECTED (M7)",
+  "B7 memory-write attention": "NOT_RUN (data)",
+  "C1 C_flowcrop": "REJECTED (recall 0.015)",
+  "C2 C_flowbox": "REJECTED (recall 0.046, raw FP 0.80)",
+  "C3 camera-motion compensation (CAMCARRY)": "PROMISING (+0.0137 [+0.0017,+0.0294])",
+  "C3' FLOWVEL": "PROMISING (+0.0130 [+0.0010,+0.0285]; replicated on 2080 +0.0161)",
+  "C3'' FLOWCARRY": "PROMISING (+0.0141 [+0.0020,+0.0296])",
+  "C3''' FV_PRESENT": "REJECTED (+0.0016)",
+  "C4 point tracking": "BLOCKED (CC-BY-NC weights, download approval)",
+  "C5 cycle consistency": "NOT_RUN",
+  "D1 Gp/Lp": "DIAGNOSTIC_COMPLETE (reference)",
+  "D2 memory admission": "REVISE (RESC_OCLR_ADMIT +0.0046 INCONCLUSIVE, tail -0.116; oracle +0.0169)",
+  "D3 distractor bank": "NOT_RUN",
+  "E1 E_beam": "REJECTED (recall 0)",
+  "E2 delayed commitment": "NOT_RUN",
+  "E3 forked hypotheses": "NOT_RUN (cost; no generator passed)",
+  "F1 OCLR": "REJECTED (RESC_OCLR -0.0001)",
+  "F2 CPFR": "REJECTED (RESC_CPFR -0.0070, worst -0.330)",
+  "F3 L2": "reference (M7)",
+  "F4 event trigger": "built into all arms",
+  "G1 G_neg": "REJECTED (-0.053 vs B_att#0)",
+  "G2 iterative prompt": "NOT_RUN",
+  "H1 H_s8": "REJECTED (loc -0.44)",
+  "H2 DINOv2": "NOT_RUN",
+  "H3 learned adapter": "NOT_RUN",
+  "I1 flow/size ranking features": "REJECTED (inside rankers)",
+  "I2 mask fusion": "REJECTED (M7)",
+  "K_OCLR_M3": "INCONCLUSIVE (+0.0071; no synergy)",
+  "K_OCLR_FLOWVEL": "INCONCLUSIVE (+0.0121; < FLOWVEL)",
+  "K_ADMIT_FLOWVEL": "INCONCLUSIVE (+0.0103; tail -0.127)",
+  "ORACLE_POOL": "DIAGNOSTIC_COMPLETE (+0.0136, not deployable)",
+  "ORACLE_POOL_ADMIT": "DIAGNOSTIC_COMPLETE (+0.0169, not deployable)",
+  "M3vel": "INCONCLUSIVE (+0.0046, replicated across Vast/RunPod)"
+ },
+ "machines": {
+  "ubuntu-rtx2080": "source of truth; diag 53 units, ORACLE x2 (53), FLOWVEL_U",
+  "runpod-rtx4090": "stopped 2026-10-14 21:25 KST after audit exit 0 (not terminated)",
+  "vast-rtx5090": "unreachable during M8"
+ },
+ "resume": {
+  "analysis": "uv run python scripts/m8_analysis.py stage1|rankers|causal|pairwise",
+  "worker": "scripts/gpu_sync.py push-code; scripts/ops/worker_env.sh; scripts/m8.py run <ARM> DEV,REP (M7_SHARD=i/4)",
+  "sync": "scripts/gpu_sync.py loop 300 outputs/milestone8/runpod; audit before stop"
+ },
+ "blocked": [
+  "new tiny-object dataset (user approval)",
+  "C4 point tracking weights (license)"
+ ],
+ "deviations": [
+  "amend1: F *_pt generators",
+  "amend2: H_s8 feature bug fix",
+  "rankers cross-fitted both directions",
+  "stage-2 diagnostic causal arms although no family met advance_to_causal",
+  "FLOWCARRY/CAMCARRY frozen as ablations after FLOWVEL result",
+  "K_ADMIT_FLOWVEL frozen after results",
+  "VK amend1: FLOWCARRY added",
+  "paired-test fix: single-candidate vs B_att#0"
+ ]
+}

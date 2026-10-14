@@ -1,0 +1,259 @@
+{
+ "updated_kst": "2026-10-14 21:35",
+ "note": "Maintained by the agent; progress = result CSV count / expected units (live).",
+ "tasks": [
+  {
+   "id": "S1-diag",
+   "title": "Stage 1 진단 (생성기 25종)",
+   "description": "살아 있는 SGGL 궤적에서 trigger frame마다 rescue 생성기를 비저장 probe로 실행해 recall·거짓 양성·위치 정확도 측정",
+   "machine": "Ubuntu 2080 (53) + RunPod (11)",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/diag/*.cand.csv",
+    "total": 53
+   }
+  },
+  {
+   "id": "S1-rankers",
+   "title": "순위화기 R0–R3 교차 적합",
+   "description": "REP→DEV, DEV→REP 교차 적합. held-out 순 이득이 양수인 순위화기 없음",
+   "machine": "Ubuntu CPU",
+   "status": "DONE"
+  },
+  {
+   "id": "C-SGGL",
+   "title": "SGGL 기준선 (RunPod)",
+   "description": "모든 RunPod arm의 같은 기계 기준선",
+   "machine": "RunPod 4090",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/runpod/runs/SGGL/*.csv",
+    "total": 64
+   },
+   "depends_on": []
+  },
+  {
+   "id": "C-M3vel",
+   "title": "M3vel 대조",
+   "description": "M7 도전자 재현: 출력 중심 차분 기반 crop 중심 예측",
+   "machine": "RunPod 4090",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/runpod/runs/M3vel/*.csv",
+    "total": 64
+   },
+   "depends_on": []
+  },
+  {
+   "id": "C-FLOWVEL",
+   "title": "FLOWVEL (광류 crop 제어)",
+   "description": "RAFT 광류로 대상 변위를 측정해 다음 crop 중심을 옮기고, 부재 중에도 광류 box를 따라감. 현재 유일한 PROMISING",
+   "machine": "RunPod 4090",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/runpod/runs/FLOWVEL/*.csv",
+    "total": 64
+   },
+   "depends_on": []
+  },
+  {
+   "id": "C-RESC_OCLR",
+   "title": "RESC_OCLR",
+   "description": "동시 부재 시 L 메모리로 8-cell crop을 보고 score>0이면 출력",
+   "machine": "RunPod 4090",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/runpod/runs/RESC_OCLR/*.csv",
+    "total": 64
+   },
+   "depends_on": []
+  },
+  {
+   "id": "C-RESC_OCLR_ADMIT",
+   "title": "RESC_OCLR_ADMIT",
+   "description": "RESC_OCLR + 회수 결과를 메모리에 기록",
+   "machine": "RunPod 4090",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/runpod/runs/RESC_OCLR_ADMIT/*.csv",
+    "total": 64
+   },
+   "depends_on": []
+  },
+  {
+   "id": "C-RESC_CPFR",
+   "title": "RESC_CPFR (foveation)",
+   "description": "같은 배율의 문맥 보존 foveation rescue",
+   "machine": "RunPod 4090",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/runpod/runs/RESC_CPFR/*.csv",
+    "total": 64
+   },
+   "depends_on": []
+  },
+  {
+   "id": "O-POOL",
+   "title": "ORACLE_POOL (진단, 배포 불가)",
+   "description": "GT로 31개 후보 중 최선을 고르는 rescue 상한 (Ubuntu 53 + RunPod 11)",
+   "machine": "Ubuntu 2080 + RunPod",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/runs/ORACLE_POOL/*.csv",
+    "total": 53
+   },
+   "depends_on": []
+  },
+  {
+   "id": "O-POOL-ADMIT",
+   "title": "ORACLE_POOL_ADMIT (진단, 배포 불가)",
+   "description": "ORACLE_POOL + 메모리 기록",
+   "machine": "Ubuntu 2080 (53) + RunPod (11 완료)",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/runs/ORACLE_POOL_ADMIT/*.csv",
+    "total": 53
+   },
+   "depends_on": []
+  },
+  {
+   "id": "K-OCLR-M3",
+   "title": "결합: RESC_OCLR + M3vel",
+   "description": "crop 이탈 rescue × 빠른 재획득 중심 제어",
+   "machine": "RunPod 4090",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/runpod/runs/K_OCLR_M3/*.csv",
+    "total": 64
+   },
+   "depends_on": []
+  },
+  {
+   "id": "K-OCLR-FLOWVEL",
+   "title": "결합: RESC_OCLR + FLOWVEL",
+   "description": "rescue × 광류 crop 제어",
+   "machine": "RunPod 4090",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/runpod/runs/K_OCLR_FLOWVEL/*.csv",
+    "total": 64
+   },
+   "depends_on": [
+    "K-OCLR-M3"
+   ]
+  },
+  {
+   "id": "VK",
+   "title": "VK 결선 (SGGL, FLOWVEL, M3vel)",
+   "description": "VKITTI2 Scene01/06 28단위, 사전 등록 preregistration_vk.json (비회귀 ≥ −0.005)",
+   "machine": "RunPod 4090",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/runpod/runs/FLOWVEL/vkitti__*.csv",
+    "total": 28
+   },
+   "depends_on": [
+    "K-OCLR-FLOWVEL"
+   ]
+  },
+  {
+   "id": "A-FV_PRESENT",
+   "title": "FLOWVEL ablation: 속도만",
+   "description": "출력이 있을 때만 광류 속도, 부재 중 crop 고정",
+   "machine": "RunPod 4090",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/runpod/runs/FV_PRESENT/*.csv",
+    "total": 64
+   },
+   "depends_on": [
+    "VK"
+   ]
+  },
+  {
+   "id": "A-FLOWCARRY",
+   "title": "FLOWVEL ablation: 부재 추적만",
+   "description": "속도 없이 부재 중 광류 box만 따라감",
+   "machine": "RunPod 4090",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/runpod/runs/FLOWCARRY/*.csv",
+    "total": 64
+   },
+   "depends_on": [
+    "A-FV_PRESENT"
+   ]
+  },
+  {
+   "id": "A-CAMCARRY",
+   "title": "FLOWVEL ablation: 카메라 운동만 (C3)",
+   "description": "부재 중 카메라 전역 운동만큼만 crop 이동",
+   "machine": "RunPod 4090",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/runpod/runs/CAMCARRY/*.csv",
+    "total": 64
+   },
+   "depends_on": [
+    "A-FLOWCARRY"
+   ]
+  },
+  {
+   "id": "K-ADMIT-FLOWVEL",
+   "title": "결합: FLOWVEL + 메모리 기록 rescue",
+   "description": "탐색적 (결과를 본 뒤 고정)",
+   "machine": "RunPod 4090",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/runpod/runs/K_ADMIT_FLOWVEL/*.csv",
+    "total": 64
+   },
+   "depends_on": [
+    "A-CAMCARRY"
+   ]
+  },
+  {
+   "id": "R-FLOWVEL_U",
+   "title": "FLOWVEL 기계 간 재현 (Ubuntu 2080)",
+   "description": "같은 FLOWVEL 설정을 Ubuntu 2080에서 실행해 Ubuntu SGGL(diag) 대비 효과가 재현되는지 확인",
+   "machine": "Ubuntu 2080",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/runs/FLOWVEL_U/*.csv",
+    "total": 64
+   }
+  },
+  {
+   "id": "VK-FLOWCARRY",
+   "title": "VK: FLOWCARRY 추가",
+   "description": "메커니즘 최소형 FLOWCARRY의 VK 비회귀 확인 (사후 추가, 공개)",
+   "machine": "RunPod 4090",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/runpod/runs/FLOWCARRY/vkitti__*.csv",
+    "total": 28
+   }
+  },
+  {
+   "id": "POD-STOP",
+   "title": "RunPod 정지 (stop, terminate 아님)",
+   "description": "최종 pull 46파일 sha256 검증, gpu_sync audit exit 0, 모든 arm 64/64 확인 후 runpodctl stop pod (2026-10-14 21:25 KST)",
+   "machine": "RunPod",
+   "status": "DONE"
+  },
+  {
+   "id": "DOCS",
+   "title": "최종 문서·검토·커밋",
+   "description": "STAGE2/COMBINATION/FINAL/NEXT 문서, 독립 검토, EXECUTION_STATUS.json, 커밋·push, Pod audit",
+   "machine": "Ubuntu",
+   "status": "RUNNING"
+  },
+  {
+   "id": "DASH",
+   "title": "연구 사이트 확장",
+   "description": "forest plot, arm 비교, Stage 1 차트, 단위 탐색기, M7 요약, 작업 진행 패널",
+   "machine": "Ubuntu",
+   "status": "DONE"
+  }
+ ]
+}

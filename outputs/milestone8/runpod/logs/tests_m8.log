@@ -1,0 +1,95 @@
+[2026-10-14T08:27:48Z] START /workspace/.venvs/m7/bin/python -m pytest -q -ra tests/test_m7.py tests/test_m8.py
+...s...s........FF                                                       [100%]
+=================================== FAILURES ===================================
+_________ test_rescue_probes_are_non_storing_and_empty_arm_equals_sggl _________
+
+    @pytest.mark.realdata
+    def test_rescue_probes_are_non_storing_and_empty_arm_equals_sggl():
+        if not torch.cuda.is_available():
+            pytest.skip("no CUDA")
+        from memint import controlled
+        from spatial import sggl
+        m = load()
+        pred = m.m55.build_predictor()
+        controlled.install(pred, None, {})
+>       u = m.m7.m6._UNITS()["davis__davis/lab-coat__obj1"]
+            ^^^^^^^^^^^^^^^^
+
+tests/test_m8.py:102: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m6.py:456: in _UNITS
+    _U.update({u.name: u for _, u in units()})
+                                     ^^^^^^^
+scripts/m6.py:192: in units
+    sp = {r["unit"]: r["split"] for r in json.loads((m56.OUT / "manifest.json").read_text())["rows"]}
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.uv/python/cpython-3.12.11-linux-x86_64-gnu/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('outputs/milestone56/manifest.json'), mode = 'r'
+buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'outputs/milestone56/manifest.json'
+
+../.uv/python/cpython-3.12.11-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
+__________ test_shared_view_backbone_is_bit_identical_to_recomputing ___________
+
+    @pytest.mark.realdata
+    def test_shared_view_backbone_is_bit_identical_to_recomputing():
+        if not torch.cuda.is_available():
+            pytest.skip("no CUDA")
+        from memint import controlled
+        m = load()
+        pred = m.m55.build_predictor()
+        controlled.install(pred, None, {})
+>       u = m.m7.m6._UNITS()["davis__davis/lab-coat__obj1"]
+            ^^^^^^^^^^^^^^^^
+
+tests/test_m8.py:120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m6.py:456: in _UNITS
+    _U.update({u.name: u for _, u in units()})
+                                     ^^^^^^^
+scripts/m6.py:192: in units
+    sp = {r["unit"]: r["split"] for r in json.loads((m56.OUT / "manifest.json").read_text())["rows"]}
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.uv/python/cpython-3.12.11-linux-x86_64-gnu/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('outputs/milestone56/manifest.json'), mode = 'r'
+buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'outputs/milestone56/manifest.json'
+
+../.uv/python/cpython-3.12.11-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_m7.py:51: no CUDA / M6 runs
+SKIPPED [1] tests/test_m7.py:122: no CUDA / M6 runs
+FAILED tests/test_m8.py::test_rescue_probes_are_non_storing_and_empty_arm_equals_sggl
+FAILED tests/test_m8.py::test_shared_view_backbone_is_bit_identical_to_recomputing
+2 failed, 14 passed, 2 skipped in 86.87s (0:01:26)
+[2026-10-14T08:29:34Z] EXIT 0

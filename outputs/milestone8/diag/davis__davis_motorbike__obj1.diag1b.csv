@@ -1,0 +1,5 @@
+unit,video_idx,loc1_H_s8,loc3_H_s8,peak_H_s8,heat_gt_H_s8
+davis__davis/motorbike__obj1,10,False,True,0.6704899668693542,0.6267933249473572
+davis__davis/motorbike__obj1,20,True,True,0.6361947059631348,0.6361947059631348
+davis__davis/motorbike__obj1,30,True,True,0.6933885812759399,0.6933885812759399
+davis__davis/motorbike__obj1,40,True,True,0.6311861276626587,0.6311861276626587

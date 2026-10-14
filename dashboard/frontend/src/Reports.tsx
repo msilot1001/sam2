@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { bytes, fileUrl, useFetch, type Entry, type Nav } from '@/lib/api'
 import { cn } from '@/lib/utils'
+import { Help } from '@/HelpTip'
 
 /** resolve a relative link inside a doc to a repo-relative path */
 export const resolveRel = (base: string, href: string) =>
@@ -44,7 +45,7 @@ export default function Reports({ path, nav }: { path?: string; nav: Nav }) {
   return (
     <div className="flex h-full">
       <aside className="flex w-72 shrink-0 flex-col border-r">
-        <div className="p-2"><Input placeholder="문서 검색…" value={filter} onChange={(e) => setFilter(e.target.value)} /></div>
+        <div className="flex items-center p-2"><Input placeholder="문서 검색…" value={filter} onChange={(e) => setFilter(e.target.value)} /><Help k="glossary.ui.reading_order" /></div>
         <ScrollArea className="min-h-0 flex-1">
           {shown.map((d, i) => {
             const group = d.split('/').slice(0, -1).join('/') || '(root)'
@@ -71,21 +72,31 @@ export default function Reports({ path, nav }: { path?: string; nav: Nav }) {
   )
 }
 
+/** "31_causal_timelines.png" -> "causal timelines" */
+export const caption = (name: string) => name.replace(/\.[^.]+$/, '').replace(/^\d+[_-]/, '').replace(/[_-]+/g, ' ')
+const GROUP_LABEL: Record<string, string> = { 'outputs/milestone8/viz': 'M8 그림', 'outputs/milestone7/viz': 'M7 그림' }
+
 export function Figures() {
   const { data } = useFetch<Entry[]>('/api/images', 30_000)
-  const [open, setOpen] = useState<Entry | null>(null)
-  const groups = Object.groupBy(data ?? [], (e) => e.path.split('/').slice(0, -1).join('/'))
+  const [open, setOpen] = useState<number | null>(null)
+  const all = data ?? []
+  const groups = Object.groupBy(all, (e) => e.path.split('/').slice(0, -1).join('/'))
+  const cur = open == null ? null : all[open]
+  const step = (d: number) => setOpen((i) => (i == null ? i : (i + d + all.length) % all.length))
   return (
     <ScrollArea className="h-full">
       <div className="space-y-6 p-4">
         {Object.entries(groups).map(([dir, imgs]) => (
           <section key={dir}>
-            <h2 className="mb-2 font-mono text-sm text-muted-foreground">{dir} ({imgs!.length})</h2>
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3">
+            <h2 className="mb-2 text-sm font-medium">{GROUP_LABEL[dir] ?? dir} <span className="font-mono text-xs text-muted-foreground">{dir} ({imgs!.length})</span><Help k="glossary.ui.figures" /></h2>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3">
               {imgs!.map((e) => (
-                <button key={e.path} onClick={() => setOpen(e)} className="overflow-hidden rounded-lg border text-left hover:ring-2 hover:ring-ring">
-                  <img src={fileUrl(e.path)} alt={e.name} loading="lazy" className="aspect-video w-full bg-muted object-contain" />
-                  <div className="truncate p-2 text-xs">{e.name} <span className="text-muted-foreground">· {bytes(e.size)}</span></div>
+                <button key={e.path} onClick={() => setOpen(all.indexOf(e))} className="overflow-hidden rounded-lg border text-left hover:ring-2 hover:ring-ring">
+                  <img src={fileUrl(e.path)} alt={caption(e.name)} loading="lazy" className="aspect-video w-full bg-muted object-contain" />
+                  <div className="p-2">
+                    <div className="truncate text-sm font-medium first-letter:uppercase">{caption(e.name)}</div>
+                    <div className="truncate text-xs text-muted-foreground">{e.name} · {bytes(e.size)} · {new Date(e.mtime * 1000).toLocaleString()}</div>
+                  </div>
                 </button>
               ))}
             </div>
@@ -93,10 +104,18 @@ export function Figures() {
         ))}
         {data?.length === 0 && <p className="text-muted-foreground">이미지 없음</p>}
       </div>
-      <Dialog open={!!open} onOpenChange={(o) => !o && setOpen(null)}>
-        <DialogContent className="max-h-[95vh] overflow-auto sm:max-w-[95vw]">
-          <DialogHeader><DialogTitle className="font-mono text-sm">{open?.path}</DialogTitle></DialogHeader>
-          {open && <img src={fileUrl(open.path)} alt={open.name} className="mx-auto max-w-full" />}
+      <Dialog open={cur != null} onOpenChange={(o) => !o && setOpen(null)}>
+        <DialogContent className="max-h-[95vh] overflow-auto sm:max-w-[95vw]"
+          onKeyDown={(e) => { if (e.key === 'ArrowRight') step(1); if (e.key === 'ArrowLeft') step(-1) }}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <button className="rounded border px-2 text-sm" onClick={() => step(-1)} aria-label="이전">←</button>
+              <span className="first-letter:uppercase">{cur && caption(cur.name)}</span>
+              <button className="rounded border px-2 text-sm" onClick={() => step(1)} aria-label="다음">→</button>
+              <span className="font-mono text-xs font-normal text-muted-foreground">{cur?.path} · {open! + 1}/{all.length}</span>
+            </DialogTitle>
+          </DialogHeader>
+          {cur && <img src={fileUrl(cur.path)} alt={caption(cur.name)} className="mx-auto max-w-full" />}
         </DialogContent>
       </Dialog>
     </ScrollArea>

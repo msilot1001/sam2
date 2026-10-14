@@ -9,7 +9,7 @@ M7의 attention(T2–T4)은 SGGL이 L을 채택한 frame에서 **L logit을 보�
 | ① 전역 탐색 heatmap | `B_att` (`rescue.heat_contrast`) | query = 현재 frame의 각 cell 특징. key = frame-0 fg token 8개(k-means) + bg token 32개. value = fg/bg 표시. fg에 대한 attention 질량 = 대상 사후확률 | 예 (crop 밖 전역 위치) | A_cos (단일 prototype 코사인, attention 없음) | 위치 정확도 top-1 0.58 = 0.58. recall 0.389 = 0.389 (Δ 0.000 [−0.014, +0.030]) | **이득 없음** |
 | ② crop 위치 제어 | `B_att_crop` | ①의 peak에 L crop을 다시 놓는다 | 예 (L 메모리에 새 시야) | A_cos_crop | recall 0.130 vs 0.099. 거짓 양성 0.12 vs 0.14. score>0 규칙의 순 이득 −30.2 vs −38.0 | 약간 낫지만 둘 다 순손실 |
 | ③ 경쟁 후보 순위화 | R3 `SetRanker` | 후보 token끼리 self-attention(경쟁) → frame-0 fg/bg token에 cross-attention(신원) → 기권 token | 아니오 (선택만) | R2 로지스틱 (후보를 독립적으로 점수화) | held-out 순 이득: GLOBAL 0.0 (항상 기권) vs −46.6. POOL −11.9 vs −77.6. LOCAL −33.1 vs −43.9 | 로지스틱보다 덜 해롭지만 **양의 이득 없음** |
-| ④ 메모리 판독 | `D_ref` | SAM 2 memory attention이 frame-0 메모리만 읽는다 + ①의 peak prompt | 예 | B_att (전체 메모리) | recall 0.351 vs 0.389 (Δ −0.038 [−0.058, −0.008]) | **더 나쁨** |
+| ④ 메모리 판독 | `D_ref` | SAM 2 memory attention이 frame-0 메모리만 읽는다 + ①의 peak prompt | 예 | B_att (전체 메모리) | D_ref vs B_att#0(둘 다 후보 1개): recall 0.351 vs 0.359 (Δ −0.008 [−0.016, 0.000]) | **차이 없음** (frame-0 메모리 제한은 효과 없음) |
 | (M7) logit 보정 | T2 | frame-0 token이 G/L 특징을 읽어 FiLM | 아니오 | T1 CNN | M7: SGGL 대비 −0.0013 | M7 기각 |
 | 미실행 | B5 학습형 localization, B7 메모리 쓰기 attention | — | — | — | 학습 데이터 부족 (REP 23영상, 동시 부재 적중은 5영상) | NOT_RUN |
 

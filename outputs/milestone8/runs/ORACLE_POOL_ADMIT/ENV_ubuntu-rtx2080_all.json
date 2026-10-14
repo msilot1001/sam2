@@ -1,0 +1,52 @@
+{
+  "machine": "ubuntu-rtx2080",
+  "torch": "2.14.1+cu130",
+  "cuda": "13.0",
+  "gpu": "NVIDIA GeForce RTX 2080",
+  "fill_hole_area": 0,
+  "arm": {
+    "name": "ORACLE_POOL_ADMIT",
+    "gens": [
+      "A_cos#0",
+      "A_cos#1",
+      "A_cos#2",
+      "A_cos_crop",
+      "B_att#0",
+      "B_att#1",
+      "B_att#2",
+      "B_att_crop",
+      "C_flowbox",
+      "C_flowcrop",
+      "D_ref",
+      "E_beam1",
+      "E_beam2",
+      "F_cpfr4_G",
+      "F_cpfr4_G_pt",
+      "F_cpfr8_G",
+      "F_cpfr8_G_pt",
+      "F_cpfr8_L",
+      "F_cpfr8_L_pt",
+      "F_oclr4_G",
+      "F_oclr4_G_pt",
+      "F_oclr8_G",
+      "F_oclr8_G_pt",
+      "F_oclr8_L",
+      "F_oclr8_L_pt",
+      "G_neg",
+      "Gp",
+      "H_s8#0",
+      "H_s8#1",
+      "H_s8#2",
+      "Lp"
+    ],
+    "ranker": {
+      "kind": "oracle"
+    },
+    "center": "out",
+    "admit": true,
+    "diagnostic": true,
+    "why": "as ORACLE_POOL + the rescued candidate is written into the producing state's memory (D2). NOT deployable.",
+    "frozen_kst": "2026-10-14 18:13"
+  },
+  "code": "ubuntu working tree"
+}

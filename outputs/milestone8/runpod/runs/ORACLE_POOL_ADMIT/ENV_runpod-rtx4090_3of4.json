@@ -1,0 +1,68 @@
+{
+  "machine": "runpod-rtx4090",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "fill_hole_area": 0,
+  "arm": {
+    "name": "ORACLE_POOL_ADMIT",
+    "gens": [
+      "A_cos#0",
+      "A_cos#1",
+      "A_cos#2",
+      "A_cos_crop",
+      "B_att#0",
+      "B_att#1",
+      "B_att#2",
+      "B_att_crop",
+      "C_flowbox",
+      "C_flowcrop",
+      "D_ref",
+      "E_beam1",
+      "E_beam2",
+      "F_cpfr4_G",
+      "F_cpfr4_G_pt",
+      "F_cpfr8_G",
+      "F_cpfr8_G_pt",
+      "F_cpfr8_L",
+      "F_cpfr8_L_pt",
+      "F_oclr4_G",
+      "F_oclr4_G_pt",
+      "F_oclr8_G",
+      "F_oclr8_G_pt",
+      "F_oclr8_L",
+      "F_oclr8_L_pt",
+      "G_neg",
+      "Gp",
+      "H_s8#0",
+      "H_s8#1",
+      "H_s8#2",
+      "Lp"
+    ],
+    "ranker": {
+      "kind": "oracle"
+    },
+    "center": "out",
+    "admit": true,
+    "diagnostic": true,
+    "why": "as ORACLE_POOL + the rescued candidate is written into the producing state's memory (D2). NOT deployable.",
+    "frozen_kst": "2026-10-14 18:13"
+  },
+  "code": {
+    "ubuntu_head": "718e618ff945d77d067bf7d333adebb0c0a31dba",
+    "uncommitted_paths": 9,
+    "pushed": "2026-10-14 19:11:02",
+    "items": [
+      "src",
+      "scripts",
+      "tests",
+      "configs",
+      "pyproject.toml",
+      "outputs/milestone8/preregistration.json",
+      "outputs/milestone8/preregistration_vk.json",
+      "outputs/milestone8/arms.json",
+      "outputs/milestone8/preregistration_amend1.json",
+      "outputs/milestone8/preregistration_amend2.json"
+    ]
+  }
+}

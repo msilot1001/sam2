@@ -99,8 +99,8 @@ def events():
 
 
 def timelines(*arms):
-    arms = arms or ("RESC_OCLR", "RESC_CPFR", "K_OCLR_M3")
-    units = ["davis__davis_drone__obj1", "davis__davis_kite-surf__obj2", "davis__davis_miami-surf__obj6", "davis__davis_skate-park__obj2"]
+    arms = arms or ("FLOWVEL", "M3vel", "RESC_OCLR")
+    units = ["davis__davis_drone__obj1", "davis__davis_kite-surf__obj2", "davis__davis_skate-park__obj2", "davis__davis_scooter-board__obj2", "davis__davis_lab-coat__obj2"]
     fig, ax = plt.subplots(len(units), 1, figsize=(14, 3 * len(units)))
     for i, st in enumerate(units):
         b = pd.read_csv(m8.OUT / "runpod/runs/SGGL" / f"{st}.csv")

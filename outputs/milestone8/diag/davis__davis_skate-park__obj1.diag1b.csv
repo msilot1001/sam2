@@ -1,0 +1,8 @@
+unit,video_idx,loc1_H_s8,loc3_H_s8,peak_H_s8,heat_gt_H_s8
+davis__davis/skate-park__obj1,10,True,True,0.7568455934524536,0.7568455934524536
+davis__davis/skate-park__obj1,20,False,True,0.6870176792144775,0.6651948690414429
+davis__davis/skate-park__obj1,30,False,False,0.6464179754257202,0.5843340158462524
+davis__davis/skate-park__obj1,40,False,True,0.6493603587150574,0.6366340517997742
+davis__davis/skate-park__obj1,50,False,False,0.6683745384216309,0.5737228393554688
+davis__davis/skate-park__obj1,60,False,True,0.7294877767562866,0.6064947843551636
+davis__davis/skate-park__obj1,70,False,False,0.7155389785766602,0.5295285582542419

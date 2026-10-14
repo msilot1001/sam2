@@ -1,15 +1,25 @@
 """Local read-only research dashboard backend (stdlib only).
 
-Run:  cd /home/sojak/sam2 && uv run python dashboard/server.py
+Run:  cd /home/sojak/sam2 && uv run python dashboard/server.py [port]
 Serves the JSON API under /api and the built frontend (dashboard/frontend/dist) on 127.0.0.1:8765.
+LAN:  DASH_HOST=<lan-ip> DASH_TOKEN=$(openssl rand -hex 16) uv run python dashboard/server.py
+      (a non-loopback DASH_HOST refuses to start without a DASH_TOKEN of >= 16 chars)
 """
+import copy
 import csv
+import hmac
+import ipaddress
 import json
 import mimetypes
+import os
+import re
 import sys
+import time
+from functools import lru_cache
+from http.cookies import CookieError, SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, parse_qsl, urlencode, urlparse
 
 REPO = Path(__file__).resolve().parent.parent
 DIST = (REPO / "dashboard/frontend/dist").resolve()
@@ -24,6 +34,10 @@ MAX_BYTES = 8 << 20
 TYPES = {".json": "application/json", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif",
                ".webp": "image/webp"}
 csv.field_size_limit(1 << 24)
+HOST = os.environ.get("DASH_HOST", "127.0.0.1")
+TOKEN = os.environ.get("DASH_TOKEN", "")
+COOKIE = "dash_token"
+LOCAL_HOSTS = {"127.0.0.1", "localhost", "[::1]"}
 
 
 class Denied(Exception):
@@ -137,6 +151,189 @@ def tail(p, n):
     return "\n".join(lines[-n:])
 
 
+# ---- mtime-keyed caches: parsed files are reused until the file changes ----
+@lru_cache(maxsize=1024)
+def _rows(path, mtime_ns):
+    with open(path, newline="", encoding="utf-8", errors="replace") as f:
+        return list(csv.DictReader(f))
+
+
+@lru_cache(maxsize=64)
+def _json(path, mtime_ns):
+    return json.loads(Path(path).read_text())
+
+
+def rows(p):
+    p = Path(p)
+    return _rows(str(p), p.stat().st_mtime_ns) if p.exists() else []
+
+
+def jsonf(p):
+    p = Path(p)
+    return _json(str(p), p.stat().st_mtime_ns) if p.exists() else None
+
+
+def fnum(v):
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def arm_dirs():
+    """[(machine, arm, dir)] for every arm run directory (incl. the RunPod SGGL baseline)."""
+    out = []
+    for m, d in MACHINES.items():
+        base = REPO / d
+        if base.exists():
+            out += [(m, a.name, a) for a in sorted(base.iterdir()) if a.is_dir()]
+    return out
+
+
+def baseline_path(machine, stem):
+    return REPO / (f"{M8}/runpod/runs/SGGL/{stem}.csv" if machine == "runpod" else f"{M8}/diag/{stem}.csv")
+
+
+def arms_summary():
+    per_unit = [{k: (v if k in ("unit", "video", "machine", "set", "arm") else
+                     v == "True" if v in ("True", "False") else fnum(v)) for k, v in r.items()}
+                for r in rows(REPO / M8 / "causal_per_unit.csv")]
+    return {"arms": jsonf(REPO / M8 / "arms.json"), "causal": jsonf(REPO / M8 / "causal_report.json"),
+            "per_unit": per_unit,
+            "runs": {f"{m}/{a}": len(list(d.glob("*.csv"))) for m, a, d in arm_dirs()}}
+
+
+def units():
+    """{stem: ["machine/arm", ...]} over all per-frame run CSVs."""
+    out = {}
+    for m, a, d in arm_dirs():
+        for f in d.glob("*.csv"):
+            out.setdefault(f.stem, []).append(f"{m}/{a}")
+    return dict(sorted(out.items()))
+
+
+def frames(p):
+    out = []
+    for r in rows(p):
+        g, l = fnum(r.get("score_G")), fnum(r.get("score_L"))
+        out.append({"i": int(r["video_idx"]), "JF": fnum(r.get("JF")), "J": fnum(r.get("J")), "F": fnum(r.get("F")),
+                    "gt_empty": r.get("gt_empty") == "True", "rescued": r.get("rescued") == "True",
+                    "coabs": g is not None and l is not None and g <= 0 and l <= 0, "gen": r.get("gen") or None})
+    return out
+
+
+STEM = re.compile(r"^[\w.-]+$")
+
+
+def unit(stem):
+    if not STEM.match(stem) or ".." in stem:
+        raise Denied(stem)
+    series, base = [], {}
+    for m, a, d in arm_dirs():
+        f = d / f"{stem}.csv"
+        if f.exists() and not (m == "runpod" and a == "SGGL"):
+            series.append({"machine": m, "arm": a, "path": rel(f), "frames": frames(f)})
+    for m in MACHINES:
+        b = baseline_path(m, stem)
+        if b.exists():
+            base[m] = {"path": rel(b), "frames": frames(b)}
+    cand = [p for p in (REPO / M8 / "diag" / f"{stem}.cand.csv", REPO / M8 / "runpod/diag" / f"{stem}.cand.csv")
+            if p.exists()]
+    if not series and not base:
+        raise FileNotFoundError(stem)
+    return {"stem": stem, "series": series, "baseline": base,
+            "candidates": {"path": rel(cand[0]), "rows": rows(cand[0])} if cand else None}
+
+
+RANKER_SETS = ["GLOBAL", "LOCAL", "POOL", "pool25"]
+
+
+def stage1():
+    gens = REPO / M8 / "stage1_generators.csv"
+    return {"report": jsonf(REPO / M8 / "stage1_report.json"), "generators": rows(gens),
+            "rankers": {s: jsonf(REPO / M8 / f"rankers_{s}.json") for s in RANKER_SETS}}
+
+
+M7 = "outputs/milestone7"
+M7_REPORTS = ["causal_pilots_report", "teval_report", "vk_report", "m3r_report", "replay_report"]
+
+
+def m7():
+    return {"reports": {n: jsonf(REPO / M7 / f"{n}.json") for n in M7_REPORTS},
+            "docs": [rel(p) for p in sorted((REPO / "docs/m7").glob("*.md"))]}
+
+
+def safe_glob(pattern):
+    """Count files matching a repo-relative glob, only inside allow-listed paths."""
+    if not pattern or pattern.startswith(("/", "~")) or ".." in pattern:
+        raise Denied(pattern)
+    return sum(1 for p in REPO.glob(pattern) if p.is_file() and is_listable(p))
+
+
+def tasks():
+    t = copy.deepcopy(jsonf(REPO / M8 / "TASKS.json"))  # the cached object must not be mutated
+    if not t:
+        return None
+    for task in t.get("tasks", []):
+        pr = task.get("progress")
+        if pr and pr.get("glob"):
+            try:
+                done = safe_glob(pr["glob"])
+            except Denied:
+                done = None
+            total = pr.get("total") or 0
+            pr.update(done=done, percent=round(100 * done / total, 1) if done is not None and total else None)
+    return t
+
+
+LOG_GLOBS = [f"{M8}/logs/*.log", f"{M8}/runpod/logs/queue*.log"]
+
+
+def latest_logs(n=4, lines=15):
+    logs = [p for g in LOG_GLOBS for p in REPO.glob(g) if is_listable(p)]
+    logs.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    return [{"path": rel(p), "mtime": p.stat().st_mtime, "tail": tail(p, lines)} for p in logs[:n]]
+
+
+_index = {"at": 0.0, "files": []}
+
+
+def search(q, limit=200):
+    """Case-insensitive substring match on repo-relative file names in the allow-listed roots."""
+    if time.time() - _index["at"] > 60:  # ponytail: full re-walk once a minute; fine for ~10^4 files
+        files = []
+        for _, root in ROOTS:
+            if root.is_file():
+                files.append(rel(root))
+            for dirpath, dirs, names in os.walk(root):
+                dirs[:] = [d for d in dirs if not denied_name([d])]
+                files += [rel(Path(dirpath) / n) for n in names if not denied_name([n])]
+        _index.update(at=time.time(), files=sorted(set(files)))
+    terms = q.lower().split()
+    hits = [f for f in _index["files"] if terms and all(t in f.lower() for t in terms)]
+    hits.sort(key=lambda f: (not f.endswith(".md"), len(f)))
+    return {"total": len(hits), "hits": hits[:limit]}
+
+
+def is_loopback(host):
+    if host == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
+
+
+def check_bind(host, token):
+    """Refuse a non-loopback bind without a strong token."""
+    if not is_loopback(host) and len(token) < 16:
+        raise SystemExit(f"refusing to bind {host!r}: set DASH_TOKEN (>= 16 chars, e.g. $(openssl rand -hex 16))")
+
+
+def token_ok(v):
+    return bool(TOKEN) and bool(v) and hmac.compare_digest(v.encode(), TOKEN.encode())
+
+
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
@@ -152,9 +349,41 @@ class H(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def authorized(self, u, q):
+        """True if the request may proceed; otherwise a response (401/403/302) has been sent."""
+        if not TOKEN:  # loopback-only mode: reject foreign Host headers (DNS rebinding)
+            host = self.headers.get("Host", "")
+            name = host[:host.find("]") + 1] if host.startswith("[") else host.split(":")[0]
+            if name not in LOCAL_HOSTS:
+                self.send(403, {"error": "bad host"})
+                return False
+            return True
+        if "token" in q:
+            if not token_ok(q["token"]):
+                self.send(401, {"error": "unauthorized"})
+                return False
+            rest = urlencode([(k, v) for k, v in parse_qsl(u.query) if k != "token"])
+            self.send_response(302)
+            self.send_header("Location", u.path + (f"?{rest}" if rest else ""))
+            self.send_header("Set-Cookie", f"{COOKIE}={TOKEN}; HttpOnly; SameSite=Strict; Path=/; Max-Age=2592000")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return False
+        try:
+            jar = SimpleCookie(self.headers.get("Cookie", ""))
+        except CookieError:
+            jar = {}
+        auth = self.headers.get("Authorization", "")
+        if token_ok(jar[COOKIE].value if COOKIE in jar else "") or token_ok(auth[7:] if auth.startswith("Bearer ") else ""):
+            return True
+        self.send(401, "401 unauthorized: open this site once with ?token=<DASH_TOKEN>\n", "text/plain; charset=utf-8")
+        return False
+
     def do_GET(self):
         u = urlparse(self.path)
         q = {k: v[0] for k, v in parse_qs(u.query).items()}
+        if not self.authorized(u, q):
+            return
         try:
             if u.path.startswith("/api/"):
                 return self.api(u.path[5:], q)
@@ -175,6 +404,20 @@ class H(BaseHTTPRequestHandler):
             return self.send(200, docs())
         if name == "images":
             return self.send(200, images())
+        if name == "arms/summary":
+            return self.send(200, arms_summary())
+        if name == "units":
+            return self.send(200, units())
+        if name.startswith("unit/"):
+            return self.send(200, unit(name[5:]))
+        if name == "stage1":
+            return self.send(200, stage1())
+        if name == "m7":
+            return self.send(200, m7())
+        if name == "tasks":
+            return self.send(200, {"tasks": tasks(), "logs": latest_logs()})
+        if name == "search":
+            return self.send(200, search(q.get("q", "")))
         p = safe(q.get("path", ""))
         if not p.is_file():
             raise FileNotFoundError
@@ -200,5 +443,7 @@ class H(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8765
-    print(f"dashboard on http://127.0.0.1:{port}  (repo {REPO})", flush=True)
-    ThreadingHTTPServer(("127.0.0.1", port), H).serve_forever()
+    check_bind(HOST, TOKEN)  # LAN/0.0.0.0 only with a token (see README)
+    auth = "token required" if TOKEN else "no token (loopback only)"
+    print(f"dashboard on http://{HOST}:{port}  ({auth}; repo {REPO})", flush=True)
+    ThreadingHTTPServer((HOST, port), H).serve_forever()

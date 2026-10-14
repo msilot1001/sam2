@@ -1,0 +1,16 @@
+unit,video_idx,loc1_H_s8,loc3_H_s8,peak_H_s8,heat_gt_H_s8
+davis__davis/longboard__obj5,10,False,True,0.714667558670044,0.708929181098938
+davis__davis/longboard__obj5,20,False,False,0.7450588941574097,0.6909995079040527
+davis__davis/longboard__obj5,30,True,True,0.7095190286636353,0.7095190286636353
+davis__davis/longboard__obj5,40,,,0.7666447162628174,
+davis__davis/longboard__obj5,41,,,0.7406169772148132,
+davis__davis/longboard__obj5,42,,,0.7217749357223511,
+davis__davis/longboard__obj5,43,,,0.71833336353302,
+davis__davis/longboard__obj5,44,,,0.7120504379272461,
+davis__davis/longboard__obj5,45,,,0.7667911052703857,
+davis__davis/longboard__obj5,46,,,0.6958723664283752,
+davis__davis/longboard__obj5,47,,,0.7337027788162231,
+davis__davis/longboard__obj5,48,,,0.7405800819396973,
+davis__davis/longboard__obj5,49,,,0.6916860342025757,
+davis__davis/longboard__obj5,50,,,0.7388745546340942,
+davis__davis/longboard__obj5,51,,,0.740623950958252,

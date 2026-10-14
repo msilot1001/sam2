@@ -1,0 +1,8 @@
+unit,video_idx,loc1_H_s8,loc3_H_s8,peak_H_s8,heat_gt_H_s8
+davis__davis/mbike-trick__obj1,10,False,True,0.6075165271759033,0.5987440943717957
+davis__davis/mbike-trick__obj1,20,True,True,0.5994556546211243,0.5994556546211243
+davis__davis/mbike-trick__obj1,30,False,True,0.6230518221855164,0.5860500931739807
+davis__davis/mbike-trick__obj1,40,False,True,0.6430494785308838,0.5889248847961426
+davis__davis/mbike-trick__obj1,50,True,True,0.6122421026229858,0.6122421026229858
+davis__davis/mbike-trick__obj1,60,False,False,0.5862212777137756,0.5508673787117004
+davis__davis/mbike-trick__obj1,70,True,True,0.6653637290000916,0.6653637290000916

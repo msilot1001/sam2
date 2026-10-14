@@ -1,0 +1,10 @@
+unit,video_idx,loc1_H_s8,loc3_H_s8,peak_H_s8,heat_gt_H_s8
+davis__davis/tractor-sand__obj2,10,False,False,0.5673906803131104,0.532342791557312
+davis__davis/tractor-sand__obj2,20,False,False,0.5859774351119995,0.45637047290802
+davis__davis/tractor-sand__obj2,30,False,False,0.5415894985198975,0.44018790125846863
+davis__davis/tractor-sand__obj2,40,True,True,0.6077167987823486,0.6077167987823486
+davis__davis/tractor-sand__obj2,50,False,True,0.5491130948066711,0.5387893319129944
+davis__davis/tractor-sand__obj2,58,True,True,0.5375425219535828,0.5375425219535828
+davis__davis/tractor-sand__obj2,59,False,False,0.620887279510498,0.42305299639701843
+davis__davis/tractor-sand__obj2,60,False,False,0.5401418209075928,0.4585481286048889
+davis__davis/tractor-sand__obj2,70,False,False,0.5600546598434448,0.43109336495399475

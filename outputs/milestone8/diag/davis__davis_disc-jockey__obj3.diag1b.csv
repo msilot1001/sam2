@@ -1,0 +1,14 @@
+unit,video_idx,loc1_H_s8,loc3_H_s8,peak_H_s8,heat_gt_H_s8
+davis__davis/disc-jockey__obj3,10,False,False,0.8045352697372437,0.7483135461807251
+davis__davis/disc-jockey__obj3,20,False,False,0.8149210214614868,0.7329301834106445
+davis__davis/disc-jockey__obj3,29,False,False,0.8101573586463928,0.6988533735275269
+davis__davis/disc-jockey__obj3,30,False,False,0.8069177269935608,0.743958592414856
+davis__davis/disc-jockey__obj3,38,,,0.8070369958877563,
+davis__davis/disc-jockey__obj3,39,,,0.8220770955085754,
+davis__davis/disc-jockey__obj3,40,,,0.8132661581039429,
+davis__davis/disc-jockey__obj3,41,,,0.841806173324585,
+davis__davis/disc-jockey__obj3,47,False,False,0.8165323138237,0.7667235136032104
+davis__davis/disc-jockey__obj3,50,False,False,0.8256523609161377,0.7014035582542419
+davis__davis/disc-jockey__obj3,51,,,0.828328013420105,
+davis__davis/disc-jockey__obj3,60,False,True,0.86259925365448,0.8620347380638123
+davis__davis/disc-jockey__obj3,70,False,False,0.7902088165283203,0.7090848088264465

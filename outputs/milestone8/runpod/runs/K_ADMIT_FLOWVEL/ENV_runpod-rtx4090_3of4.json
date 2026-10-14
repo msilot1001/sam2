@@ -1,0 +1,39 @@
+{
+  "machine": "runpod-rtx4090",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "fill_hole_area": 0,
+  "arm": {
+    "name": "K_ADMIT_FLOWVEL",
+    "gens": [
+      "F_oclr8_L"
+    ],
+    "ranker": {
+      "kind": "score",
+      "thr": 0.0
+    },
+    "center": "flowvel",
+    "admit": true,
+    "why": "stage-3 combination frozen AFTER seeing RESC_OCLR_ADMIT (+0.0046, only rescue variant with positive mean) and FLOWVEL (+0.0130): motion control x memory-admitted rescue. Exploratory (post-hoc choice disclosed). Synergy test vs FLOWVEL, RESC_OCLR_ADMIT.",
+    "frozen_kst": "2026-10-14 19:43"
+  },
+  "code": {
+    "ubuntu_head": "b1ca5a0371672c25fd11a4c734c1aaa7c7ae0a97",
+    "uncommitted_paths": 26,
+    "pushed": "2026-10-14 21:02:56",
+    "items": [
+      "src",
+      "scripts",
+      "tests",
+      "configs",
+      "pyproject.toml",
+      "outputs/milestone8/preregistration.json",
+      "outputs/milestone8/preregistration_vk.json",
+      "outputs/milestone8/arms.json",
+      "outputs/milestone8/preregistration_vk_amend1.json",
+      "outputs/milestone8/preregistration_amend1.json",
+      "outputs/milestone8/preregistration_amend2.json"
+    ]
+  }
+}

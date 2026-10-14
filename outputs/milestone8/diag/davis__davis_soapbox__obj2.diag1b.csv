@@ -1,0 +1,10 @@
+unit,video_idx,loc1_H_s8,loc3_H_s8,peak_H_s8,heat_gt_H_s8
+davis__davis/soapbox__obj2,10,True,True,0.6823728084564209,0.6823728084564209
+davis__davis/soapbox__obj2,20,False,False,0.6939727067947388,0.5801633596420288
+davis__davis/soapbox__obj2,30,False,False,0.601071834564209,0.5470763444900513
+davis__davis/soapbox__obj2,40,False,True,0.6200003623962402,0.600597620010376
+davis__davis/soapbox__obj2,50,False,True,0.6132376194000244,0.5752868056297302
+davis__davis/soapbox__obj2,60,False,False,0.625974714756012,0.545478105545044
+davis__davis/soapbox__obj2,70,False,True,0.6120710372924805,0.5773417949676514
+davis__davis/soapbox__obj2,80,True,True,0.5977907180786133,0.5977907180786133
+davis__davis/soapbox__obj2,90,False,True,0.6166056394577026,0.6014446020126343

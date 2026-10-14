@@ -67,6 +67,19 @@
   - process당 시간: 1 worker는 0.63 s/frame, 4.9 s/trigger이고, 2 worker에서는 각각 1.1 s/frame, 9.0 s/trigger였다.
   - 합산 처리량이 1 worker의 약 0.82배였다. 그래서 2080은 1 worker로 되돌렸다. shard 2의 남은 단위는 RunPod로 옮겼다.
 
-## 4. 시간과 비용
+## 4. 시간과 비용 (2026-10-14)
 
-(최종 갱신 시 실제 값 기록)
+| 자원 | 사용 | 내용 |
+|---|---|---|
+| Ubuntu RTX 2080 | 약 15:20–21:40 KST, GPU 거의 연속 사용 (≈ 6 GPU-h) | diag 53단위 + diag1b 22단위, refs, ORACLE_POOL/ADMIT 53단위 ×2, FLOWVEL_U 재현 |
+| RunPod RTX 4090 | Pod 가동 07:35–12:25 UTC (4.8 h, 과금 기준). GPU 작업 08:50–12:21 UTC (≈ 3.5 GPU-h) | 설치·데이터 이전 약 1.2 h. diag 11단위. arm 14개 × 64단위 + VK 4 arm × 28단위 + ORACLE 11단위 ×2 |
+| Vast RTX 5090 | 0 | M8 기간 내내 연결 불가 |
+| 비용 | RunPod 4.8 h × 시간당 요금 | 요금은 확인하지 못했다. RTX 4090 일반 요금대(약 $0.3–0.7/h)라면 약 $1.5–3.4. 8시간 예산 안이다. Pod는 audit exit 0을 확인한 뒤 **stop**했다 (terminate 아님) |
+| 처리량 개선 | | 데이터 로컬화 1.5×. 4 worker 2.0× (1 worker 대비). backbone 공유 ≈ 1.7× (probe 단위). 2080 2-worker는 0.82×라 되돌림 |
+
+**데이터 전송:**
+- DAVIS: Pod에서 직접 다운로드(0.8 GB zip)
+- PUMaVOS A/B + SegTrack: 5,634파일
+- VKITTI Scene01/06: 1,446파일
+- 모두 md5로 검증했다.
+- 결과 회수: 원장 `outputs/SYNC_LEDGER.tsv`의 NEW/SAME/APPENDED 행. 충돌 9건은 동기화 자체 시험 1건과 실행 중이던 로그 사본 8건이고, 결과 CSV는 없다.

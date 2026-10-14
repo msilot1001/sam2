@@ -1,0 +1,10 @@
+unit,video_idx,loc1_H_s8,loc3_H_s8,peak_H_s8,heat_gt_H_s8
+davis__davis/dog-gooses__obj4,10,False,False,0.6306945085525513,0.5442685484886169
+davis__davis/dog-gooses__obj4,20,True,True,0.662527322769165,0.662527322769165
+davis__davis/dog-gooses__obj4,30,True,True,0.634915828704834,0.634915828704834
+davis__davis/dog-gooses__obj4,40,False,False,0.6739972829818726,0.5694571733474731
+davis__davis/dog-gooses__obj4,50,False,False,0.624724805355072,0.5280441045761108
+davis__davis/dog-gooses__obj4,60,False,False,0.6021385192871094,0.5562601089477539
+davis__davis/dog-gooses__obj4,70,False,False,0.6425185203552246,0.4755859673023224
+davis__davis/dog-gooses__obj4,80,False,False,0.6138172149658203,0.5072488784790039
+davis__davis/dog-gooses__obj4,81,False,False,0.6435337066650391,0.5230317115783691

@@ -1,0 +1,12 @@
+unit,video_idx,loc1_H_s8,loc3_H_s8,peak_H_s8,heat_gt_H_s8
+davis__davis/surf__obj2,10,True,True,0.6363580226898193,0.6363580226898193
+davis__davis/surf__obj2,20,False,False,0.6258702874183655,0.6213055849075317
+davis__davis/surf__obj2,30,True,True,0.6213033199310303,0.6213033199310303
+davis__davis/surf__obj2,40,True,True,0.6341111660003662,0.6341111660003662
+davis__davis/surf__obj2,48,,,0.6766543388366699,
+davis__davis/surf__obj2,49,,,0.6899405717849731,
+davis__davis/surf__obj2,50,,,0.565837562084198,
+davis__davis/surf__obj2,51,,,0.5946725606918335,
+davis__davis/surf__obj2,52,,,0.6536881923675537,
+davis__davis/surf__obj2,53,,,0.6024025082588196,
+davis__davis/surf__obj2,54,,,0.6214393377304077,
