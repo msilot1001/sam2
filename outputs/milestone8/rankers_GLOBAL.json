@@ -1,0 +1,230 @@
+{
+ "gens": [
+  "A_cos",
+  "B_att",
+  "D_ref",
+  "G_neg"
+ ],
+ "fit_data": "coabs+disagree+regular candidates of the fit split",
+ "threshold": "max net_dJ_frames on the fit split's coabs frames s.t. fp_rate_empty <= 0.10 (R3: out-of-fold)",
+ "R0_score": {
+  "fitREP": {
+   "thr": 20.633766174316406,
+   "fit_eval": {
+    "frames_present": 106,
+    "frames_empty": 308,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   },
+   "heldout_eval": {
+    "frames_present": 25,
+    "frames_empty": 47,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   }
+  },
+  "fitDEV": {
+   "thr": 19.439966201782227,
+   "fit_eval": {
+    "frames_present": 25,
+    "frames_empty": 47,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   },
+   "heldout_eval": {
+    "frames_present": 106,
+    "frames_empty": 308,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.03773584905660377,
+    "fp_rate_empty": 0.02922077922077922,
+    "mean_J_gain_present": 0.00027622895344375564,
+    "videos_rescued": 0,
+    "net_dJ_frames": -8.970719730934961
+   }
+  },
+  "pooled_heldout": {
+   "net_dJ_frames": -8.970719730934961,
+   "frames_present": 131,
+   "frames_empty": 355,
+   "rescued_frames": 0.0,
+   "fp_frames": 9.0
+  }
+ },
+ "R1_trainfree": {
+  "fitREP": {
+   "thr": 0.9339947775006294,
+   "fit_eval": {
+    "frames_present": 106,
+    "frames_empty": 308,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   },
+   "heldout_eval": {
+    "frames_present": 25,
+    "frames_empty": 47,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   }
+  },
+  "fitDEV": {
+   "thr": 0.6729443520307542,
+   "fit_eval": {
+    "frames_present": 25,
+    "frames_empty": 47,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.2,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.05122238142106454,
+    "videos_rescued": 0,
+    "net_dJ_frames": 1.2805595355266135
+   },
+   "heldout_eval": {
+    "frames_present": 106,
+    "frames_empty": 308,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.14150943396226415,
+    "fp_rate_empty": 0.1038961038961039,
+    "mean_J_gain_present": 0.02880731726761957,
+    "videos_rescued": 0,
+    "net_dJ_frames": -28.946424369632325
+   }
+  },
+  "pooled_heldout": {
+   "net_dJ_frames": -28.946424369632325,
+   "frames_present": 131,
+   "frames_empty": 355,
+   "rescued_frames": 0.0,
+   "fp_frames": 32.0
+  }
+ },
+ "R2_logistic": {
+  "fitREP": {
+   "thr": 0.49549126625061035,
+   "fit_eval": {
+    "frames_present": 106,
+    "frames_empty": 308,
+    "rescue_rate_present": 0.2358490566037736,
+    "wrong_rescue_present": 0.16037735849056603,
+    "fp_rate_empty": 0.06168831168831169,
+    "mean_J_gain_present": 0.20069968385771236,
+    "videos_rescued": 2,
+    "net_dJ_frames": 2.274166488917512
+   },
+   "heldout_eval": {
+    "frames_present": 25,
+    "frames_empty": 47,
+    "rescue_rate_present": 0.08,
+    "wrong_rescue_present": 0.04,
+    "fp_rate_empty": 0.6595744680851063,
+    "mean_J_gain_present": 0.04336749058765756,
+    "videos_rescued": 1,
+    "net_dJ_frames": -29.91581273530856
+   }
+  },
+  "fitDEV": {
+   "thr": 1.372756838798523,
+   "fit_eval": {
+    "frames_present": 25,
+    "frames_empty": 47,
+    "rescue_rate_present": 0.2,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.12586945655123866,
+    "videos_rescued": 1,
+    "net_dJ_frames": 3.1467364137809666
+   },
+   "heldout_eval": {
+    "frames_present": 106,
+    "frames_empty": 308,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.07547169811320754,
+    "fp_rate_empty": 0.05519480519480519,
+    "mean_J_gain_present": 0.0034161242034286454,
+    "videos_rescued": 0,
+    "net_dJ_frames": -16.637890834436565
+   }
+  },
+  "pooled_heldout": {
+   "net_dJ_frames": -46.553703569745124,
+   "frames_present": 131,
+   "frames_empty": 355,
+   "rescued_frames": 2.0,
+   "fp_frames": 48.0
+  }
+ },
+ "R3_set": {
+  "fitREP": {
+   "thr": 36.137367248535156,
+   "fit_eval": {
+    "frames_present": 106,
+    "frames_empty": 308,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   },
+   "heldout_eval": {
+    "frames_present": 25,
+    "frames_empty": 47,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   }
+  },
+  "fitDEV": {
+   "thr": 58.672760009765625,
+   "fit_eval": {
+    "frames_present": 25,
+    "frames_empty": 47,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   },
+   "heldout_eval": {
+    "frames_present": 106,
+    "frames_empty": 308,
+    "rescue_rate_present": 0.0,
+    "wrong_rescue_present": 0.0,
+    "fp_rate_empty": 0.0,
+    "mean_J_gain_present": 0.0,
+    "videos_rescued": 0,
+    "net_dJ_frames": 0.0
+   }
+  },
+  "pooled_heldout": {
+   "net_dJ_frames": 0.0,
+   "frames_present": 131,
+   "frames_empty": 355,
+   "rescued_frames": 0.0,
+   "fp_frames": 0.0
+  }
+ }
+}

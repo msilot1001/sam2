@@ -19,5 +19,179 @@
     "center": "out",
     "why": "machine-matched SGGL baseline for every worker that runs arms (== diag trajectory on Ubuntu)",
     "frozen_kst": "2026-10-14 17:06"
+  },
+  "ORACLE_POOL": {
+    "name": "ORACLE_POOL",
+    "gens": [
+      "A_cos#0",
+      "A_cos#1",
+      "A_cos#2",
+      "A_cos_crop",
+      "B_att#0",
+      "B_att#1",
+      "B_att#2",
+      "B_att_crop",
+      "C_flowbox",
+      "C_flowcrop",
+      "D_ref",
+      "E_beam1",
+      "E_beam2",
+      "F_cpfr4_G",
+      "F_cpfr4_G_pt",
+      "F_cpfr8_G",
+      "F_cpfr8_G_pt",
+      "F_cpfr8_L",
+      "F_cpfr8_L_pt",
+      "F_oclr4_G",
+      "F_oclr4_G_pt",
+      "F_oclr8_G",
+      "F_oclr8_G_pt",
+      "F_oclr8_L",
+      "F_oclr8_L_pt",
+      "G_neg",
+      "Gp",
+      "H_s8#0",
+      "H_s8#1",
+      "H_s8#2",
+      "Lp"
+    ],
+    "ranker": {
+      "kind": "oracle"
+    },
+    "center": "out",
+    "diagnostic": true,
+    "why": "upper bound of causal rescue: GT picks the best of all 31 stage-1 candidates on co-absence frames (J>0.5), output + re-centre, no memory write. NOT deployable.",
+    "frozen_kst": "2026-10-14 18:13"
+  },
+  "ORACLE_POOL_ADMIT": {
+    "name": "ORACLE_POOL_ADMIT",
+    "gens": [
+      "A_cos#0",
+      "A_cos#1",
+      "A_cos#2",
+      "A_cos_crop",
+      "B_att#0",
+      "B_att#1",
+      "B_att#2",
+      "B_att_crop",
+      "C_flowbox",
+      "C_flowcrop",
+      "D_ref",
+      "E_beam1",
+      "E_beam2",
+      "F_cpfr4_G",
+      "F_cpfr4_G_pt",
+      "F_cpfr8_G",
+      "F_cpfr8_G_pt",
+      "F_cpfr8_L",
+      "F_cpfr8_L_pt",
+      "F_oclr4_G",
+      "F_oclr4_G_pt",
+      "F_oclr8_G",
+      "F_oclr8_G_pt",
+      "F_oclr8_L",
+      "F_oclr8_L_pt",
+      "G_neg",
+      "Gp",
+      "H_s8#0",
+      "H_s8#1",
+      "H_s8#2",
+      "Lp"
+    ],
+    "ranker": {
+      "kind": "oracle"
+    },
+    "center": "out",
+    "admit": true,
+    "diagnostic": true,
+    "why": "as ORACLE_POOL + the rescued candidate is written into the producing state's memory (D2). NOT deployable.",
+    "frozen_kst": "2026-10-14 18:13"
+  },
+  "RESC_OCLR": {
+    "name": "RESC_OCLR",
+    "gens": [
+      "F_oclr8_L"
+    ],
+    "ranker": {
+      "kind": "score",
+      "thr": 0.0
+    },
+    "center": "out",
+    "why": "stage-2 diagnostic causal arm (no family met advance_to_causal): on co-absence, L memory probed on a plain crop with target long side = 8 stride-16 cells at the flow-carried centre; accept iff SAM 2 object score > 0 (train-free, no fitted parameter -> evaluable on DEV+REP); output + re-centre. Stage-1 replay: 23 rescued / 5 FP frames, gains in 2 videos.",
+    "frozen_kst": "2026-10-14 18:34"
+  },
+  "RESC_OCLR_ADMIT": {
+    "name": "RESC_OCLR_ADMIT",
+    "gens": [
+      "F_oclr8_L"
+    ],
+    "ranker": {
+      "kind": "score",
+      "thr": 0.0
+    },
+    "center": "out",
+    "admit": true,
+    "why": "RESC_OCLR + rescued output written into L memory (D2 memory admission)",
+    "frozen_kst": "2026-10-14 18:34"
+  },
+  "RESC_CPFR": {
+    "name": "RESC_CPFR",
+    "gens": [
+      "F_cpfr8_L"
+    ],
+    "ranker": {
+      "kind": "score",
+      "thr": 0.0
+    },
+    "center": "out",
+    "why": "matched-magnification context-preserving foveation counterpart of RESC_OCLR (F family mechanism test under causal feedback). Stage-1 replay: 22 rescued / 39 FP frames.",
+    "frozen_kst": "2026-10-14 18:34"
+  },
+  "K_OCLR_M3": {
+    "name": "K_OCLR_M3",
+    "gens": [
+      "F_oclr8_L"
+    ],
+    "ranker": {
+      "kind": "score",
+      "thr": 0.0
+    },
+    "center": "m3vel",
+    "why": "stage-3 combination (motion control x rescue generation): RESC_OCLR on co-absence + M3-vel damped-velocity crop centre on every frame. Components target different episodes (drone crop escape vs skate-park/sheep fast re-acquisition). Synergy test: vs RESC_OCLR, M3vel, SGGL (same machine).",
+    "frozen_kst": "2026-10-14 18:38"
+  },
+  "K_OCLR_FLOWVEL": {
+    "name": "K_OCLR_FLOWVEL",
+    "gens": [
+      "F_oclr8_L"
+    ],
+    "ranker": {
+      "kind": "score",
+      "thr": 0.0
+    },
+    "center": "flowvel",
+    "why": "stage-3 combination: RESC_OCLR + FLOWVEL flow-driven crop centre. Synergy test vs RESC_OCLR, FLOWVEL, SGGL.",
+    "frozen_kst": "2026-10-14 18:38"
+  },
+  "FV_PRESENT": {
+    "name": "FV_PRESENT",
+    "gens": [],
+    "center": "fv_present",
+    "why": "FLOWVEL ablation (frozen after FLOWVEL PROMISING): damped flow velocity only while SGGL output is present; crop stays put while absent (as SGGL). Isolates the velocity part.",
+    "frozen_kst": "2026-10-14 19:08"
+  },
+  "FLOWCARRY": {
+    "name": "FLOWCARRY",
+    "gens": [],
+    "center": "flowcarry",
+    "why": "FLOWVEL ablation: no velocity; while the output is empty the crop follows the RAFT flow-carried target box. Isolates the absence-tracking part.",
+    "frozen_kst": "2026-10-14 19:08"
+  },
+  "CAMCARRY": {
+    "name": "CAMCARRY",
+    "gens": [],
+    "center": "camcarry",
+    "why": "FLOWVEL ablation / C3: while the output is empty the crop moves with the CAMERA motion (median flow outside the target box) instead of the target-region flow. Tests whether target-local flow matters.",
+    "frozen_kst": "2026-10-14 19:08"
   }
 }

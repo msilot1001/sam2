@@ -1,0 +1,654 @@
+{
+ "n_units": 64,
+ "n_videos": 39,
+ "frames": 5082,
+ "trigger_counts": {
+  "coabs": 486,
+  "regular": 399,
+  "disagree": 242
+ },
+ "coabs_gt_present": 131,
+ "coabs_gt_empty": 355,
+ "latency_s": {
+  "sggl_per_frame": 0.5941957794675989,
+  "flow_per_frame": 0.047067136118754474,
+  "rescue_all_generators_per_trigger": 6.010947556593077
+ },
+ "peak_vram_gb": 2.40327936,
+ "generators_coabs": [
+  {
+   "gen": "A_cos",
+   "recall": 0.3893,
+   "mean_best_J": 0.365,
+   "top_J": 0.3178,
+   "videos_hit": 3,
+   "units_hit": 4,
+   "fp_rate_gt_empty": 1.0,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "B_att",
+   "recall": 0.3893,
+   "mean_best_J": 0.3715,
+   "top_J": 0.3246,
+   "videos_hit": 4,
+   "units_hit": 5,
+   "fp_rate_gt_empty": 1.0,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": true
+  },
+  {
+   "gen": "D_ref",
+   "recall": 0.3511,
+   "mean_best_J": 0.3191,
+   "top_J": 0.3191,
+   "videos_hit": 3,
+   "units_hit": 4,
+   "fp_rate_gt_empty": 1.0,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "G_neg",
+   "recall": 0.3053,
+   "mean_best_J": 0.2986,
+   "top_J": 0.2986,
+   "videos_hit": 3,
+   "units_hit": 4,
+   "fp_rate_gt_empty": 0.9972,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "H_s8",
+   "recall": 0.2366,
+   "mean_best_J": 0.2251,
+   "top_J": 0.1265,
+   "videos_hit": 3,
+   "units_hit": 3,
+   "fp_rate_gt_empty": 0.9944,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "F_oclr8_L",
+   "recall": 0.1756,
+   "mean_best_J": 0.1471,
+   "top_J": 0.1471,
+   "videos_hit": 2,
+   "units_hit": 2,
+   "fp_rate_gt_empty": 0.0141,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "F_cpfr8_L",
+   "recall": 0.1679,
+   "mean_best_J": 0.1386,
+   "top_J": 0.1386,
+   "videos_hit": 1,
+   "units_hit": 1,
+   "fp_rate_gt_empty": 0.1099,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "B_att_crop",
+   "recall": 0.1298,
+   "mean_best_J": 0.1053,
+   "top_J": 0.1053,
+   "videos_hit": 3,
+   "units_hit": 3,
+   "fp_rate_gt_empty": 0.1239,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "A_cos_crop",
+   "recall": 0.0992,
+   "mean_best_J": 0.076,
+   "top_J": 0.076,
+   "videos_hit": 3,
+   "units_hit": 3,
+   "fp_rate_gt_empty": 0.1352,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "Gp",
+   "recall": 0.0687,
+   "mean_best_J": 0.0603,
+   "top_J": 0.0603,
+   "videos_hit": 2,
+   "units_hit": 2,
+   "fp_rate_gt_empty": 0.2451,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "Lp",
+   "recall": 0.0611,
+   "mean_best_J": 0.0515,
+   "top_J": 0.0515,
+   "videos_hit": 2,
+   "units_hit": 2,
+   "fp_rate_gt_empty": 0.0761,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "C_flowbox",
+   "recall": 0.0458,
+   "mean_best_J": 0.0661,
+   "top_J": 0.0661,
+   "videos_hit": 1,
+   "units_hit": 1,
+   "fp_rate_gt_empty": 0.7972,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "F_oclr4_G_pt",
+   "recall": 0.0382,
+   "mean_best_J": 0.0638,
+   "top_J": 0.0638,
+   "videos_hit": 2,
+   "units_hit": 2,
+   "fp_rate_gt_empty": 0.9239,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "F_oclr8_G_pt",
+   "recall": 0.0305,
+   "mean_best_J": 0.062,
+   "top_J": 0.062,
+   "videos_hit": 1,
+   "units_hit": 1,
+   "fp_rate_gt_empty": 0.9211,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "F_oclr8_L_pt",
+   "recall": 0.0229,
+   "mean_best_J": 0.0454,
+   "top_J": 0.0454,
+   "videos_hit": 3,
+   "units_hit": 3,
+   "fp_rate_gt_empty": 0.9099,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "C_flowcrop",
+   "recall": 0.0153,
+   "mean_best_J": 0.0142,
+   "top_J": 0.0142,
+   "videos_hit": 2,
+   "units_hit": 2,
+   "fp_rate_gt_empty": 0.0028,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "F_cpfr4_G_pt",
+   "recall": 0.0153,
+   "mean_best_J": 0.0533,
+   "top_J": 0.0533,
+   "videos_hit": 1,
+   "units_hit": 1,
+   "fp_rate_gt_empty": 0.9268,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "F_cpfr8_G",
+   "recall": 0.0153,
+   "mean_best_J": 0.0178,
+   "top_J": 0.0178,
+   "videos_hit": 1,
+   "units_hit": 1,
+   "fp_rate_gt_empty": 0.0479,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "F_oclr4_G",
+   "recall": 0.0153,
+   "mean_best_J": 0.0197,
+   "top_J": 0.0197,
+   "videos_hit": 2,
+   "units_hit": 2,
+   "fp_rate_gt_empty": 0.0056,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "F_cpfr4_G",
+   "recall": 0.0076,
+   "mean_best_J": 0.0144,
+   "top_J": 0.0144,
+   "videos_hit": 1,
+   "units_hit": 1,
+   "fp_rate_gt_empty": 0.0141,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "F_oclr8_G",
+   "recall": 0.0076,
+   "mean_best_J": 0.0152,
+   "top_J": 0.0152,
+   "videos_hit": 1,
+   "units_hit": 1,
+   "fp_rate_gt_empty": 0.0197,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "E_beam2",
+   "recall": 0.0,
+   "mean_best_J": 0.0131,
+   "top_J": 0.0131,
+   "videos_hit": 0,
+   "units_hit": 0,
+   "fp_rate_gt_empty": 0.0028,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "E_beam1",
+   "recall": 0.0,
+   "mean_best_J": 0.0135,
+   "top_J": 0.0135,
+   "videos_hit": 0,
+   "units_hit": 0,
+   "fp_rate_gt_empty": 0.0028,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "F_cpfr8_L_pt",
+   "recall": 0.0,
+   "mean_best_J": 0.0437,
+   "top_J": 0.0437,
+   "videos_hit": 0,
+   "units_hit": 0,
+   "fp_rate_gt_empty": 0.9465,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  },
+  {
+   "gen": "F_cpfr8_G_pt",
+   "recall": 0.0,
+   "mean_best_J": 0.0351,
+   "top_J": 0.0351,
+   "videos_hit": 0,
+   "units_hit": 0,
+   "fp_rate_gt_empty": 0.938,
+   "n_present": 131,
+   "n_empty": 355,
+   "adv_recall": false
+  }
+ ],
+ "reference_recall_max_Gp_Lp": 0.06870229007633588,
+ "oracle_any_generator_recall": 0.5114503816793893,
+ "localisation_coabs": {
+  "A_cos": {
+   "loc1": 0.5801526717557252,
+   "loc3": 0.6793893129770993
+  },
+  "B_att": {
+   "loc1": 0.5801526717557252,
+   "loc3": 0.6412213740458015
+  },
+  "H_s8": {
+   "loc1": 0.1450381679389313,
+   "loc3": 0.29770992366412213
+  }
+ },
+ "paired_tests": {
+  "B_att_vs_A_cos_recall": {
+   "delta": 0.0,
+   "CI": [
+    -0.014494512452511609,
+    0.029850746268656716
+   ],
+   "n_frames": 131,
+   "n_videos": 11
+  },
+  "H_s8_vs_A_cos_recall": {
+   "delta": -0.15267175572519084,
+   "CI": [
+    -0.24181082830025882,
+    0.0
+   ],
+   "n_frames": 131,
+   "n_videos": 11
+  },
+  "cpfr8_vs_oclr8_G_recall": {
+   "delta": 0.007633587786259542,
+   "CI": [
+    0.0,
+    0.03125
+   ],
+   "n_frames": 131,
+   "n_videos": 11
+  },
+  "cpfr8_vs_oclr8_G_bestJ": {
+   "delta": 0.002638664341753461,
+   "CI": [
+    -0.015348233541752349,
+    0.02415051016307643
+   ],
+   "n_frames": 131,
+   "n_videos": 11
+  },
+  "cpfr8_vs_oclr8_L_recall": {
+   "delta": -0.007633587786259542,
+   "CI": [
+    -0.03125,
+    0.0
+   ],
+   "n_frames": 131,
+   "n_videos": 11
+  },
+  "cpfr8_vs_oclr8_L_bestJ": {
+   "delta": -0.008482523984146005,
+   "CI": [
+    -0.03095451285351152,
+    0.0008035019423369229
+   ],
+   "n_frames": 131,
+   "n_videos": 11
+  },
+  "cpfr4_vs_oclr4_G_recall": {
+   "delta": -0.007633587786259542,
+   "CI": [
+    -0.04040745290745291,
+    0.013793103448275862
+   ],
+   "n_frames": 131,
+   "n_videos": 11
+  },
+  "G_neg_vs_B_att#0_recall": {
+   "delta": -0.08396946564885496,
+   "CI": [
+    -0.1360568170930344,
+    -0.009704114655570991
+   ],
+   "n_frames": 131,
+   "n_videos": 11
+  },
+  "D_ref_vs_B_att_recall": {
+   "delta": -0.03816793893129771,
+   "CI": [
+    -0.05785232709873858,
+    -0.008188653672389357
+   ],
+   "n_frames": 131,
+   "n_videos": 11
+  },
+  "C_flowcrop_vs_Lp_recall": {
+   "delta": -0.04580152671755725,
+   "CI": [
+    -0.13607186464329324,
+    0.016129032258064516
+   ],
+   "n_frames": 131,
+   "n_videos": 11
+  },
+  "E_beam1_vs_Lp_recall": {
+   "delta": -0.061068702290076333,
+   "CI": [
+    -0.1627950043066322,
+    0.0
+   ],
+   "n_frames": 131,
+   "n_videos": 11
+  },
+  "B_att_vs_A_cos_loc1": {
+   "delta": 0.0,
+   "CI": [
+    -0.10582107843137255,
+    0.08392344497607652
+   ]
+  },
+  "H_s8_vs_A_cos_loc1": {
+   "delta": -0.4351145038167939,
+   "CI": [
+    -0.611764705882353,
+    -0.16662087912087936
+   ]
+  }
+ },
+ "hits_by_video": {
+  "A_cos": {
+   "davis/dog-gooses": 0,
+   "davis/drone": 40,
+   "davis/kite-surf": 10,
+   "davis/lady-running": 1,
+   "davis/skate-park": 0
+  },
+  "A_cos_crop": {
+   "davis/dog-gooses": 0,
+   "davis/drone": 5,
+   "davis/kite-surf": 3,
+   "davis/lady-running": 0,
+   "davis/skate-park": 5
+  },
+  "B_att": {
+   "davis/dog-gooses": 1,
+   "davis/drone": 39,
+   "davis/kite-surf": 10,
+   "davis/lady-running": 1,
+   "davis/skate-park": 0
+  },
+  "B_att_crop": {
+   "davis/dog-gooses": 0,
+   "davis/drone": 9,
+   "davis/kite-surf": 3,
+   "davis/lady-running": 0,
+   "davis/skate-park": 5
+  },
+  "C_flowbox": {
+   "davis/dog-gooses": 0,
+   "davis/drone": 6,
+   "davis/kite-surf": 0,
+   "davis/lady-running": 0,
+   "davis/skate-park": 0
+  },
+  "C_flowcrop": {
+   "davis/dog-gooses": 0,
+   "davis/drone": 0,
+   "davis/kite-surf": 1,
+   "davis/lady-running": 1,
+   "davis/skate-park": 0
+  },
+  "D_ref": {
+   "davis/dog-gooses": 0,
+   "davis/drone": 36,
+   "davis/kite-surf": 9,
+   "davis/lady-running": 1,
+   "davis/skate-park": 0
+  },
+  "F_cpfr4_G": {
+   "davis/dog-gooses": 0,
+   "davis/drone": 1,
+   "davis/kite-surf": 0,
+   "davis/lady-running": 0,
+   "davis/skate-park": 0
+  },
+  "F_cpfr4_G_pt": {
+   "davis/dog-gooses": 2,
+   "davis/drone": 0,
+   "davis/kite-surf": 0,
+   "davis/lady-running": 0,
+   "davis/skate-park": 0
+  },
+  "F_cpfr8_G": {
+   "davis/dog-gooses": 0,
+   "davis/drone": 0,
+   "davis/kite-surf": 0,
+   "davis/lady-running": 2,
+   "davis/skate-park": 0
+  },
+  "F_cpfr8_L": {
+   "davis/dog-gooses": 0,
+   "davis/drone": 22,
+   "davis/kite-surf": 0,
+   "davis/lady-running": 0,
+   "davis/skate-park": 0
+  },
+  "F_oclr4_G": {
+   "davis/dog-gooses": 0,
+   "davis/drone": 0,
+   "davis/kite-surf": 1,
+   "davis/lady-running": 1,
+   "davis/skate-park": 0
+  },
+  "F_oclr4_G_pt": {
+   "davis/dog-gooses": 4,
+   "davis/drone": 0,
+   "davis/kite-surf": 0,
+   "davis/lady-running": 1,
+   "davis/skate-park": 0
+  },
+  "F_oclr8_G": {
+   "davis/dog-gooses": 0,
+   "davis/drone": 0,
+   "davis/kite-surf": 0,
+   "davis/lady-running": 1,
+   "davis/skate-park": 0
+  },
+  "F_oclr8_G_pt": {
+   "davis/dog-gooses": 4,
+   "davis/drone": 0,
+   "davis/kite-surf": 0,
+   "davis/lady-running": 0,
+   "davis/skate-park": 0
+  },
+  "F_oclr8_L": {
+   "davis/dog-gooses": 0,
+   "davis/drone": 22,
+   "davis/kite-surf": 0,
+   "davis/lady-running": 1,
+   "davis/skate-park": 0
+  },
+  "F_oclr8_L_pt": {
+   "davis/dog-gooses": 1,
+   "davis/drone": 1,
+   "davis/kite-surf": 0,
+   "davis/lady-running": 1,
+   "davis/skate-park": 0
+  },
+  "G_neg": {
+   "davis/dog-gooses": 0,
+   "davis/drone": 31,
+   "davis/kite-surf": 8,
+   "davis/lady-running": 1,
+   "davis/skate-park": 0
+  },
+  "Gp": {
+   "davis/dog-gooses": 0,
+   "davis/drone": 0,
+   "davis/kite-surf": 8,
+   "davis/lady-running": 0,
+   "davis/skate-park": 1
+  },
+  "H_s8": {
+   "davis/dog-gooses": 0,
+   "davis/drone": 27,
+   "davis/kite-surf": 3,
+   "davis/lady-running": 1,
+   "davis/skate-park": 0
+  },
+  "Lp": {
+   "davis/dog-gooses": 2,
+   "davis/drone": 0,
+   "davis/kite-surf": 6,
+   "davis/lady-running": 0,
+   "davis/skate-park": 0
+  }
+ },
+ "disagree_recall": {
+  "A_cos": 0.516,
+  "A_cos_crop": 0.214,
+  "B_att": 0.516,
+  "B_att_crop": 0.214,
+  "C_flowbox": 0.363,
+  "C_flowcrop": 0.231,
+  "D_ref": 0.291,
+  "E_beam1": 0.247,
+  "E_beam2": 0.253,
+  "F_cpfr4_G": 0.39,
+  "F_cpfr4_G_pt": 0.374,
+  "F_cpfr8_G": 0.374,
+  "F_cpfr8_G_pt": 0.357,
+  "F_cpfr8_L": 0.39,
+  "F_cpfr8_L_pt": 0.418,
+  "F_oclr4_G": 0.363,
+  "F_oclr4_G_pt": 0.379,
+  "F_oclr8_G": 0.407,
+  "F_oclr8_G_pt": 0.385,
+  "F_oclr8_L": 0.445,
+  "F_oclr8_L_pt": 0.445,
+  "G_neg": 0.451,
+  "Gp": 0.187,
+  "H_s8": 0.385,
+  "Lp": 0.214
+ },
+ "regular_recall": {
+  "A_cos": 0.97,
+  "A_cos_crop": 0.846,
+  "B_att": 0.962,
+  "B_att_crop": 0.876,
+  "C_flowbox": 0.962,
+  "C_flowcrop": 0.987,
+  "D_ref": 0.803,
+  "E_beam1": 0.987,
+  "E_beam2": 0.987,
+  "F_cpfr4_G": 0.97,
+  "F_cpfr4_G_pt": 0.962,
+  "F_cpfr8_G": 0.97,
+  "F_cpfr8_G_pt": 0.962,
+  "F_cpfr8_L": 0.975,
+  "F_cpfr8_L_pt": 0.977,
+  "F_oclr4_G": 0.972,
+  "F_oclr4_G_pt": 0.965,
+  "F_oclr8_G": 0.957,
+  "F_oclr8_G_pt": 0.967,
+  "F_oclr8_L": 0.977,
+  "F_oclr8_L_pt": 0.975,
+  "G_neg": 0.944,
+  "Gp": 0.818,
+  "H_s8": 0.965,
+  "Lp": 0.899
+ }
+}

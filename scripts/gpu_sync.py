@@ -83,7 +83,8 @@ def push_code(extra=""):
 
 
 def _manifest(e, rdir):
-    cmd = (f"cd {e['WORKER_REPO']} && [ -d {rdir} ] && find {rdir} -type f ! -name .ubuntu_verified.tsv "
+    # files modified in the last minute are still being written: they are picked up by a later pull
+    cmd = (f"cd {e['WORKER_REPO']} && [ -d {rdir} ] && find {rdir} -type f ! -name .ubuntu_verified.tsv -mmin +1 "
            f"-printf '%s\\t%p\\n' | while IFS=$'\\t' read s p; do printf '%s\\t%s\\t%s\\n' \"$p\" \"$s\" "
            f"\"$(sha256sum \"$p\" | cut -d' ' -f1)\"; done")
     r = ssh(e, cmd, capture_output=True, text=True)
@@ -91,6 +92,8 @@ def _manifest(e, rdir):
         raise RuntimeError(f"manifest failed: {r.stderr.strip()}")
     out = {}
     for line in r.stdout.splitlines():
+        if line.count("\t") != 2:
+            continue
         p, s, h = line.split("\t")
         out[p] = (int(s), h)
     return out
@@ -101,7 +104,7 @@ def _verified_local():
     if LEDGER.exists():
         for line in LEDGER.read_text().splitlines()[1:]:
             f = line.split("\t")
-            if len(f) >= 7 and f[6] in ("NEW", "SAME", "CONFLICT"):     # CONFLICT: saved as *.conflict-<ts>
+            if len(f) >= 7 and f[6] in ("NEW", "SAME", "CONFLICT", "APPENDED"):     # CONFLICT: saved as *.conflict-<ts>
                 done.add((f[2], f[4]))                         # (remote path, sha256)
     return done
 
@@ -128,15 +131,22 @@ def pull_once(rdir, ldir=None):
     if not LEDGER.exists():
         LEDGER.parent.mkdir(parents=True, exist_ok=True)
         LEDGER.write_text("time\tworker\tremote\tlocal\tsha256\tsize\tstatus\n")
+    retry = 0
     for p, (size, h) in todo.items():
         sp = stage / p
         if not sp.exists() or sp.stat().st_size != size or sha(sp) != h:
-            raise RuntimeError(f"verification failed: {p}")
+            retry += 1                                        # changed during transfer: not saved, retried next pull
+            print(f"  RETRY (changed during transfer): {p}", flush=True)
+            continue
         dst = ROOT / ldir / Path(p).relative_to(rdir)
         dst.parent.mkdir(parents=True, exist_ok=True)
         if dst.exists():
+            old = dst.read_bytes()
             if sha(dst) == h:
                 st = "SAME"
+            elif sp.read_bytes()[:len(old)] == old:           # append-only growth (logs): Ubuntu bytes kept as prefix
+                shutil.move(sp, dst)
+                st = "APPENDED"
             else:
                 dst = dst.with_name(dst.name + f".conflict-{ts}")
                 shutil.move(sp, dst)

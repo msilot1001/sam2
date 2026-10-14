@@ -28,9 +28,13 @@ def fam(g):
     return g.split("#")[0]
 
 
+DIAGS = (DIAG, OUT / "runpod" / "diag")      # Ubuntu 2080 units + units recorded on the RunPod worker
+
+
 def load():
     F, C, V = [], [], []
-    for f in sorted(DIAG.glob("*.csv")):
+    for f in sorted(p for d in DIAGS for p in d.glob("*.csv")):
+        DIAG = f.parent
         if f.name.endswith(".cand.csv"):
             continue
         st = f.name[:-4]
@@ -193,30 +197,38 @@ def _thr_for_fp(X, s, fp=0.10):
     return float(e[k]) if k < len(e) else float(e[-1] - 1e-6)
 
 
-def rankers(gens=None):
+def rankers(gens=None, name=None):
+    """Cross-fitted rankers: direction 'REP->DEV' (pre-registered) and 'DEV->REP' (added so causal arms can be evaluated
+    out-of-sample on all of DEV+REP). Each direction: fit on one split, threshold on that split (max net_dJ_frames s.t.
+    fp_rate_empty <= 0.10; R3 uses out-of-fold scores), apply to the other split."""
     F, C, V = load()
-    gens = (gens.split(",") if isinstance(gens, str) else gens) or sorted(C.fam.unique())
+    gens = (gens.split(",") if isinstance(gens, str) and gens else gens) or sorted(C.fam.unique())
     X, XV = _ranker_data(C, V, gens)
-    fit, ev = X.split == "REP", X.split == "DEV"
     RANKERS.mkdir(parents=True, exist_ok=True)
-    res = {"gens": gens, "fit": "REP coabs+disagree+regular candidates", "eval": "DEV coabs frames",
-           "threshold": "max net_dJ_frames on REP coabs subject to REP fp_rate_empty <= 0.10 (R3: out-of-fold REP scores)"}
-    S = {}
-    S["R0_score"] = X.score.to_numpy()
-    S["R1_trainfree"] = ranker.r1(X)
-    lab = fit & (X.y >= 0)
-    lr = ranker.LR().fit(ranker.scalars(X[lab]), X.y[lab].to_numpy())
-    S["R2_logistic"] = lr(ranker.scalars(X))
-    tag = "_".join(sorted(gens)) if len(gens) < 6 else f"pool{len(gens)}"
-    (RANKERS / f"R2_{tag}.json").write_text(json.dumps(lr.state()))
-    S["R3_set"] = _fit_set(X, XV, fit, gens, tag)
-    for k, s in S.items():
-        thr = _thr_best_net(X[fit], s[fit.to_numpy()])
-        res[k] = {"thr_fit_REP": thr, "REP": _accept_eval(X[fit], s[fit.to_numpy()], thr),
-                  "DEV": _accept_eval(X[ev], s[ev.to_numpy()], thr)}
+    tag = name or ("_".join(sorted(gens)) if len(gens) < 6 else f"pool{len(gens)}")
+    res = {"gens": gens, "fit_data": "coabs+disagree+regular candidates of the fit split",
+           "threshold": "max net_dJ_frames on the fit split's coabs frames s.t. fp_rate_empty <= 0.10 (R3: out-of-fold)"}
+    for fs, es in (("REP", "DEV"), ("DEV", "REP")):
+        fit, ev = X.split == fs, X.split == es
+        S = {"R0_score": X.score.to_numpy(), "R1_trainfree": ranker.r1(X)}
+        lab = fit & (X.y >= 0)
+        lr = ranker.LR().fit(ranker.scalars(X[lab]), X.y[lab].to_numpy())
+        S["R2_logistic"] = lr(ranker.scalars(X))
+        (RANKERS / f"R2_{tag}_fit{fs}.json").write_text(json.dumps(lr.state()))
+        S["R3_set"] = _fit_set(X, XV, fit, gens, f"{tag}_fit{fs}")
+        for k, sc in S.items():
+            thr = _thr_best_net(X[fit], sc[fit.to_numpy()])
+            res.setdefault(k, {})[f"fit{fs}"] = {"thr": thr, "fit_eval": _accept_eval(X[fit], sc[fit.to_numpy()], thr),
+                                                  "heldout_eval": _accept_eval(X[ev], sc[ev.to_numpy()], thr)}
+    for k in res:
+        if k.startswith("R"):
+            h = [res[k][f"fit{f}"]["heldout_eval"] for f in ("REP", "DEV")]
+            res[k]["pooled_heldout"] = {m: h[0][m] + h[1][m] for m in ("net_dJ_frames", "frames_present", "frames_empty")}
+            res[k]["pooled_heldout"]["rescued_frames"] = sum(x["rescue_rate_present"] * x["frames_present"] for x in h)
+            res[k]["pooled_heldout"]["fp_frames"] = sum(x["fp_rate_empty"] * x["frames_empty"] for x in h)
+            print(tag, k, {a: round(b, 2) for a, b in res[k]["pooled_heldout"].items()},
+                  "| REP->DEV", {a: round(b, 3) for a, b in res[k]["fitREP"]["heldout_eval"].items() if a in ("rescue_rate_present", "fp_rate_empty", "net_dJ_frames")})
     (OUT / f"rankers_{tag}.json").write_text(json.dumps(res, indent=1, default=float))
-    for k in S:
-        print(k, "thr", round(res[k]["thr_fit_REP"], 3), "DEV", {a: round(b, 3) for a, b in res[k]["DEV"].items()})
     return res
 
 
@@ -301,6 +313,97 @@ def _fit_set(X, XV, fit, gens, tag, steps=1500, seed=0):
     torch.save({"states": states, "gens": fams, "mu": mu, "sd": sd, "steps": steps, "seed": seed,
                 "folds": fold}, RANKERS / f"R3_{tag}.pt")
     return s
+
+
+
+
+# ----------------------------------------------------------------------------- causal arms
+def _base_frames():
+    """Machine-matched SGGL per unit: RunPod `runs/SGGL` for pod arms, the Ubuntu diag trajectory for Ubuntu arms."""
+    pod = {f.stem: pd.read_csv(f) for f in (OUT / "runpod/runs/SGGL").glob("*.csv")}
+    ubu = {f.stem: pd.read_csv(f) for f in DIAG.glob("*.csv") if not f.name.endswith((".cand.csv", ".cand1b.csv", ".diag1b.csv"))}
+    return {"runpod": pod, "ubuntu": ubu}
+
+
+def _pilot(U, label):
+    S = U[U.small].copy()
+    vid = S.groupby("video").d.mean()
+    lovo = [S[S.video != v].d.mean() for v in vid.index]
+    r = {"arm": label, "n_units": int(len(S)), "n_videos": int(S.video.nunique()), "dJF": float(S.d.mean()),
+         "CI_video": cluster_bootstrap(S, "video", lambda x: x.d.mean(), n=2000),
+         "dJ": float(S.dJ.mean()), "dF": float(S.dF.mean()),
+         "videos_up_0.01": int((vid > 0.01).sum()), "videos_down_0.01": int((vid < -0.01).sum()),
+         "lovo_min": float(min(lovo)), "without_miami": float(S[S.video != "davis/miami-surf"].d.mean()),
+         "worst_unit": [S.loc[S.d.idxmin(), "unit"], float(S.d.min())], "best_unit": [S.loc[S.d.idxmax(), "unit"], float(S.d.max())],
+         "tiny_dJF": float(S[S.tiny].d.mean()) if S.tiny.any() else None, "n_tiny": int(S.tiny.sum()),
+         "all_units_dJF": float(U.d.mean()),
+         "coabs_frames": int(U.coabs_n.sum()), "coabs_dJF_framesum": float(U.coabs_dsum.sum()),
+         "false_reacq_frames": int(U.fp_arm.sum()), "false_reacq_frames_SGGL": int(U.fp_base.sum()),
+         "rescued_frames": int(U.rescued.sum()),
+         "latency_s_mean": float(U.lat.mean()), "latency_s_SGGL": float(U.lat_base.mean()) if U.lat_base.notna().any() else None,
+         "extra_sam2_calls_per_frame": float(U.calls.mean() - 2), "peak_vram_gb": float(U.vram.max() / 1e9),
+         "per_video": vid.round(4).to_dict()}
+    adv = r["dJF"] >= 0.005 and r["videos_up_0.01"] >= 3 and r["lovo_min"] > 0 and r["without_miami"] > 0 and r["worst_unit"][1] >= -0.05
+    rej = r["dJF"] <= 0 or (r["videos_up_0.01"] <= 2 and r["lovo_min"] <= 0)
+    r["verdict"] = "PROMISING" if adv else ("REJECTED" if rej else "INCONCLUSIVE")
+    if r["dJF"] >= 0.03 and r["CI_video"][0] > 0:
+        r["verdict"] = "STRONG_WIN"
+    return r
+
+
+def causal(*names):
+    base = _base_frames()
+    out = {}
+    dirs = {"runpod": OUT / "runpod/runs", "ubuntu": OUT / "runs"}
+    arms = sorted({p.name for d in dirs.values() if d.exists() for p in d.iterdir() if p.is_dir() and p.name != "SGGL"})
+    rows_all = []
+    for arm in (names or arms):
+        rows = []
+        for mach, d in dirs.items():
+            for f in sorted((d / arm).glob("*.csv")) if (d / arm).exists() else []:
+                b = base[mach].get(f.stem)
+                if b is None:
+                    continue
+                a = pd.read_csv(f)
+                m = a.merge(b[["video_idx", "J", "F", "JF"] + (["latency_s"] if "latency_s" in b else [])],
+                            on="video_idx", suffixes=("", "_b"))
+                assert len(m) == len(a) == len(b), (arm, f.stem)
+                co = (a.score_G <= 0) & (a.score_L <= 0)
+                rows.append({"unit": a.unit.iloc[0], "video": a.video.iloc[0], "machine": mach, "set": a.set.iloc[0],
+                             "area0": a.area0.iloc[0], "small": a.area0.iloc[0] < 0.01, "tiny": a.area0.iloc[0] < 0.001,
+                             "d": a.JF.mean() - m.JF_b.mean(), "dJ": a.J.mean() - m.J_b.mean(), "dF": a.F.mean() - m.F_b.mean(),
+                             "coabs_n": int(co.sum()), "coabs_dsum": float((m.JF - m.JF_b)[co.to_numpy()].sum()),
+                             "fp_arm": int((a.gt_empty & (a.J < 1)).sum()), "fp_base": int((a.gt_empty & (m.J_b < 1)).sum()),
+                             "rescued": int(a.get("rescued", pd.Series(False)).sum()), "lat": a.latency_s.mean(),
+                             "lat_base": m.latency_s_b.mean() if "latency_s_b" in m else np.nan,
+                             "calls": a.calls.mean() if "calls" in a else 2.0, "vram": a.peak_vram_bytes.max()})
+        if not rows:
+            continue
+        U = pd.DataFrame(rows)
+        V = U[U.set == "VK"]
+        U = U[U.set != "VK"]
+        if len(V):                                          # VKITTI finalists: descriptive, object-clustered
+            V = V.assign(scene=V.video)
+            out[f"{arm}@VK"] = {"n_units": int(len(V)), "dJF": float(V.d.mean()),
+                                "CI_object": cluster_bootstrap(V.assign(o=V.unit), "o", lambda x: x.d.mean(), n=2000),
+                                "per_scene": V.groupby("scene").d.mean().round(4).to_dict(),
+                                "units_up_0.01": int((V.d > 0.01).sum()), "units_down_0.01": int((V.d < -0.01).sum()),
+                                "worst_unit": [V.loc[V.d.idxmin(), "unit"], float(V.d.min())],
+                                "non_regression_pass": bool(V.d.mean() >= -0.005)}
+            print(f"{arm}@VK dJF={V.d.mean():+.4f} per_scene={out[f'{arm}@VK']['per_scene']}")
+        if not len(U):
+            continue
+        out[arm] = _pilot(U, arm)
+        out[arm]["machines"] = U.machine.value_counts().to_dict()
+        rows_all.append(U.assign(arm=arm))
+        r = out[arm]
+        print(f"{arm:20s} n={r['n_units']:2d} dJF={r['dJF']:+.4f} CI=[{r['CI_video'][0]:+.4f},{r['CI_video'][1]:+.4f}] "
+              f"up/down={r['videos_up_0.01']}/{r['videos_down_0.01']} lovo={r['lovo_min']:+.4f} worst={r['worst_unit'][1]:+.3f} "
+              f"rescued={r['rescued_frames']} FPreacq={r['false_reacq_frames']}vs{r['false_reacq_frames_SGGL']} {r['verdict']}")
+    (OUT / "causal_report.json").write_text(json.dumps(out, indent=1, default=float))
+    if rows_all:
+        pd.concat(rows_all).to_csv(OUT / "causal_per_unit.csv", index=False)
+    return out
 
 
 if __name__ == "__main__":

@@ -390,7 +390,9 @@ class Rank:
     def __init__(self, spec):
         from spatial import ranker
         self.spec, self.rk = spec, ranker
-        if spec["kind"] == "lr":
+        if spec["kind"] == "oracle":
+            pass
+        elif spec["kind"] == "lr":
             self.lr = ranker.LR.load(json.loads((RANKERS / f"{spec['name']}.json").read_text()))
         elif spec["kind"] == "set":
             blob = torch.load(RANKERS / f"{spec['name']}.pt", weights_only=False)
@@ -472,7 +474,12 @@ def run_arm(pred, flow, s, u, A, rank, n=None):
                                "area_ratio": float(m.sum() / max(g0.sum(), 1))})
                     vecs.append(np.zeros(256, np.float32) if v is None else v.float().cpu().numpy())
                 cdf = pd.DataFrame(cr)
-                i, sc = rank(cdf, np.stack(vecs), refs_t)
+                if rank.spec["kind"] == "oracle":                  # DIAGNOSTIC ONLY: GT picks the best candidate
+                    g_ = m7.gt(u, t)
+                    Js = [j_measure(np.nan_to_num(c[1], nan=-1.0) > 0, g_) if g_.any() else 0.0 for c in cands]
+                    i, sc = (int(np.argmax(Js)), float(max(Js))) if Js and max(Js) > 0.5 else (None, float(max(Js, default=0)))
+                else:
+                    i, sc = rank(cdf, np.stack(vecs), refs_t)
             res.update(calls=2 + len(cands), rscore=sc)
             if i is not None:
                 name, lg, _, _, o = cands[i]
@@ -497,6 +504,13 @@ def run_arm(pred, flow, s, u, A, rank, n=None):
             # target region (dense motion, not mask-centre differences; keeps following the target while both views miss)
             c0 = vcam.center_of(out) or trk.flow_center()
             c = (c0[0] + 0.5 * trk.v[1], c0[1] + 0.5 * trk.v[0])
+        elif A.get("center") == "fv_present":          # ablation: flow velocity only while the output is present
+            c0 = vcam.center_of(out)
+            c = None if c0 is None else (c0[0] + 0.5 * trk.v[1], c0[1] + 0.5 * trk.v[0])
+        elif A.get("center") == "flowcarry":           # ablation: no velocity; while absent follow the flow-carried box
+            c = vcam.center_of(out) or trk.flow_center()
+        elif A.get("center") == "camcarry":            # ablation (C3): while absent shift the crop by CAMERA motion only
+            c = vcam.center_of(out) or (d.center[0] + trk.cam[1], d.center[1] + trk.cam[0])
         else:
             c = vcam.center_of(out)
         d.set_center(c)
@@ -510,7 +524,7 @@ def run(arm, sets="DEV,REP"):
     A = arms()[arm]
     pred = m55.build_predictor()
     controlled.install(pred, None, {})
-    needs_flow = any(g.startswith(("C_", "F_")) for g in A["gens"]) or A.get("center") == "flowvel" or A.get("flow", False)
+    needs_flow = any(g.startswith(("C_", "F_")) for g in A["gens"]) or A.get("center") in ("flowvel", "fv_present", "flowcarry", "camcarry") or A.get("flow", False)
     flow = motion.Flow() if needs_flow else None
     rank = Rank(A["ranker"]) if A["gens"] else None
     dd = Path(os.environ.get("M8_RUNS_DIR", OUT / "runs")) / arm      # workers: M8_RUNS_DIR=outputs/milestone8/runpod/runs
@@ -524,9 +538,10 @@ def run(arm, sets="DEV,REP"):
     if os.environ.get("M8_SUBSET"):                       # benchmarking: fixed unit subset k/m, then M7_SHARD within it
         k, m = map(int, os.environ["M8_SUBSET"].split("/"))
         us = [x for i, x in enumerate(us) if i % m == k]
+    skip = set(os.environ.get("M8_SKIP", "").split(","))
     for s, x, u in m7.shard(us):
         f = dd / f"{m7.stem(u)}.csv"
-        if f.exists():
+        if f.exists() or m7.stem(u) in skip:
             continue
         torch.cuda.reset_peak_memory_stats()
         df = run_arm(pred, flow, s, u, A, rank)

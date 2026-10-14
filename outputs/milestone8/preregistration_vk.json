@@ -1,0 +1,9 @@
+{
+ "created": "2026-10-14 19:25 KST, after the DEV+REP causal results of SGGL, M3vel, FLOWVEL, RESC_OCLR (before any M8 VK output)",
+ "finalists": ["FLOWVEL (only DEV+REP arm with verdict PROMISING: +0.0130 [+0.0010, +0.0285], 5 up / 2 down)"],
+ "references": ["SGGL (machine-matched baseline)", "M3vel (M7 challenger)"],
+ "set": "VK = VKITTI2 Scene01/06 clone crop units (28 units, 2 scenes). These scenes were M2-M4 development scenes -> descriptive, NOT an independent confirmation. Scene02/18/20 are not used.",
+ "machine": "RunPod RTX 4090 (all three arms)",
+ "rule": "FLOWVEL must not regress on VK: dJF vs SGGL >= -0.005 (M7 final-rule non-regression clause); scene-level and object-cluster CIs reported descriptively",
+ "frozen_arms": "outputs/milestone8/arms.json (FLOWVEL frozen 2026-10-14 16:14 KST, unchanged)"
+}
