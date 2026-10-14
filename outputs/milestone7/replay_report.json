@@ -1,0 +1,877 @@
+{
+  "replay_fidelity": {
+    "max_abs_J_diff_SGGL_replay_vs_live": 0.0009041591320071429,
+    "mean_JF_diff": 2.352221052440518e-07
+  },
+  "counts": {
+    "DEV": {
+      "units": 21,
+      "videos": 16,
+      "small_units": 16,
+      "tiny_units": 3,
+      "frames": 2182
+    },
+    "REP": {
+      "units": 43,
+      "videos": 23,
+      "small_units": 41,
+      "tiny_units": 4,
+      "frames": 2900
+    }
+  },
+  "pilots": {
+    "SGGL-V": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": 0.006930901960418204,
+      "CI_video": [
+        -0.0034961571312286427,
+        0.023908018981401383
+      ],
+      "videos_up_0.01": 1,
+      "videos_down_0.01": 4,
+      "units_up_0.01": 2,
+      "units_down_0.01": 4,
+      "lovo_min": -0.0019155335577366356,
+      "lovo_max": 0.008506772860667047,
+      "without_miami": -0.0019155335577366356,
+      "worst_unit": [
+        "davis__davis/dog-gooses__obj5",
+        -0.05579754987151586
+      ],
+      "best_unit": [
+        "davis__davis/miami-surf__obj5",
+        0.4782608695652176
+      ],
+      "dJF_vs_P5": 0.018107736927052327,
+      "verdict": "REJECT"
+    },
+    "S1-K3": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": -0.0005319489691321083,
+      "CI_video": [
+        -0.0019456128839069058,
+        0.0008813211727239567
+      ],
+      "videos_up_0.01": 0,
+      "videos_down_0.01": 1,
+      "units_up_0.01": 1,
+      "units_down_0.01": 2,
+      "lovo_min": -0.0011763919048643674,
+      "lovo_max": -0.00019072565713970844,
+      "without_miami": -0.0011763919048643674,
+      "worst_unit": [
+        "davis__davis/lady-running__obj2",
+        -0.0196404544407065
+      ],
+      "best_unit": [
+        "davis__davis/miami-surf__obj5",
+        0.02898550724637683
+      ],
+      "dJF_vs_P5": 0.010644885997502011,
+      "verdict": "REJECT"
+    },
+    "S1-state": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": -4.83584406974939e-05,
+      "CI_video": [
+        -0.0028499561513057334,
+        0.003073538611610189
+      ],
+      "videos_up_0.01": 1,
+      "videos_down_0.01": 2,
+      "units_up_0.01": 1,
+      "units_down_0.01": 2,
+      "lovo_min": -0.0014749058673666515,
+      "lovo_max": 0.0009189009031749103,
+      "without_miami": -0.0014749058673666515,
+      "worst_unit": [
+        "davis__davis/dog-gooses__obj5",
+        -0.0514581789880274
+      ],
+      "best_unit": [
+        "davis__davis/miami-surf__obj5",
+        0.07246376811594207
+      ],
+      "dJF_vs_P5": 0.011128476525936626,
+      "verdict": "REJECT"
+    },
+    "S2-observe": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": 0.0069684761026581055,
+      "CI_video": [
+        -0.0034473316245007242,
+        0.023978804844282157
+      ],
+      "videos_up_0.01": 1,
+      "videos_down_0.01": 4,
+      "units_up_0.01": 2,
+      "units_down_0.01": 4,
+      "lovo_min": -0.0018735389281743927,
+      "lovo_max": 0.00854718278722694,
+      "without_miami": -0.0018735389281743927,
+      "worst_unit": [
+        "davis__davis/dog-gooses__obj5",
+        -0.05579754987151586
+      ],
+      "best_unit": [
+        "davis__davis/miami-surf__obj5",
+        0.4782608695652176
+      ],
+      "dJF_vs_P5": 0.018145311069292226,
+      "verdict": "REJECT"
+    },
+    "S3-abs": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": 0.0002817452478463145,
+      "CI_video": [
+        -0.0015591536294848522,
+        0.0023274553841123873
+      ],
+      "videos_up_0.01": 0,
+      "videos_down_0.01": 2,
+      "units_up_0.01": 2,
+      "units_down_0.01": 2,
+      "lovo_min": -0.0007514825455264829,
+      "lovo_max": 0.0005167077952615602,
+      "without_miami": -0.0007514825455264829,
+      "worst_unit": [
+        "davis__davis/lady-running__obj2",
+        -0.01287615740740744
+      ],
+      "best_unit": [
+        "davis__davis/miami-surf__obj2",
+        0.054385088949090554
+      ],
+      "dJF_vs_P5": 0.011458580214480435,
+      "verdict": "REJECT"
+    },
+    "S3-rel": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": 0.0007395465845140115,
+      "CI_video": [
+        -0.003976167491676162,
+        0.006567050458047075
+      ],
+      "videos_up_0.01": 1,
+      "videos_down_0.01": 3,
+      "units_up_0.01": 3,
+      "units_down_0.01": 4,
+      "lovo_min": -0.00225397025814001,
+      "lovo_max": 0.0018481453809210287,
+      "without_miami": -0.00225397025814001,
+      "worst_unit": [
+        "davis__davis/dog-gooses__obj5",
+        -0.05579754987151586
+      ],
+      "best_unit": [
+        "davis__davis/miami-surf__obj5",
+        0.11594202898550726
+      ],
+      "dJF_vs_P5": 0.01191638155114813,
+      "verdict": "REJECT"
+    },
+    "S4-evidence": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": -0.0010026911217078211,
+      "CI_video": [
+        -0.003976027177491898,
+        0.0017249990029771633
+      ],
+      "videos_up_0.01": 0,
+      "videos_down_0.01": 3,
+      "units_up_0.01": 3,
+      "units_down_0.01": 4,
+      "lovo_min": -0.0022119756285777672,
+      "lovo_max": -2.5581963506225425e-05,
+      "without_miami": -0.0022119756285777672,
+      "worst_unit": [
+        "davis__davis/dog-gooses__obj5",
+        -0.05579754987151586
+      ],
+      "best_unit": [
+        "davis__davis/miami-surf__obj2",
+        0.026671855873743433
+      ],
+      "dJF_vs_P5": 0.0101741438449263,
+      "verdict": "REJECT"
+    },
+    "F1-blend": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": 0.0013048092735107992,
+      "CI_video": [
+        -0.011453205040157802,
+        0.020347730778673447
+      ],
+      "videos_up_0.01": 3,
+      "videos_down_0.01": 11,
+      "units_up_0.01": 4,
+      "units_down_0.01": 17,
+      "lovo_min": -0.00857923271108357,
+      "lovo_max": 0.003108811694219275,
+      "without_miami": -0.00857923271108357,
+      "worst_unit": [
+        "davis__davis/dog-gooses__obj5",
+        -0.06084661346296405
+      ],
+      "best_unit": [
+        "davis__davis/miami-surf__obj5",
+        0.4786252405756776
+      ],
+      "dJF_vs_P5": 0.01248164424014492,
+      "verdict": "INCONCLUSIVE"
+    },
+    "F1-blend.7": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": 0.004758901449528168,
+      "CI_video": [
+        -0.007006877094296621,
+        0.023451495878669824
+      ],
+      "videos_up_0.01": 2,
+      "videos_down_0.01": 7,
+      "units_up_0.01": 4,
+      "units_down_0.01": 11,
+      "lovo_min": -0.004966705372918112,
+      "lovo_max": 0.006414010966473078,
+      "without_miami": -0.004966705372918112,
+      "worst_unit": [
+        "davis__davis/dog-gooses__obj5",
+        -0.05796591372994275
+      ],
+      "best_unit": [
+        "davis__davis/miami-surf__obj5",
+        0.47853710949977407
+      ],
+      "dJF_vs_P5": 0.015935736416162288,
+      "verdict": "REJECT"
+    },
+    "F2-boundary": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": -0.0062421309558950994,
+      "CI_video": [
+        -0.009148422332902239,
+        -0.003409223793826301
+      ],
+      "videos_up_0.01": 1,
+      "videos_down_0.01": 9,
+      "units_up_0.01": 1,
+      "units_down_0.01": 14,
+      "lovo_min": -0.007115617973544643,
+      "lovo_max": -0.0056767715168390825,
+      "without_miami": -0.007115617973544643,
+      "worst_unit": [
+        "davis__davis/swing__obj3",
+        -0.036914754317148746
+      ],
+      "best_unit": [
+        "segtrack__segtrack/birdfall__obj1",
+        0.01576868991462499
+      ],
+      "dJF_vs_P5": 0.00493470401073902,
+      "verdict": "REJECT"
+    },
+    "F3-asym": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": -0.0022690484902668957,
+      "CI_video": [
+        -0.003909309935336393,
+        -0.000546709552604489
+      ],
+      "videos_up_0.01": 1,
+      "videos_down_0.01": 1,
+      "units_up_0.01": 3,
+      "units_down_0.01": 4,
+      "lovo_min": -0.0029225858898586795,
+      "lovo_max": -0.0018784926231744598,
+      "without_miami": -0.0029225858898586795,
+      "worst_unit": [
+        "davis__davis/motorbike__obj1",
+        -0.023759455678907804
+      ],
+      "best_unit": [
+        "davis__davis/miami-surf__obj4",
+        0.0165052285249232
+      ],
+      "dJF_vs_P5": 0.008907786476367223,
+      "verdict": "REJECT"
+    },
+    "F3-sym": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": -0.010983628741338397,
+      "CI_video": [
+        -0.02663702899399039,
+        0.010441225708284353
+      ],
+      "videos_up_0.01": 2,
+      "videos_down_0.01": 22,
+      "units_up_0.01": 3,
+      "units_down_0.01": 36,
+      "lovo_min": -0.02169239258641264,
+      "lovo_max": -0.008726234814014463,
+      "without_miami": -0.02169239258641264,
+      "worst_unit": [
+        "davis__davis/swing__obj3",
+        -0.09858284201811707
+      ],
+      "best_unit": [
+        "davis__davis/miami-surf__obj5",
+        0.5062742904368538
+      ],
+      "dJF_vs_P5": 0.00019320622529572199,
+      "verdict": "REJECT"
+    },
+    "F4-instance": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": -0.010508406768606184,
+      "CI_video": [
+        -0.015833889035832216,
+        -0.005507052280644162
+      ],
+      "videos_up_0.01": 2,
+      "videos_down_0.01": 13,
+      "units_up_0.01": 5,
+      "units_down_0.01": 26,
+      "lovo_min": -0.011574422001051134,
+      "lovo_max": -0.00899253469716795,
+      "without_miami": -0.010848518152796829,
+      "worst_unit": [
+        "davis__davis/swing__obj3",
+        -0.09539724276914718
+      ],
+      "best_unit": [
+        "davis__davis/motocross-bumps__obj1",
+        0.04499842690667999
+      ],
+      "dJF_vs_P5": 0.0006684281980279368,
+      "verdict": "REJECT"
+    },
+    "F-union": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": -0.010515943940996099,
+      "CI_video": [
+        -0.016072232095171588,
+        -0.005443333950367742
+      ],
+      "videos_up_0.01": 2,
+      "videos_down_0.01": 13,
+      "units_up_0.01": 4,
+      "units_down_0.01": 25,
+      "lovo_min": -0.01157895711561442,
+      "lovo_max": -0.008976589878167091,
+      "without_miami": -0.011221637582592493,
+      "worst_unit": [
+        "davis__davis/swing__obj3",
+        -0.09671977145942046
+      ],
+      "best_unit": [
+        "davis__davis/motocross-bumps__obj1",
+        0.04494059521969851
+      ],
+      "dJF_vs_P5": 0.0006608910256380216,
+      "verdict": "REJECT"
+    },
+    "F-inter": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": -0.008289553166713889,
+      "CI_video": [
+        -0.013453857095102897,
+        -0.004178645001962769
+      ],
+      "videos_up_0.01": 0,
+      "videos_down_0.01": 10,
+      "units_up_0.01": 2,
+      "units_down_0.01": 15,
+      "lovo_min": -0.009915218180386782,
+      "lovo_max": -0.006625034151253233,
+      "without_miami": -0.009915218180386782,
+      "worst_unit": [
+        "davis__davis/lab-coat__obj1",
+        -0.07403680139055091
+      ],
+      "best_unit": [
+        "davis__davis/miami-surf__obj5",
+        0.029045198068579192
+      ],
+      "dJF_vs_P5": 0.00288728179992023,
+      "verdict": "REJECT"
+    },
+    "M1-verify": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": -0.0004168775482047688,
+      "CI_video": [
+        -0.0009468559373011839,
+        -3.692631220128241e-05
+      ],
+      "videos_up_0.01": 0,
+      "videos_down_0.01": 1,
+      "units_up_0.01": 0,
+      "units_down_0.01": 1,
+      "lovo_min": -0.00046592196564062394,
+      "lovo_max": -0.00024547312409997835,
+      "without_miami": -0.00046592196564062394,
+      "worst_unit": [
+        "davis__davis/lady-running__obj2",
+        -0.010015525298073036
+      ],
+      "best_unit": [
+        "davis__davis/dogs-jump__obj1",
+        0.0
+      ],
+      "dJF_vs_P5": 0.010759957418429352,
+      "verdict": "REJECT"
+    },
+    "M1-always": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": 0.00027116300186764953,
+      "CI_video": [
+        -0.001076782275236062,
+        0.0017774457754242633
+      ],
+      "videos_up_0.01": 0,
+      "videos_down_0.01": 1,
+      "units_up_0.01": 2,
+      "units_down_0.01": 1,
+      "lovo_min": -0.0005040846743230554,
+      "lovo_max": 0.0005059365806047046,
+      "without_miami": -0.0005040846743230554,
+      "worst_unit": [
+        "davis__davis/lady-running__obj2",
+        -0.01287615740740744
+      ],
+      "best_unit": [
+        "davis__davis/miami-surf__obj2",
+        0.026671855873743433
+      ],
+      "dJF_vs_P5": 0.01144799796850177,
+      "verdict": "REJECT"
+    },
+    "M1-trusted": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": 0.0001284246162574255,
+      "CI_video": [
+        -9.47107649659812e-06,
+        0.0003250079139431365
+      ],
+      "videos_up_0.01": 0,
+      "videos_down_0.01": 0,
+      "units_up_0.01": 0,
+      "units_down_0.01": 0,
+      "lovo_min": 4.5084679884493835e-05,
+      "lovo_max": 0.0001437833300390313,
+      "without_miami": 0.00014353339464065202,
+      "worst_unit": [
+        "davis__davis/sheep__obj4",
+        -0.0004440966954344372
+      ],
+      "best_unit": [
+        "davis__davis/dog-gooses__obj5",
+        0.004930715092795079
+      ],
+      "dJF_vs_P5": 0.011305259582891546,
+      "verdict": "INCONCLUSIVE"
+    },
+    "R2-scale": {
+      "n_units": 57,
+      "n_videos": 34,
+      "dJF_vs_SGGL": 0.00087437792238813,
+      "CI_video": [
+        -0.0003795240004058521,
+        0.0028053023690273
+      ],
+      "videos_up_0.01": 0,
+      "videos_down_0.01": 0,
+      "units_up_0.01": 1,
+      "units_down_0.01": 0,
+      "lovo_min": -0.00015944064542412135,
+      "lovo_max": 0.0009969515783049862,
+      "without_miami": -0.00015944064542412135,
+      "worst_unit": [
+        "davis__davis/scooter-board__obj2",
+        -0.005989746808955809
+      ],
+      "best_unit": [
+        "davis__davis/miami-surf__obj5",
+        0.0579710144927536
+      ],
+      "dJF_vs_P5": 0.01205121288902225,
+      "verdict": "REJECT"
+    }
+  },
+  "pilots_by_set": {
+    "SGGL": {
+      "DEV": 0.0,
+      "REP": 0.0
+    },
+    "SGGL-V": {
+      "DEV": -0.0009560240976135906,
+      "REP": 0.010008726763552562
+    },
+    "S1-K3": {
+      "DEV": -0.00013761808860791175,
+      "REP": -0.0006858341908000875
+    },
+    "S1-state": {
+      "DEV": -0.00013385788172964874,
+      "REP": -1.4992805172750547e-05
+    },
+    "S2-observe": {
+      "DEV": -0.0008221662158839418,
+      "REP": 0.010008726763552562
+    },
+    "S3-abs": {
+      "DEV": 0.0008400602308671623,
+      "REP": 6.386623008208125e-05
+    },
+    "S3-rel": {
+      "DEV": -0.0004287635209943644,
+      "REP": 0.0011954724793465485
+    },
+    "S4-evidence": {
+      "DEV": -0.00029490563926471564,
+      "REP": -0.0012789000904661063
+    },
+    "F1-blend": {
+      "DEV": -0.007149663678174517,
+      "REP": 0.004604115791241654
+    },
+    "F1-blend.7": {
+      "DEV": -0.004345034180035918,
+      "REP": 0.008311656817162933
+    },
+    "F2-boundary": {
+      "DEV": -0.004854919503984926,
+      "REP": -0.006783481766396631
+    },
+    "F3-asym": {
+      "DEV": -0.0031582244839980303,
+      "REP": -0.0019220529805181606
+    },
+    "F3-sym": {
+      "DEV": -0.015812088835041323,
+      "REP": -0.00909935163160067
+    },
+    "F4-instance": {
+      "DEV": -0.003962967725192387,
+      "REP": -0.013062724444084736
+    },
+    "F-union": {
+      "DEV": -0.004579557244576985,
+      "REP": -0.012832582651793802
+    },
+    "F-inter": {
+      "DEV": -0.011992478259717027,
+      "REP": -0.006844509227980958
+    },
+    "M1-verify": {
+      "DEV": -0.00013385788172964874,
+      "REP": -0.0005273242473170108
+    },
+    "M1-always": {
+      "DEV": 0.0004411330855804002,
+      "REP": 0.000204833213101698
+    },
+    "M1-trusted": {
+      "DEV": 7.712504405954501e-06,
+      "REP": 0.00017553178185799952
+    },
+    "R2-scale": {
+      "DEV": -0.00013385788172964874,
+      "REP": 0.0012678357971657999
+    }
+  },
+  "oracles_small_vs_SGGL": {
+    "or_sel": {
+      "mean": 0.017899158286555365,
+      "CI": [
+        0.003984386130921376,
+        0.040092904612684346
+      ]
+    },
+    "or_sel5": {
+      "mean": 0.032995327530526516,
+      "CI": [
+        0.01570149011777312,
+        0.056929434723979336
+      ]
+    },
+    "or_fuse": {
+      "mean": 0.020168265648806548,
+      "CI": [
+        0.005249585503717611,
+        0.043550561129174985
+      ]
+    },
+    "or_comp": {
+      "mean": 0.024143829223265433,
+      "CI": [
+        0.009614627386916085,
+        0.047481365973609135
+      ]
+    },
+    "JF_blend": {
+      "mean": -0.005704027777481503,
+      "CI": [
+        -0.02548820007591532,
+        0.020058207646624113
+      ]
+    },
+    "JF_L2": {
+      "mean": -0.008044233240627995,
+      "CI": [
+        -0.01943229327818341,
+        0.002670930591147275
+      ]
+    },
+    "JF_Lp": {
+      "mean": -0.07619025821216793,
+      "CI": [
+        -0.11146394521453197,
+        -0.04660153787486889
+      ]
+    },
+    "JF_Lt": {
+      "mean": -0.0038931229014463583,
+      "CI": [
+        -0.016460486765958952,
+        0.006748865903238498
+      ]
+    }
+  },
+  "SGGL_vs_P5_small": {
+    "mean": 0.01117683496663412,
+    "CI": [
+      -0.010132462621986324,
+      0.026727005480750802
+    ]
+  },
+  "taxonomy": {
+    "11_annotation_absence": {
+      "frames_primary": 35,
+      "frames_any": 35,
+      "units": 5,
+      "videos": 4,
+      "SGGL_JF_loss_sum": 35.0,
+      "top_videos": {
+        "davis/drone": 28,
+        "davis/dog-gooses": 3,
+        "davis/miami-surf": 2,
+        "pumavos/ice_cream": 2
+      }
+    },
+    "3_L_false_reacq": {
+      "frames_primary": 7,
+      "frames_any": 7,
+      "units": 1,
+      "videos": 1,
+      "SGGL_JF_loss_sum": 5.0,
+      "top_videos": {
+        "davis/miami-surf": 7
+      }
+    },
+    "3b_L_wrong_object_tracking": {
+      "frames_primary": 38,
+      "frames_any": 38,
+      "units": 4,
+      "videos": 4,
+      "SGGL_JF_loss_sum": 33.26890261469497,
+      "top_videos": {
+        "davis/miami-surf": 19,
+        "davis/drone": 16,
+        "davis/hockey": 2,
+        "davis/lab-coat": 1
+      }
+    },
+    "6_different_targets": {
+      "frames_primary": 5,
+      "frames_any": 9,
+      "units": 4,
+      "videos": 3,
+      "SGGL_JF_loss_sum": 2.0700183740940314,
+      "top_videos": {
+        "davis/lab-coat": 2,
+        "davis/lady-running": 2,
+        "davis/sheep": 1
+      }
+    },
+    "9_memory_feedback": {
+      "frames_primary": 7,
+      "frames_any": 17,
+      "units": 4,
+      "videos": 2,
+      "SGGL_JF_loss_sum": 6.566029079616036,
+      "top_videos": {
+        "davis/miami-surf": 6,
+        "pumavos/smile": 1
+      }
+    },
+    "2_G_absent_state": {
+      "frames_primary": 10,
+      "frames_any": 10,
+      "units": 3,
+      "videos": 3,
+      "SGGL_JF_loss_sum": 9.460922787193974,
+      "top_videos": {
+        "davis/kite-surf": 8,
+        "davis/scooter-board": 1,
+        "davis/skate-park": 1
+      }
+    },
+    "1_G_absent_resolution": {
+      "frames_primary": 1,
+      "frames_any": 1,
+      "units": 1,
+      "videos": 1,
+      "SGGL_JF_loss_sum": 0.10576923076923084,
+      "top_videos": {
+        "davis/scooter-board": 1
+      }
+    },
+    "4_correct_L_vetoed": {
+      "frames_primary": 6,
+      "frames_any": 7,
+      "units": 2,
+      "videos": 2,
+      "SGGL_JF_loss_sum": 0.46948445062164046,
+      "top_videos": {
+        "davis/dog-gooses": 4,
+        "davis/lady-running": 2
+      }
+    },
+    "8_crop_escape": {
+      "frames_primary": 51,
+      "frames_any": 52,
+      "units": 10,
+      "videos": 9,
+      "SGGL_JF_loss_sum": 7.4569850972786,
+      "top_videos": {
+        "davis/motocross-bumps": 21,
+        "davis/rallye": 10,
+        "davis/motocross-jump": 8,
+        "davis/drift-straight": 4
+      }
+    },
+    "7_both_wrong": {
+      "frames_primary": 165,
+      "frames_any": 213,
+      "units": 20,
+      "videos": 14,
+      "SGGL_JF_loss_sum": 156.64034646018985,
+      "top_videos": {
+        "davis/drone": 63,
+        "davis/skate-park": 20,
+        "davis/kite-surf": 16,
+        "davis/dog-gooses": 12
+      }
+    },
+    "5_complementary": {
+      "frames_primary": 5,
+      "frames_any": 5,
+      "units": 4,
+      "videos": 3,
+      "SGGL_JF_loss_sum": 1.6849184287219543,
+      "top_videos": {
+        "davis/lab-coat": 3,
+        "davis/miami-surf": 1,
+        "pumavos/smile": 1
+      }
+    },
+    "10_boundary_thin": {
+      "frames_primary": 46,
+      "frames_any": 75,
+      "units": 19,
+      "videos": 14,
+      "SGGL_JF_loss_sum": 15.749963946768059,
+      "top_videos": {
+        "pumavos/smile": 10,
+        "davis/miami-surf": 9,
+        "davis/skate-park": 6,
+        "davis/stunt": 4
+      }
+    },
+    "12_unresolved": {
+      "frames_primary": 102,
+      "frames_any": 102,
+      "units": 22,
+      "videos": 14,
+      "SGGL_JF_loss_sum": 61.21408548207532,
+      "top_videos": {
+        "davis/miami-surf": 47,
+        "davis/lab-coat": 11,
+        "davis/scooter-board": 10,
+        "davis/skate-park": 7
+      }
+    }
+  },
+  "event_frame_fraction": 0.047619047619047616,
+  "M1_2x2_L_present": {
+    "both_correct": 3932,
+    "L_correct_Lp_wrong": 361,
+    "L_wrong_Lp_correct": 26,
+    "both_wrong": 211,
+    "units_L_wrong_Lp_correct": 10,
+    "videos_L_wrong_Lp_correct": 8
+  },
+  "M1_disagreement_vs_time": {
+    "(0, 10]": 0.0125,
+    "(10, 30]": 0.07361002349256068,
+    "(30, 60]": 0.19089207735495944,
+    "(60, 1000]": 0.09090909090909091
+  },
+  "R1_resolution_probe": [
+    {
+      "event": false,
+      "Lgood": false,
+      "n": 9,
+      "frac_lost_at_G_res": 0.0,
+      "units": 5
+    },
+    {
+      "event": false,
+      "Lgood": true,
+      "n": 390,
+      "frac_lost_at_G_res": 0.0,
+      "units": 62
+    },
+    {
+      "event": true,
+      "Lgood": false,
+      "n": 130,
+      "frac_lost_at_G_res": 0.023076923076923078,
+      "units": 21
+    },
+    {
+      "event": true,
+      "Lgood": true,
+      "n": 46,
+      "frac_lost_at_G_res": 0.043478260869565216,
+      "units": 16
+    }
+  ],
+  "R2_L2": {
+    "small_L2_vs_SGGL": {
+      "mean": -0.008044233240627995,
+      "CI": [
+        -0.01943229327818341,
+        0.002670930591147275
+      ]
+    }
+  }
+}

@@ -76,6 +76,31 @@ def prereg():
     m55._freeze(OUT / "preregistration.json", {**PREREG, "rows": []})
 
 
+PREREG_R2 = {
+    "created_after": "stage-0 recording + replay of 20 policies on DEV+REP (all S/F/M/R pilots REJECT or INCONCLUSIVE in "
+                     "replay; oracles: selection {G,L} +0.018, fusion bound +0.020, component bound +0.024, extra candidates "
+                     "{L2,Lp,Lt} +0.033). Frozen before any T-head output and before any causal pilot.",
+    "T_heads": {"variants": "T0 (no transfer), T1 (CNN fusion), T2 (+target tokens), T3 (+abstain gate), T4 (+identity gate)",
+                "data": "REP cache every 2nd frame on the live SGGL trajectory; fit/val split 4:1 by video hash",
+                "positive_control": "T1 and T4 on 64 fixed fit items, 1500 steps, lr 1e-3 cosine, bs 8: pass iff fit J - input J "
+                                    ">= +0.05",
+                "main": "3000 steps, bs 8, AdamW 1e-3 cosine, wd 1e-4, grad clip 5, seed 0; same for every variant",
+                "screen": "DEV, output-only along the live SGGL trajectory (all heads in one pass); selection = SGGL's self gate",
+                "attention_claim": "T2/T3/T4 must beat T1 on DEV small units by >= +0.005 (video CI > 0) before any attention-"
+                                   "specific benefit is claimed; T1 must beat T0 for any cross-view feature benefit",
+                "advance": "pilot rule on DEV small units (REP is training data): dJF vs SGGL >= +0.005, >= 3 videos up, LOVO "
+                           "min > 0; then a causal rollout"},
+    "causal_pilots": {"why": "replay keeps SGGL's crop trajectory; verify replay ~ causal for the best point estimate of "
+                             "each non-learned family",
+                      "arms": ["F1-blend.7 (F)", "S2-observe (S)", "M1-always (M)"],
+                      "rule": "same pilot rule as stage 1 on causal DEV+REP small units"},
+}
+
+
+def prereg_r2():
+    m55._freeze(OUT / "preregistration_r2.json", {**PREREG_R2, "rows": []})
+
+
 def status(**kw):
     p = OUT / "EXECUTION_STATUS.json"
     s = json.loads(p.read_text()) if p.exists() else {"experiments": [], "known_bugs": [], "completed": []}

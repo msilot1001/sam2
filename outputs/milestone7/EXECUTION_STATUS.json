@@ -10,8 +10,10 @@
     }
   ],
   "known_bugs": [],
-  "completed": [],
+  "completed": [
+    "stage0 rec DEV,REP"
+  ],
   "next_scheduled": "S0-REC on DEV,REP",
   "base_commit": "9d6f14bd1d12b9ec56b166992b4932a119dc33aa",
-  "updated_kst": "2026-10-14 09:58"
+  "updated_kst": "2026-10-14 11:22"
 }
