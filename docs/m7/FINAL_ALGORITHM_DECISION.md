@@ -2,7 +2,7 @@
 
 ## FINAL_DECISION: KEEP_SGGL
 
-**M3-vel vs SGGL: INSUFFICIENT_EVIDENCE. 다음 확인 단계의 지정 도전자다.**
+**M3-vel vs SGGL: INSUFFICIENT_EVIDENCE. 다음 확인 단계의 도전자로 지정했다.**
 
 **결정 요지:**
 - 18개 후보 계열을 모두 screening했다.
@@ -10,26 +10,26 @@
 - **SGGL을 사전 등록한 최종 규칙(DEV + REP 영상 CI 하한 > 0)으로 이긴 방법은 없다.**
 - **가장 가까운 후보 M3-vel (crop 중심 속도 예측):**
   - +0.0046 [−0.0001, +0.0115], 영상 하나씩 빼기 최솟값 +0.0017.
-  - CI 하한이 bootstrap 잡음 수준(−0.0001)에서 0에 걸려 최종 규칙을 통과하지 못했다. bootstrap seed에 따라 부호가 바뀔 수 있는 수준이다.
-  - 더 중요한 것은 이득이 2개 영상(skate-park, sheep)에 몰려 있다는 점이다. 사전 pilot 규칙은 영상 3개를 요구했다.
-  - 이득의 형태는 '대상이 사라졌다 다시 나타날 때 10–18 frame 빨리 재획득'이다(`outputs/milestone7/viz/20_M3vel_timelines.png`).
+  - CI 하한(−0.0001)이 bootstrap 잡음 수준에서 0에 걸려 최종 규칙을 통과하지 못했다. bootstrap seed에 따라 부호가 바뀔 수 있는 수준이다.
+  - 더 큰 문제는 이득이 영상 2개(skate-park, sheep)에 몰려 있다는 것이다. 사전 pilot 규칙은 영상 3개를 요구했다.
+  - 이득은 주로 대상이 사라졌다 다시 나타날 때 10–18 frame 빨리 재획득하는 형태다(`outputs/milestone7/viz/20_M3vel_timelines.png`).
   - 개정판(M3-vel-r)도 표적 회귀를 줄이지 못했다. VK에서는 +0.0013이다.
 - **SGGL 자체의 VK 결과:**
   - VKITTI2 Scene01/06(합성, 28객체)은 M2–M4의 개발 scene이었다. SGGL에는 처음 적용했지만 프로젝트 전체로는 새 데이터가 아니다.
   - 여기서 SGGL은 P5 대비 +0.017이다. 두 scene 모두 양수(+0.017, +0.020)이고, 22개 객체가 오르고 1개가 내렸다.
   - 실질 표본은 scene 2개다. 그래서 객체 군집 CI [+0.009, +0.025]는 서술용이다. '독립 재현'이 아니라 '개발 세트와 같은 방향, 같은 크기의 효과'라고만 말할 수 있다.
-  - 유일한 큰 손실(obj57, −0.073)은 crop이 이웃 차량으로 넘어간 오대상 추적이다(`viz/21_VK_examples.png`).
+  - 큰 손실은 obj57(−0.073) 하나뿐이고, crop이 이웃 차량으로 넘어가 다른 대상을 추적한 경우다(`viz/21_VK_examples.png`).
 - 따라서 더 복잡한 알고리즘으로 교체하지 않는다. SGGL을 주 알고리즘으로 유지한다.
 - **SGGL-V 거부권:** 개발 데이터에서 miami-surf 하나에만 효과가 있다. VK에서는 1객체 5 frame에서만 발동했고 효과는 −0.00002다. 그래서 선택 사항(ablation)으로 내린다.
 - PUMaVOS C는 최종 규칙을 통과한 방법이 없어 **봉인을 유지한다.**
 
-**정직한 범위:**
+**한계:**
 - DEV와 REP는 여러 번 본 개발 데이터라 모든 Stage 1–3 결과는 탐색적이다.
 - VK도 이전 milestone에서 본 합성 scene 2개다.
 - 극소 대상(< 0.1%)은 여전히 7객체뿐이다(VK에는 없음).
 - 프로젝트 규칙상 VKITTI 보류 scene(02, 18, 20)은 쓰지 않았다.
 
-**사전 등록에서 벗어난 점 (모두 출력 전에 결정했거나 결과 영향이 없음을 검증):**
+**사전 등록에서 벗어난 점 (모두 출력을 보기 전에 결정했거나, 결과에 영향이 없음을 확인했다):**
 1. **인과 pilot 교체:** 사전 등록한 S2-observe를 M3-vel로 바꿨다(`preregistration_r2_amend.json`, 11:45 KST. 첫 pilot 출력은 12:19).
    - 사유: 재생에서 S2가 SGGL-V와 같다. 정정: 정확히는 1 frame이 다르다.
    - 그 결과 **S 계열은 인과 확인이 없다.**
@@ -75,13 +75,13 @@
 | M1 | 보호 / 신뢰 메모리 반사실 | probe + 정책 (재생 + 인과) | **격리 테스트**, 재생 동등성 | 34 | +0.0003 (인과) | +0.011 | 거의 없음 (26 frame) | lady-running −0.043 | +1 메모리 attention | Matthews 2003 (직접 선례) | 중간 | REJECTED |
 | M2 | 메모리 허용 분리 | 허용 hook만 있음 (`Dual.excluded`, `planners.backfill`). M2 정책은 없음 | — | — | 측정 안 함 | — | — | — | 0 | DAM4SAM, SAMURAI, SAM2Long | 높음 | NOT_IMPLEMENTED (인과 근거 없음: 범주 9가 영상 2개) |
 | M3 | crop 중심 제어 (속도 예측; 개정판) | 정책 (인과 전용) | 기계 간 동일 | 34 | **+0.0046** / 개정판 +0.0044 | +0.016 | skate-park +0.169, sheep +0.060 | lab-coat obj2 −0.014 ~ −0.018 | 0 | DaSiamRPN, KeepTrack (search region) | 높음 | **INCONCLUSIVE** (가장 강한 도전자, 영상 2개) |
-| R1 | 같은 crop·메모리에서 해상도만 낮춤 | probe | 격리 | 39 (DEV + REP 전체) | (진단) | — | 원인 가설: 화소 상세만으로는 설명되지 않음 (특징 격자 점유, 시야, 메모리와 일치; G 쪽 개입 없음) | 맞는 / 틀린 후보 구별 불가 (4.3% vs 2.3%) | 사건 frame +encoder | Rottmann & Schubert 2019 | 낮음–중간 | DIAGNOSTIC_ONLY |
+| R1 | 같은 crop·메모리에서 해상도만 낮춤 | probe | 격리 | 39 (DEV + REP 전체) | (진단) | — | 원인 가설: 화소 상세만으로는 설명되지 않음. 특징 격자 점유, 시야, 메모리 설명과 맞지만 G 쪽 개입은 없음 | 맞는 / 틀린 후보 구별 불가 (4.3% vs 2.3%) | 사건 frame +encoder | Rottmann & Schubert 2019 | 낮음–중간 | DIAGNOSTIC_ONLY |
 | R2 | 2× crop 상태 일치 (재획득 확인) | 상태 + 정책 (재생) | 재생 | 34 | +0.0009 | +0.012 | — | — | +1 상태 | multi-scale 일관성 | 낮음–중간 | REJECTED |
 | T1 | 정렬 특징 CNN 결합 | head + 학습 | 항등 초기화, 기울기, 정렬, PC | 12 (DEV) | −0.0134 | — | — | −0.125 | +head 14 ms | SAM2Refiner, GLNet | 높음 | REJECTED |
 | T2 | 목표 token cross-attention | head + 학습 | 같음 | 12 | −0.0013 | — | T1 대비 +0.012 | — | +16 ms | SAM2Refiner + Cutie 조합 | 중간 | REJECTED |
 | T3 | 기권 gate | head + 학습 | gate 범위 테스트 | 12 | −0.0008 | — | T2 대비 +0.0005 | — | 같음 | Flamingo gate, Tao | 중간 | REJECTED |
 | T4 | 신원 제약 attention | head + 학습 | 같음 | 12 | −0.0081 | — | — | T3 대비 −0.007 | 같음 | OSTrack 후보 제거 | 중간 | REJECTED |
-| O1 | 사건 기반 실행 | 비용 분석 | — | — | — | — | 사건 frame 4.8% → 검증 비용 약 5%로 줄일 수 있음 | 검증 자체에 이득이 없음 | 절감 | Viola–Jones 계열 | 높음 | DIAGNOSTIC_ONLY |
+| O1 | 사건 기반 실행 | 비용 분석 | — | — | — | — | 사건 frame이 4.8%라 검증 비용을 약 5%로 줄일 수 있음 | 검증 자체에 이득이 없음 | 절감 | Viola–Jones 계열 | 높음 | DIAGNOSTIC_ONLY |
 | K1–K5 | 조합 4종 | 정책 (재생) | 같음 | 34 | −0.0005 ~ −0.0011 | | — | dog-gooses −0.056 | — | | | REJECTED |
 
 ## 3. 최종 알고리즘: SGGL
@@ -141,7 +141,7 @@ for t = 1 .. T-1:
 
 **선택 사항 (기본 off):**
 - `a2v`: SGGL-V 거부권.
-- `M3-vel`: crop 중심 속도 예측. `Policy.center` 한 줄 교체로 바꿀 수 있다.
+- `M3-vel`: crop 중심 속도 예측. `Policy.center` 한 줄만 바꾸면 된다.
 
 ## 4. 시각 증거 (`outputs/milestone7/viz/`, 성공과 실패를 함께)
 
@@ -161,4 +161,4 @@ for t = 1 .. T-1:
 
 - 벽시계 지연 시간은 실행 시점의 동시 부하에 따라 0.24–0.49 s/frame(RTX 5090)로 달라진다. 그래서 후보 간 비교에 쓰지 않았다.
 - 같은 부하에서 측정한 profile(SGGL 1 process, 4 thread): SAM 2 GPU 133 ms, JPEG decode·crop 65 ms, J/F 채점 28 ms.
-- 비교는 기계 간 수치 차이를 피하려고 같은 기계 기준선과 짝지었다([`MIGRATION_RTX5090.md`](MIGRATION_RTX5090.md)).
+- 기계 간 수치 차이를 피하려고 모든 비교는 같은 기계의 기준선과 짝지었다([`MIGRATION_RTX5090.md`](MIGRATION_RTX5090.md)).

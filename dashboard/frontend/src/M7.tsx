@@ -43,7 +43,7 @@ function PilotCard({ title, desc, obj, hk }: { title: string; desc: string; obj:
   if (!pilots.length) return null
   return (
     <Card>
-      <CardHeader><CardTitle>{title}<Help k={hk} /></CardTitle><CardDescription>{desc} · 색: 파랑 = CI가 0 초과, 빨강 = 0 미만, 회색 = 0 포함<Help k="m7.forest" /></CardDescription></CardHeader>
+      <CardHeader><CardTitle>{title}<Help k={hk} /></CardTitle><CardDescription>{desc} · 색: CI가 0보다 크면 파랑, 0보다 작으면 빨강, 0을 포함하면 회색<Help k="m7.forest" /></CardDescription></CardHeader>
       <CardContent className="space-y-3">
         <Forest rows={forestRows(Object.fromEntries(pilots), ['dJF_vs_SGGL'], ['CI_video'], ciColor)} labelWidth={140} />
         <PilotTable rows={pilots.sort((a, b) => b[1].dJF_vs_SGGL - a[1].dJF_vs_SGGL)} />
@@ -75,7 +75,7 @@ export default function M7({ nav }: { nav: Nav }) {
 
       {isPilot(m3r) && (
         <Card>
-          <CardHeader><CardTitle>M3-vel-r 개정판 재실행 (m3r_report)<Help k="m7.m3r" /></CardTitle><CardDescription>M7 도전자 M3-vel의 사전 등록 개정판 · 원본 M3-vel은 M8에서 M3vel arm으로 재현</CardDescription></CardHeader>
+          <CardHeader><CardTitle>M3-vel-r 개정판 재실행 (m3r_report)<Help k="m7.m3r" /></CardTitle><CardDescription>M7 도전자 M3-vel의 사전 등록 개정판 · 원본 M3-vel은 M8의 M3vel arm으로 재현함</CardDescription></CardHeader>
           <CardContent><PilotTable rows={[['M3-vel-r', m3r]]} /></CardContent>
         </Card>
       )}
@@ -120,7 +120,7 @@ export default function M7({ nav }: { nav: Nav }) {
         )}
         {tax.length > 0 && (
           <Card>
-            <CardHeader><CardTitle>실패 분류 (taxonomy)<Help k="m7.taxonomy" /></CardTitle><CardDescription>클래스별 SGGL J&F 손실 합 (replay_report.taxonomy) · 두 view 모두 틀림 / 동시 부재<Help k="m7.coabsence" /></CardDescription></CardHeader>
+            <CardHeader><CardTitle>실패 분류 (taxonomy)<Help k="m7.taxonomy" /></CardTitle><CardDescription>클래스별 SGGL J&F 손실 합 (replay_report.taxonomy) · 두 view 모두 틀림, 동시 부재<Help k="m7.coabsence" /></CardDescription></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={tax.length * 24 + 40}>
                 <BarChart data={tax} layout="vertical" margin={{ left: 8, right: 24 }}>

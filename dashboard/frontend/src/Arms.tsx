@@ -61,7 +61,7 @@ export default function Arms({ sel, nav }: { sel?: string; nav: Nav }) {
     <div className="space-y-4 p-4">
       <div className="text-xs text-muted-foreground">causal_report.json · causal_per_unit.csv · arms.json · 30초마다 갱신 ({at?.toLocaleTimeString()})</div>
       <Card>
-        <CardHeader><CardTitle>모든 causal arm 지표<Help k="arms.table" /></CardTitle><CardDescription>열 머리글 클릭 = 정렬 · 행 클릭 = 아래에서 상세 보기</CardDescription></CardHeader>
+        <CardHeader><CardTitle>모든 causal arm 지표<Help k="arms.table" /></CardTitle><CardDescription>열 머리글을 누르면 정렬 · 행을 누르면 아래에 상세 표시</CardDescription></CardHeader>
         <CardContent>
           <Table className="text-xs">
             <TableHeader>
@@ -155,7 +155,7 @@ function ArmDetail({ arm, r, spec, perUnit, nav }: { arm: string; r: any; spec: 
           <h3 className="mt-6 mb-2 text-sm font-medium">지연 시간 · VRAM<Help k="arms.detail.cost" /></h3>
           <div className="grid grid-cols-3 gap-4">
             <Stat label="latency arm (s/frame)" value={num(r.latency_s_mean, 3)} sub={`SGGL ${num(r.latency_s_SGGL, 3)} (${signed(r.latency_s_mean - r.latency_s_SGGL, 3)})`} />
-            <Stat label="추가 SAM2 호출/frame" value={num(r.extra_sam2_calls_per_frame, 3)} />
+            <Stat label="frame당 추가 SAM2 호출" value={num(r.extra_sam2_calls_per_frame, 3)} />
             <Stat label="peak VRAM" value={`${num(r.peak_vram_gb, 2)} GB`} />
           </div>
           <h3 className="mt-6 mb-2 text-sm font-medium">rescue / 오재획득 (arm vs SGGL)<Help k="arms.detail.counts" /></h3>
@@ -175,8 +175,8 @@ function ArmDetail({ arm, r, spec, perUnit, nav }: { arm: string; r: any; spec: 
         <section>
           <h3 className="mb-1 text-sm font-medium">video별 ΔJ&F (정렬)<Help k="arms.detail.perVideo" /></h3>
           <div className="flex gap-3 text-xs text-muted-foreground">
-            <span><span className="mr-1 inline-block size-2 rounded-sm" style={{ background: UP }} />arm 우세</span>
-            <span><span className="mr-1 inline-block size-2 rounded-sm" style={{ background: DOWN }} />SGGL 우세</span>
+            <span><span className="mr-1 inline-block size-2 rounded-sm" style={{ background: UP }} />arm이 나음</span>
+            <span><span className="mr-1 inline-block size-2 rounded-sm" style={{ background: DOWN }} />SGGL이 나음</span>
           </div>
           <ResponsiveContainer width="100%" height={Math.max(160, pv.length * 16 + 40)}>
             <BarChart data={pv} layout="vertical" margin={{ left: 8, right: 24 }}>
@@ -192,7 +192,7 @@ function ArmDetail({ arm, r, spec, perUnit, nav }: { arm: string; r: any; spec: 
           </ResponsiveContainer>
         </section>
         <section className="lg:col-span-2">
-          <h3 className="mb-1 text-sm font-medium">unit별 Δ (d) vs 첫 프레임 면적 area0 (로그 축) — 점 클릭 = Unit 탐색<Help k="arms.detail.scatter" /></h3>
+          <h3 className="mb-1 text-sm font-medium">unit별 Δ (d) vs 첫 프레임 면적 area0 (로그 축) · 점을 누르면 Unit 탐색으로 이동<Help k="arms.detail.scatter" /></h3>
           <div className="flex gap-4 text-xs text-muted-foreground">
             <span><span className="mr-1 inline-block size-2 rounded-full" style={{ background: SERIES[0] }} />일반 unit</span>
             <span><span className="mr-1 inline-block size-2 rounded-full" style={{ background: SERIES[1] }} />tiny unit</span>
@@ -251,7 +251,7 @@ function Compare({ names, causal, perUnit, nav }: { names: string[]; causal: Rec
     <Card>
       <CardHeader>
         <CardTitle>arm 대 arm 비교<Help k="arms.compare" /></CardTitle>
-        <CardDescription>2–3개 선택 (색 = 선택 순서) · video별 ΔJ&F와 unit별 Δ 차이 (arm k − 첫 번째 arm)</CardDescription>
+        <CardDescription>2–3개 선택 (색은 선택 순서) · video별 ΔJ&F와 unit별 Δ 차이 (arm k − 첫 번째 arm)</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-wrap gap-2">

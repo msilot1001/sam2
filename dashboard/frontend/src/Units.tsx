@@ -89,7 +89,7 @@ export default function Units({ stem, nav }: { stem?: string; nav: Nav }) {
         </label>
         <Help k="units.unit" />
         {error && <span className="text-sm text-red-600">{error}</span>}
-        <span className="text-xs text-muted-foreground">30초마다 갱신 · 차트 클릭 = 그 프레임으로 후보 표 필터</span>
+        <span className="text-xs text-muted-foreground">30초마다 갱신 · 차트를 누르면 후보 표를 그 프레임으로 필터링</span>
         <span className="text-xs">실패 사례 조사 방법<Help k="units.howto" /></span>
       </div>
 
@@ -98,7 +98,7 @@ export default function Units({ stem, nav }: { stem?: string; nav: Nav }) {
           <CardHeader>
             <CardTitle className="font-mono">{current}<Help k="units.chart_jf" /></CardTitle>
             <CardDescription>
-              각 arm은 같은 기계의 SGGL과 비교 (runpod → runpod/runs/SGGL, ubuntu → diag) · 회색 음영 = gt_empty · 빨간 띠 = co-absence (score_G ≤ 0 그리고 score_L ≤ 0, {view.nCoabs} frames) · 굵은 점 = rescued 프레임<Help k="units.shading" />
+              각 arm을 같은 기계의 SGGL과 비교 (runpod → runpod/runs/SGGL, ubuntu → diag) · 회색 음영: gt_empty · 빨간 띠: co-absence (score_G ≤ 0이고 score_L ≤ 0, {view.nCoabs} frames) · 굵은 점: rescued 프레임<Help k="units.shading" />
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -134,7 +134,7 @@ export default function Units({ stem, nav }: { stem?: string; nav: Nav }) {
                 ))}
               </LineChart>
             </ResponsiveContainer>
-            <div className="text-sm font-medium">Δ J&F (arm − 같은 기계 SGGL), 프레임별<Help k="units.chart_delta" /></div>
+            <div className="text-sm font-medium">프레임별 Δ J&F (arm − 같은 기계 SGGL)<Help k="units.chart_delta" /></div>
             <ResponsiveContainer width="100%" height={220}>
               <LineChart data={view.data} margin={{ right: 16, left: 0 }} onClick={pick}>
                 <CartesianGrid stroke={INK.grid} vertical={false} />
@@ -207,7 +207,7 @@ export default function Units({ stem, nav }: { stem?: string; nav: Nav }) {
               </TableBody>
             </Table>
           </div>
-          <div className="text-xs text-muted-foreground">초록 행 = J &gt; 0.5 (stage-1 recall 기준)</div>
+          <div className="text-xs text-muted-foreground">초록 행은 J &gt; 0.5 (stage-1 recall 기준)</div>
         </CardContent>
       </Card>
     </div>

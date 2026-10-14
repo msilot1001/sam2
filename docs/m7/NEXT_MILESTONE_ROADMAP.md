@@ -6,20 +6,20 @@
 - GPU: Vast RTX 5090. Git 원본과 영구 보관은 Ubuntu.
 
 **M7이 남긴 가장 큰 미해결 문제와 근거:**
-1. **두 view의 동시 부재:** 감사상 SGGL 손실 1위(156.6 frame-JF, 영상 14개).
+1. **두 view의 동시 부재:** 감사에서 SGGL 손실 1위다(156.6 frame-JF, 영상 14개).
 2. **데이터 부족:** 극소 대상 7객체, 거짓 재획득 1 영상 등 표본이 작다.
-3. **M3-vel의 검정력 부족:** 이득 영상 2개.
+3. **M3-vel의 검정력 부족:** 이득이 난 영상이 2개뿐이다.
 
 ## 작업 목록 (각 작업은 사전 등록 → 실행 → 같은 기계 기준선 비교)
 
 | ID | 목표 | 파일 | 수용 기준 |
 |---|---|---|---|
-| **M71-01** | 극소 대상 데이터 확보 **(사용자 승인 필요)**. 후보: LVOS v2 val, SA-V val/test, VOST. 라이선스, 크기, SAM 2 학습 겹침을 확인하고, GT만으로 prompt 면적 < 0.1% 객체를 센다(SAM 2 실행 금지) | `scripts/m71_data.py`, `docs/m71/DATA.md` | 극소 객체 ≥ 20개, 영상 ≥ 12개, 거짓 재획득 후보 사건 ≥ 5 영상. 영상 단위 분할을 추론 전에 고정 |
-| M71-02 | VOTS2025 참가 추적기 설명 읽기 (crop + 전체 frame + 검증 선례) | `docs/m71/PRIOR_ART_VOTS.md` | 직접 선례 유무를 기록. 있으면 주장 범위 축소 |
+| **M71-01** | 극소 대상 데이터 확보 **(사용자 승인 필요)**. 후보: LVOS v2 val, SA-V val/test, VOST. 라이선스, 크기, SAM 2 학습 겹침을 확인하고, GT만으로 prompt 면적 < 0.1% 객체를 센다(SAM 2는 실행하지 않는다) | `scripts/m71_data.py`, `docs/m71/DATA.md` | 극소 객체 ≥ 20개, 영상 ≥ 12개, 거짓 재획득 후보 사건 ≥ 5 영상. 영상 단위 분할을 추론 전에 고정 |
+| M71-02 | VOTS2025 참가 추적기 설명 읽기 (crop + 전체 frame + 검증 선례) | `docs/m71/PRIOR_ART_VOTS.md` | 직접 선례가 있는지 기록한다. 있으면 주장 범위를 줄인다 |
 | M71-03 | 새 데이터 개발 절반에서 SGGL, SGGL-V, M3-vel, P5, B0 실행 (Vast, 4 worker × 3 thread) | `scripts/m7.py run` | 기준: SGGL vs P5 영상 CI 하한 > 0. M3-vel은 사전 pilot 규칙 ADVANCE일 때만 채택 |
-| M71-04 | '두 view 동시 부재' 전용 후보 생성: 부재 연속 k frame 뒤 L2(2× crop) 또는 전역 재탐지 후보를 만들고, 신원 + G 일치로 확인. M7 재생에서 L2 fallback은 +3.4 frame-JF였고, miami-surf에서는 −14 | `src/spatial/policies.py` | 거짓 재획득 사건에서 손실 증가 없이 부재 frame 회수율 향상. 사전 pilot 규칙 |
-| M71-05 | (조건부) T head를 대규모 데이터(SA-V train 일부)로 학습. 단 M71-01 승인 시만. M7은 18 영상에서 일반화하지 않았다 | `src/spatial/feature_fusion.py` | 학습에 쓰지 않은 영상에서 J > 입력 J, 그리고 DEV 영상 평가 > SGGL |
-| M71-06 | 확인 1회: 코드를 고정하고 커밋한 뒤, 새 데이터 확인 절반 + PUMaVOS C (C는 Ubuntu에서만 존재. 실행 시 그 영상만 Vast로 전송하거나 Ubuntu 2080에서 실행) | `scripts/m7.py confirm` (신설) | 결과를 모두 보고하고 이후 튜닝하지 않는다 |
+| M71-04 | '두 view 동시 부재'용 후보 생성: k frame 연속 부재 뒤 L2(2× crop) 또는 전역 재탐지 후보를 만들고, 신원과 G 일치로 확인한다. M7 재생에서 L2 fallback은 +3.4 frame-JF였고, miami-surf에서는 −14 | `src/spatial/policies.py` | 거짓 재획득 사건에서 손실을 늘리지 않고 부재 frame 회수율을 높인다. 사전 pilot 규칙 적용 |
+| M71-05 | (조건부) T head를 대규모 데이터(SA-V train 일부)로 학습. M71-01이 승인된 경우에만 한다. M7에서는 영상 18개 규모에서 일반화되지 않았다 | `src/spatial/feature_fusion.py` | 학습에 쓰지 않은 영상에서 J > 입력 J, 그리고 DEV 영상 평가 > SGGL |
+| M71-06 | 확인 1회: 코드를 고정하고 커밋한 뒤, 새 데이터 확인 절반 + PUMaVOS C (C는 Ubuntu에만 있다. 실행할 때 그 영상만 Vast로 보내거나 Ubuntu 2080에서 실행한다) | `scripts/m7.py confirm` (새로 만듦) | 결과를 모두 보고하고 이후 튜닝하지 않는다 |
 | M71-07 | 원고: 상한 분해, 실패 분류, 해상도 probe 진단(가설), 음성 결과, VK 서술 결과 | `docs/m71/` | 초안 |
 
 ## 계산 예산 (RTX 5090, 이번 M7에서 측정한 처리량 기준)

@@ -29,7 +29,7 @@
 
 **옮기지 않은 것과 이유:**
 - **Stage 0 기록 2.3 GB:** CPU 재생은 Ubuntu에서 끝났다. GPU 작업에 필요 없다.
-- **PUMaVOS raw와 zip, C clip:** 봉인이 이유다. 확인 실행을 승인하면 그때 해당 영상만 보낸다.
+- **PUMaVOS raw와 zip, C clip:** 봉인 때문이다. 확인 실행을 승인하면 그때 해당 영상만 보낸다.
 - **VKITTI2 Scene01/06 (137 MB):** 사전 등록상 결선 후보가 고정된 뒤에 쓴다. 필요할 때 30초 이내에 보낼 수 있다.
 - **원본 zip과 archive 전부.**
 
@@ -44,9 +44,9 @@
 | TF32 | 꺼짐 | 꺼짐 |
 
 **발견과 조치:**
-- `_C` 유무 때문에 기본 설정의 출력이 달랐다. 전체 길이 3객체 중 kite-surf obj2 1 frame에서 J&F 0.0009 차이가 났고, 저장 logit의 부호가 최대 162 px 뒤집혔다.
+- `_C` 유무 때문에 기본 설정의 출력이 달랐다. 전체 길이 3객체 중 kite-surf obj2 1 frame에서 J&F 0.0009 차이가 났고, 저장한 logit은 최대 162 px에서 부호가 뒤집혔다.
 - M5–M7의 모든 결과는 hole filling 없이 나왔다. 그래서 `scripts/m55.py:build_predictor`에 `pred.fill_hole_area = 0`을 명시했다(커밋 `4c63eb1`).
-- Ubuntu에서는 동작이 바뀌지 않는다(원래 0과 같은 동작). 테스트에 `assert pred.fill_hole_area == 0`을 추가했다.
+- Ubuntu에서는 동작이 바뀌지 않는다(원래부터 0일 때와 같게 동작했다). 테스트에 `assert pred.fill_hole_area == 0`을 추가했다.
 
 **재현성 검증 (`scripts/m7_repro.py`, `outputs/milestone7/repro/*/compare.csv`; 기능 확인용이며 연구 결과가 아니다):**
 
@@ -62,8 +62,8 @@
 - 위 5객체 검사는 모든 frame이 동일했다. 그러나 Vast 인과 pilot 3종의 G 상태(P5, 정책과 무관)를 Ubuntu Stage 0 기록과 비교하니, **DEV + REP 5,082 frame 중 266 frame(5.2%, 41객체)에서 J&F가 달랐다.**
   - frame 최대 차이: 0.004 (soapbox obj1)
   - 객체 평균 최대 차이: 8e-5
-- Vast 3개 arm끼리는 G가 완전히 같다. 즉 Vast는 결정적이지만, 두 기계 사이는 긴 영상에서 비트 동일이 아니다. torch 2.14/cu130과 2.11/cu128 커널 수치 차이가 frame을 거치며 누적되는 것으로 보인다.
-- 크기는 결정 규칙의 임계값(0.005)보다 약 60배 작다. 그래도 '비트 동일'이라는 앞의 표현은 5객체에만 해당하며 전체 세트에는 성립하지 않는다.
+- Vast 3개 arm끼리는 G가 완전히 같다. Vast 안에서는 결정적이지만, 긴 영상에서는 두 기계의 결과가 비트 단위로 같지 않다. torch 2.14/cu130과 2.11/cu128 커널 수치 차이가 frame을 거치며 누적되는 것으로 보인다.
+- 차이의 크기는 결정 규칙의 임계값(0.005)보다 약 60배 작다. 그래도 앞에서 쓴 '비트 동일'은 5객체에만 맞고 전체 세트에는 맞지 않는다.
 
 **운용 규칙 (정정 반영):**
 1. **모든 비교는 같은 기계의 기준선과 짝지어 계산한다.** Vast 실험의 SGGL 기준선은 Vast에서 다시 실행한다(`outputs/milestone7/runs/SGGL`). 이것은 짝 비교용 별도 결과이고, Stage 0 기록을 대체하지 않는다.
@@ -83,7 +83,7 @@
 ## 5. Vast에서 시작한 작업 (이전 직후)
 
 - 사전 등록된 인과 pilot 3종(F1-blend.7, M3-vel, M1-always; DEV + REP)을 병렬로 시작했다.
-- 이 작업들은 `nohup`으로 SSH 연결과 무관하게 실행된다.
+- 이 작업들은 `nohup`으로 실행해 SSH 연결이 끊겨도 계속 돈다.
 - 로그는 `outputs/milestone7/logs/causal_*.log`, 결과는 `outputs/milestone7/runs/<arm>/`에 쌓인다.
 
 ## 6. 비용 (시간당 약 $0.571)
@@ -110,7 +110,7 @@
 
 ## 8. 처리량 최적화 (13:30–14:00 KST)
 
-**문제 (cgroup 계측, 48초 구간):**
+**문제 (cgroup 측정, 48초 구간):**
 - CPU quota는 12.29 vCPU이고, 측정 구간에서 12.27 vCPU를 썼다.
 - **throttling이 482 주기 중 482 주기(100%)**에서 발생했다. GPU 사용률은 15%였다.
 - 원인: torch 기본 thread 수가 32다. 64 CPU가 보이는데 quota는 12다. 학습 process가 783%, rollout process가 330% CPU를 썼다.
@@ -133,7 +133,7 @@
 
 - 5 worker부터는 GPU 예측 시간 자체가 늘어 GPU가 병목이 된다. 그래서 4 worker를 택했다.
 - **처리 단계별 시간 (4 thread, frame당):** SAM 2 GPU 133 ms, JPEG decode·crop 65 ms, J/F 28 ms.
-- J/F 채점은 전체의 약 12%라 별도 평가 worker로 분리하지 않았다. 효과 대비 복잡도가 크다.
+- J/F 채점은 전체의 약 12%라 별도 평가 worker로 분리하지 않았다. 얻는 효과에 비해 복잡도가 크다.
 
 **기계 간 SGGL 차이 (같은 64객체):** 객체 평균 최대 0.0017(queen_car obj1)이고, 1e-4를 넘는 객체는 3개다. crop 궤적이 미세하게 갈라지는 경우다.
 
@@ -148,6 +148,6 @@
 | rec_vk, runs/SGGL-V·M3-vel의 VK | Vast | 732afcd | rec_vk/ENV_vast.json |
 | runs/M3-vel-r | 0–39번 Ubuntu (6077884), 40–63번 Vast (732afcd) | | runs/M3-vel-r/PROVENANCE.json |
 
-- 사이 커밋들은 정책, 지표, 모델 코드를 바꾸지 않았다. 바뀐 것은 sharding, 데이터 적재 위치, 새 정책 추가뿐이다.
+- 그 사이의 커밋들은 정책, 지표, 모델 코드를 바꾸지 않았다. 바뀐 것은 sharding, 데이터 적재 위치, 새 정책 추가뿐이다.
 - 예외 1: 4c63eb1의 `fill_hole_area = 0`은 모든 Vast 실행에 적용돼 있다.
-- 예외 2: SGGL 기준선은 처음 16객체를 32 thread로, 나머지를 3–4 thread로 실행했다. 출력은 thread 수에 대해 비트 동일함을 확인했다.
+- 예외 2: SGGL 기준선은 처음 16객체를 32 thread로, 나머지를 3–4 thread로 실행했다. thread 수가 달라도 출력이 비트 단위로 같음을 확인했다.

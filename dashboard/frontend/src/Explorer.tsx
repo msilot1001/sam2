@@ -87,7 +87,7 @@ function FileView({ path, nav }: { path: string; nav: Nav }) {
   const e = ext(path)
   const kind = BIN.includes(e) ? 'file_binary' : e === 'csv' || e === 'tsv' ? 'file_csv' : e === 'json' ? 'file_json' : ['md', 'png', 'jpg', 'jpeg', 'gif', 'webp'].includes(e) ? 'file_view' : 'file_tail'
   const head = <div className="mb-3 flex items-center gap-2 font-mono text-xs text-muted-foreground">{path} <a className="underline" href={fileUrl(path)} target="_blank" rel="noreferrer">원본</a><Help k={`glossary.ui.${kind}`} /></div>
-  if (BIN.includes(e)) return <div>{head}<p>바이너리 파일 (.{e}) — 크기만 표시하며 내용은 제공하지 않습니다.</p></div>
+  if (BIN.includes(e)) return <div>{head}<p>바이너리 파일 (.{e}). 크기만 보여 주고 내용은 열지 않습니다.</p></div>
   if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(e)) return <div>{head}<img src={fileUrl(path)} alt={path} className="max-w-full" /></div>
   if (e === 'csv' || e === 'tsv') return <div>{head}<CsvView path={path} /></div>
   if (e === 'json') return <div>{head}<JsonFile path={path} /></div>
@@ -174,7 +174,7 @@ function CsvView({ path }: { path: string }) {
         </Table>
       </details>
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        행 {data.offset + 1}–{data.offset + data.rows.length} / {data.total} · 열 머리글 클릭 = 정렬 (현재 페이지)
+        행 {data.offset + 1}–{data.offset + data.rows.length} / {data.total} · 열 머리글을 누르면 정렬 (현재 페이지 안에서)
         <button disabled={offset === 0} className="rounded border px-2 disabled:opacity-40" onClick={() => setOffset(Math.max(0, offset - PAGE))}>이전</button>
         <button disabled={offset + PAGE >= data.total} className="rounded border px-2 disabled:opacity-40" onClick={() => setOffset(offset + PAGE)}>다음</button>
       </div>

@@ -1,0 +1,8 @@
+{
+ "GLOBAL.frame_present_vs_empty.score": 0.5979572089022686,
+ "GLOBAL.frame_present_vs_empty.cos_fg": 0.7131491237501344,
+ "GLOBAL.cand_hit_vs_miss(J>0.5 vs J<0.1).cos_fg": 0.6594128746428803,
+ "POOL.frame_present_vs_empty.score": 0.6577357273411462,
+ "POOL.frame_present_vs_empty.cos_fg": 0.709644124287711,
+ "POOL.cand_hit_vs_miss(J>0.5 vs J<0.1).cos_fg": 0.8151383925867604
+}

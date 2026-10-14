@@ -806,11 +806,12 @@
    "pumavos/smile": 0.0,
    "segtrack/birdfall": 0.0
   },
-  "verdict": "PROMISING",
+  "verdict": "DIAGNOSTIC_ORACLE",
   "machines": {
    "ubuntu": 53,
    "runpod": 11
-  }
+  },
+  "verdict_rule_only": "PROMISING"
  },
  "ORACLE_POOL_ADMIT": {
   "arm": "ORACLE_POOL_ADMIT",
@@ -883,11 +884,12 @@
    "pumavos/smile": 0.0,
    "segtrack/birdfall": 0.0
   },
-  "verdict": "PROMISING",
+  "verdict": "DIAGNOSTIC_ORACLE",
   "machines": {
    "ubuntu": 53,
    "runpod": 11
-  }
+  },
+  "verdict_rule_only": "PROMISING"
  },
  "RESC_CPFR": {
   "arm": "RESC_CPFR",

@@ -1,0 +1,107 @@
+{
+ "FLOWVEL": {
+  "dJF": 0.012998858265919459,
+  "P(boot<=0)": 0.00925,
+  "bonferroni_CI_m11": [
+   -0.0011144512901709723,
+   0.03741841264470891
+  ],
+  "video_sign_test_p": 0.39152830513194203,
+  "videos_pos_neg": [
+   20,
+   14
+  ],
+  "top2_videos": [
+   "davis/kite-surf",
+   "davis/drone"
+  ],
+  "top2_share_of_gain": 0.6880944628559225,
+  "dJF_without_top2": 0.0043604095202340815,
+  "coabs_subset_dJF_on_SGGL_coabs_frames": 0.11712263056601169,
+  "coabs_frames": 486
+ },
+ "FLOWCARRY": {
+  "dJF": 0.014062656617443645,
+  "P(boot<=0)": 0.0025,
+  "bonferroni_CI_m11": [
+   -3.871447710455898e-07,
+   0.03813802139710335
+  ],
+  "video_sign_test_p": 0.14599609375,
+  "videos_pos_neg": [
+   9,
+   3
+  ],
+  "top2_videos": [
+   "davis/kite-surf",
+   "davis/drone"
+  ],
+  "top2_share_of_gain": 0.6382290730783291,
+  "dJF_without_top2": 0.005471419588868002,
+  "coabs_subset_dJF_on_SGGL_coabs_frames": 0.11778924260156272,
+  "coabs_frames": 486
+ },
+ "CAMCARRY": {
+  "dJF": 0.01373374108706341,
+  "P(boot<=0)": 0.00275,
+  "bonferroni_CI_m11": [
+   -0.00011472434577624997,
+   0.03600794611564322
+  ],
+  "video_sign_test_p": 0.14599609375,
+  "videos_pos_neg": [
+   9,
+   3
+  ],
+  "top2_videos": [
+   "davis/kite-surf",
+   "davis/drone"
+  ],
+  "top2_share_of_gain": 0.65288857641106,
+  "dJF_without_top2": 0.005126922451625513,
+  "coabs_subset_dJF_on_SGGL_coabs_frames": 0.11590601483389987,
+  "coabs_frames": 486
+ },
+ "M3vel": {
+  "dJF": 0.004559147256944967,
+  "P(boot<=0)": 0.028,
+  "bonferroni_CI_m11": [
+   -0.0011053199269263332,
+   0.015486949380666328
+  ],
+  "video_sign_test_p": 0.6075913612730801,
+  "videos_pos_neg": [
+   19,
+   15
+  ],
+  "top2_videos": [
+   "davis/skate-park",
+   "davis/sheep"
+  ],
+  "top2_share_of_gain": 0.8709279191404229,
+  "dJF_without_top2": 0.0006450411833413423,
+  "coabs_subset_dJF_on_SGGL_coabs_frames": 0.031460313970599396,
+  "coabs_frames": 486
+ },
+ "RESC_OCLR_ADMIT": {
+  "dJF": 0.004637489200702745,
+  "P(boot<=0)": 0.26375,
+  "bonferroni_CI_m11": [
+   -0.009846539621156643,
+   0.02792541929467986
+  ],
+  "video_sign_test_p": 0.375,
+  "videos_pos_neg": [
+   4,
+   1
+  ],
+  "top2_videos": [
+   "davis/drone",
+   "davis/sheep"
+  ],
+  "top2_share_of_gain": 1.5963796441350033,
+  "dJF_without_top2": -0.003091081119100322,
+  "coabs_subset_dJF_on_SGGL_coabs_frames": 0.053224608897365945,
+  "coabs_frames": 486
+ }
+}

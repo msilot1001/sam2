@@ -4,7 +4,7 @@
  "updated_kst": "2026-10-14 21:35",
  "decision": {
   "CURRENT_INCUMBENT": "SGGL",
-  "BEST_CAUSAL_CHALLENGER": "FLOWCARRY ~ CAMCARRY ~ FLOWVEL (absence-time crop carry / camera-motion compensation)",
+  "BEST_CAUSAL_CHALLENGER": "FLOWVEL (pre-frozen; +0.0130 [+0.0010,+0.0285]); FLOWCARRY/CAMCARRY = post-hoc ablation equivalents; Bonferroni lower bound ~0; 69% of gain from 2 videos; VK null explained by object growth (VK diag)",
   "SEALED_TEST_STATUS": "PUMaVOS C sealed"
  },
  "candidates": {
@@ -74,5 +74,18 @@
   "K_ADMIT_FLOWVEL frozen after results",
   "VK amend1: FLOWCARRY added",
   "paired-test fix: single-candidate vs B_att#0"
+ ],
+ "review": {
+  "raw": "docs/m8/REVIEW_raw.md",
+  "response": "docs/m8/REVIEW_RESPONSE.md",
+  "findings": 14,
+  "high": 1,
+  "all_addressed": true
+ },
+ "extra_reports": [
+  "robustness_report.json",
+  "auc_report.json",
+  "pairwise_report.json",
+  "vk_coabs_diag.json"
  ]
 }

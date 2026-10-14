@@ -25,7 +25,7 @@ export function VerdictBadge({ v }: { v?: string }) {
 }
 
 export const OracleBadge = () => (
-  <Badge variant="destructive" title="diagnostic: true — GT를 사용하는 상한선 실험">ORACLE / 배포 불가</Badge>
+  <Badge variant="destructive" title="diagnostic: true. GT를 쓰는 상한 실험">ORACLE / 배포 불가</Badge>
 )
 
 export function Stat({ label, value, sub }: { label: string; value: React.ReactNode; sub?: React.ReactNode }) {

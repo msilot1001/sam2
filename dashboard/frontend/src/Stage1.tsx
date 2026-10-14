@@ -33,7 +33,7 @@ export default function Stage1() {
         <Card>
           <CardHeader>
             <CardTitle>생성기 recall vs 거짓 양성 (co-absence 프레임)<Help k="stage1.recallChart" /></CardTitle>
-            <CardDescription>recall = 후보 중 하나라도 J &gt; 0.5 (GT 있는 co-absence 프레임 기준) · 원시 FP = GT 없는 프레임에서 후보가 '존재'를 출력한 비율 (순위화 전) · 점선 = 기준 recall (max Gp/Lp)</CardDescription>
+            <CardDescription>recall: GT가 있는 co-absence 프레임에서 후보 중 하나라도 J &gt; 0.5인 비율 · 원시 FP: GT가 없는 프레임에서 후보가 '존재'를 출력한 비율 (순위화 전) · 점선: 기준 recall (max Gp/Lp)</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={gens.length * 22 + 60}>
@@ -69,7 +69,7 @@ export default function Stage1() {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader><CardTitle>순위화기 pooled held-out 순 이득<Help k="stage1.rankerChart" /></CardTitle><CardDescription>net ΔJ frames (REP→DEV + DEV→REP 교차 적합 합산) · 0 초과면 이득</CardDescription></CardHeader>
+            <CardHeader><CardTitle>ranker의 pooled held-out 순이득<Help k="stage1.rankerChart" /></CardTitle><CardDescription>net ΔJ frames (REP→DEV와 DEV→REP 교차 적합을 합한 값) · 0보다 크면 이득</CardDescription></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={rk} margin={{ left: 8, right: 24 }} barGap={2}>
@@ -89,7 +89,7 @@ export default function Stage1() {
       </div>
 
       <Card>
-        <CardHeader><CardTitle>짝지은 반증 검정 (paired falsification tests)<Help k="stage1.tests" /></CardTitle><CardDescription>delta와 bootstrap CI · 색 = CI가 0을 제외할 때만 파랑(+)/빨강(−), 아니면 회색</CardDescription></CardHeader>
+        <CardHeader><CardTitle>짝지은 반증 검정 (paired falsification tests)<Help k="stage1.tests" /></CardTitle><CardDescription>delta와 bootstrap CI · CI가 0을 제외하면 파랑(+) 또는 빨강(−), 아니면 회색</CardDescription></CardHeader>
         <CardContent>
           <div className="mb-2 flex gap-4 text-xs text-muted-foreground">
             <Swatch color={UP} label="유의 +" /><Swatch color={DOWN} label="유의 −" /><Swatch color={INK.muted} label="CI가 0 포함" />
@@ -128,7 +128,7 @@ export default function Stage1() {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>생성기 표<Help k="stage1.genTable" /></CardTitle><CardDescription>co-absence 지표 + disagree/regular 트리거 recall</CardDescription></CardHeader>
+        <CardHeader><CardTitle>생성기 표<Help k="stage1.genTable" /></CardTitle><CardDescription>co-absence 지표와 disagree/regular 트리거 recall</CardDescription></CardHeader>
         <CardContent>
           <Table className="text-xs">
             <TableHeader>

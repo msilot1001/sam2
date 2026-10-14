@@ -2,7 +2,7 @@
 
 **시작점:**
 - 브랜치 `exp/m7-algorithm-research`, base commit `9d6f14b`(M6.1 최종)
-- 중단된 이전 M7 시도("disagreement-aware selection", 로컬 브랜치 `exp/m7-disagreement-aware-selection`)는 커밋 없이 사용자가 중단했다. 그 시도의 선행연구 검토 원자료만 [`PRIOR_ART_raw.md`](PRIOR_ART_raw.md)로 재사용한다.
+- 이전 M7 시도("disagreement-aware selection", 로컬 브랜치 `exp/m7-disagreement-aware-selection`)는 커밋 없이 사용자가 중단했다. 그 시도의 선행연구 검토 원자료만 [`PRIOR_ART_raw.md`](PRIOR_ART_raw.md)로 재사용한다.
 - 환경: RTX 2080 8 GB, SAM 2.1 Hiera-T, CUDA FP32, TF32 꺼짐, 영상 CPU offload
 
 ## 1. 읽은 문서와 이어받는 사실
@@ -43,16 +43,16 @@
 |---|---|---|
 | DEV | M6 개발 crop 객체 21개 (DAVIS val, PUMaVOS A/B, SegTrack) | 개발. 여러 번 본 데이터 |
 | REP | DAVIS 2017 train crop 객체 43개 / 영상 23개 | 개발 + T head 학습(영상 단위 분리). miami-surf는 발견 사례 |
-| VK | VKITTI2 Scene01/06 clone crop 객체 28개 (scene 2개, 합성) | SGGL에는 처음 쓰는 세트. 결선 후보 고정 뒤 1회만 실행. 같은 종류의 방해물(차량)이 많다 |
-| PUMaVOS C | 11개 객체 | 손대지 않음. 최종 단일 방법이 최종 규칙을 통과할 때만 1회 |
+| VK | VKITTI2 Scene01/06 clone crop 객체 28개 (scene 2개, 합성) | SGGL에는 처음 쓰는 세트. 결선 후보를 고정한 뒤 1회만 실행. 같은 종류의 방해물(차량)이 많다 |
+| PUMaVOS C | 11개 객체 | 손대지 않음. 최종 단일 방법이 최종 규칙을 통과할 때만 1회 실행 |
 
 - **추가 데이터:** 이전 시도에서 LVOS v2 메타데이터 확인을 시작했지만 사용자가 그 agent를 중단했다. 그래서 새 데이터는 내려받지 않는다.
-- **알려진 한계:** VKITTI의 prompt 면적은 ≥ 0.1%로 선택된다. 그래서 극소(< 0.1%) 대상은 이후 frame에서만 나타나고, scene이 2개라 영상 군집 CI는 의미가 없다.
+- **알려진 한계:** VKITTI 객체는 prompt 면적 ≥ 0.1% 기준으로 골랐다. 그래서 극소(< 0.1%) 대상은 이후 frame에서만 나타나고, scene이 2개라 영상 군집 CI는 의미가 없다.
 
 ## 4. 규칙 (사용자 지시 그대로 적용)
 
 - **누설 금지:** GT는 frame 0 prompt와 오프라인 채점에만 쓴다. 미래 frame과 미래 GT는 쓰지 않는다. 정책은 현재와 과거의 모델 출력만 본다.
-- **진단 분기 격리:** probe는 저장하지 않는 예측이고, 건드린 이미지 feature cache를 복원한다. 테스트로 production 출력 비트 동일성을 확인했다.
+- **진단 분기 격리:** probe는 저장하지 않는 예측이고, 건드린 이미지 feature cache를 복원한다. production 출력이 비트 단위로 같음을 테스트로 확인했다.
 - **재생과 인과 rollout 구분:** 재생은 SGGL 궤적 위에서 출력만 바꾼 근사다. 출력을 바꾸는 후보는 인과 rollout으로 다시 확인해야 ADVANCE할 수 있다.
 - **학습 데이터:** DAVIS train(REP)만 쓰고 영상 단위로 분리한다. DEV, VK, C의 라벨은 쓰지 않는다.
 - **GPU:** 한 번에 한 작업. 초기 상한은 8–12 GPU-시간이다.

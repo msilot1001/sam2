@@ -403,6 +403,9 @@ def causal(*names):
             continue
         out[arm] = _pilot(U, arm)
         out[arm]["machines"] = U.machine.value_counts().to_dict()
+        if json.loads((OUT / "arms.json").read_text()).get(arm, {}).get("diagnostic"):
+            out[arm]["verdict_rule_only"] = out[arm]["verdict"]       # GT-picked: not a deployable verdict
+            out[arm]["verdict"] = "DIAGNOSTIC_ORACLE"
         rows_all.append(U.assign(arm=arm))
         r = out[arm]
         print(f"{arm:20s} n={r['n_units']:2d} dJF={r['dJF']:+.4f} CI=[{r['CI_video'][0]:+.4f},{r['CI_video'][1]:+.4f}] "
@@ -427,6 +430,73 @@ def pairwise(*pairs):
         res[pr] = {"delta": float(m.x.mean()), "CI": cluster_bootstrap(m, "video", lambda d: d.x.mean(), n=2000), "n": len(m)}
         print(f"{pr:28s} n={len(m)} delta={m.x.mean():+.4f} CI=[{res[pr]['CI'][0]:+.4f},{res[pr]['CI'][1]:+.4f}]")
     (OUT / "pairwise_report.json").write_text(json.dumps(res, indent=1))
+
+def robustness(*arms):
+    """Review follow-up: multiplicity-adjusted CI, video sign test, share of the two biggest videos, Δ without them,
+    and the pre-registered co-absence-subset dJF (frames where the machine-matched SGGL had co-absence)."""
+    from math import comb
+    U = pd.read_csv(OUT / "causal_per_unit.csv")
+    U = U[U.small & (U.machine == "runpod")]
+    base = {f.stem: pd.read_csv(f) for f in (OUT / "runpod/runs/SGGL").glob("*.csv")}
+    deploy = [a for a, v in json.loads((OUT / "arms.json").read_text()).items() if not v.get("diagnostic") and a not in ("SGGL", "FLOWVEL_U")]
+    m = len(deploy)
+    rng = np.random.default_rng(0)
+    res = {}
+    for a in arms or ("FLOWVEL", "FLOWCARRY", "CAMCARRY", "M3vel", "RESC_OCLR_ADMIT"):
+        X = U[U.arm == a]
+        vid = X.groupby("video").d.mean()
+        vids = vid.index.to_numpy()
+        boots = []
+        for _ in range(4000):
+            pick = rng.choice(vids, len(vids))
+            boots.append(np.mean(np.concatenate([X[X.video == v].d.to_numpy() for v in pick])))
+        boots = np.array(boots)
+        lo_b, hi_b = np.percentile(boots, [100 * 0.025 / m, 100 - 100 * 0.025 / m])
+        up, dn = int((vid > 0).sum()), int((vid < 0).sum())
+        n = up + dn
+        p_sign = sum(comb(n, k) for k in range(max(up, dn), n + 1)) / 2 ** n * 2 if n else 1.0
+        top2 = vid.sort_values(ascending=False).index[:2]
+        gain = X.d.sum()
+        share = float(X[X.video.isin(top2)].d.sum() / gain) if gain > 0 else float("nan")
+        # pre-registered co-absence subset: frames where SGGL (same machine) had both scores <= 0
+        num = den = 0.0
+        for f in (OUT / "runpod/runs" / a).glob("*.csv"):
+            if f.stem not in base or "vkitti" in f.stem:
+                continue
+            b, x = base[f.stem], pd.read_csv(f)
+            if b.area0.iloc[0] >= 0.01:
+                continue
+            co = ((b.score_G <= 0) & (b.score_L <= 0)).to_numpy()
+            num += float((x.JF.to_numpy() - b.JF.to_numpy())[co].sum())
+            den += co.sum()
+        res[a] = {"dJF": float(X.d.mean()), "P(boot<=0)": float((boots <= 0).mean()),
+                  f"bonferroni_CI_m{m}": [float(lo_b), float(hi_b)], "video_sign_test_p": float(min(1.0, p_sign)),
+                  "videos_pos_neg": [up, dn], "top2_videos": list(top2), "top2_share_of_gain": share,
+                  "dJF_without_top2": float(X[~X.video.isin(top2)].d.mean()),
+                  "coabs_subset_dJF_on_SGGL_coabs_frames": num / den if den else None, "coabs_frames": int(den)}
+        print(a, {k: (round(v, 4) if isinstance(v, float) else v) for k, v in res[a].items()})
+    (OUT / "robustness_report.json").write_text(json.dumps(res, indent=1))
+
+
+def auc():
+    """Stage-1 separability (no fitting): frame-level present-vs-absent and within-frame hit-vs-miss AUCs."""
+    F, C, V = load()
+    X = C[C.trig == "coabs"].copy()
+    def a_(pos, neg):
+        pos, neg = np.asarray(pos, float), np.asarray(neg, float)
+        r = pd.Series(np.r_[pos, neg]).rank().to_numpy()
+        return float((r[:len(pos)].sum() - len(pos) * (len(pos) + 1) / 2) / (len(pos) * len(neg)))
+    out = {}
+    for name, fams in (("GLOBAL", ["A_cos", "B_att", "D_ref", "G_neg"]), ("POOL", None)):
+        Y = X if fams is None else X[X.fam.isin(fams)]
+        fr = Y.groupby(["unit", "video_idx", "gt_empty"]).agg(score=("score", "max"), cos_fg=("cos_fg", "max")).reset_index()
+        for f in ("score", "cos_fg"):
+            out[f"{name}.frame_present_vs_empty.{f}"] = a_(fr[~fr.gt_empty][f].dropna(), fr[fr.gt_empty][f].dropna())
+        P = Y[~Y.gt_empty]
+        out[f"{name}.cand_hit_vs_miss(J>0.5 vs J<0.1).cos_fg"] = a_(P[P.J > 0.5].cos_fg.dropna(), P[P.J < 0.1].cos_fg.dropna())
+    for k, v in out.items():
+        print(k, round(v, 3))
+    (OUT / "auc_report.json").write_text(json.dumps(out, indent=1))
 
 
 if __name__ == "__main__":

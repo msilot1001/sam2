@@ -29,8 +29,8 @@ refs (frame-0 tokens) ───────────────────�
 
 ## 3. 기계별 계획과 실제
 
-- **RTX 2080 (Ubuntu):** M7 측정으로 GPU-bound(≈2.4 frame/s, worker 수와 무관). 1 worker. diag shard 0→1→2를 연쇄 실행(`outputs/milestone8/chain_diag.sh`). Vast가 오면 남은 shard를 넘긴다(`STOP_UBUNTU_DIAG_<i>` 파일로 건너뜀).
-- **RTX 5090 (Vast):** M7 측정: 4 worker × 3 thread가 가장 좋았다(8.8 frame/s). M8 작업은 trigger frame에서 probe가 25–31개라 작업 형태가 다르므로, 도착하면 1/2/4 worker를 다시 측정한다.
+- **RTX 2080 (Ubuntu):** M7 측정에서 GPU-bound였다(≈2.4 frame/s, worker 수와 무관). 1 worker. diag shard 0→1→2를 차례로 실행(`outputs/milestone8/chain_diag.sh`). Vast가 연결되면 남은 shard를 넘긴다(`STOP_UBUNTU_DIAG_<i>` 파일로 건너뜀).
+- **RTX 5090 (Vast):** M7 측정: 4 worker × 3 thread가 가장 좋았다(8.8 frame/s). M8 작업은 trigger frame에서 probe가 25–31개라 작업 형태가 다르므로, 연결되면 1/2/4 worker를 다시 측정한다.
 - **실제 경과:**
   - Vast(89.221.67.161:16328)는 M8 시작부터 연결이 거부되었다.
   - 17:00 KST부터 사용자가 RunPod RTX 4090 워커를 제공했다. 실제 CPU quota는 13.6 vCPU이고 RAM은 251 GB다.
@@ -50,5 +50,5 @@ refs (frame-0 tokens) ───────────────────�
 
 ## 4. 재개 방법
 
-- 모든 명령은 단위 CSV가 이미 있으면 건너뛴다(원자적 쓰기). 중단해도 같은 명령으로 재개된다.
+- 모든 명령은 단위 CSV가 이미 있으면 건너뛴다(원자적 쓰기). 중단해도 같은 명령으로 다시 이어서 돌릴 수 있다.
 - `M7_SHARD=i/n`은 단위 순서가 고정된 결정적 분할이다. 기계 이력은 각 run 디렉터리의 `PROVENANCE.json`에 남긴다.

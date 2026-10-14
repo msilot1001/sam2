@@ -1,5 +1,5 @@
 {
- "updated_kst": "2026-10-14 21:35",
+ "updated_kst": "2026-10-14 22:07",
  "note": "Maintained by the agent; progress = result CSV count / expected units (live).",
  "tasks": [
   {
@@ -242,11 +242,22 @@
    "status": "DONE"
   },
   {
+   "id": "VK-DIAG",
+   "title": "VK 동시 부재 진단 (검토 지적 1)",
+   "description": "VK에서 FLOWVEL 계열이 효과 없는 원인을 확인: SGGL 궤적의 동시 부재 frame에서 GT crop 내부 비율, 면적, 생성기 recall 측정 (판정용 아님)",
+   "machine": "Ubuntu 2080",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone8/diag_vk/*.cand.csv",
+    "total": 28
+   }
+  },
+  {
    "id": "DOCS",
    "title": "최종 문서·검토·커밋",
    "description": "STAGE2/COMBINATION/FINAL/NEXT 문서, 독립 검토, EXECUTION_STATUS.json, 커밋·push, Pod audit",
    "machine": "Ubuntu",
-   "status": "RUNNING"
+   "status": "DONE"
   },
   {
    "id": "DASH",

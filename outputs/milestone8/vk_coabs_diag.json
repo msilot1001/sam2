@@ -1,0 +1,28 @@
+{
+ "DEV+REP": {
+  "frames": 5082,
+  "coabs_gt": 131,
+  "units": 14,
+  "videos": 11,
+  "in_crop_zero": 0.46564885496183206,
+  "in_crop_ge_half": 0.5038167938931297,
+  "in_crop_median": 0.5428571428571428,
+  "area_ratio_lt_half": 0.45038167938931295,
+  "area_ratio_median": 0.6757679180887372,
+  "gt_area_median_px": 207.0,
+  "flowbox_hit": 0.16030534351145037
+ },
+ "VK": {
+  "frames": 1736,
+  "coabs_gt": 89,
+  "units": 4,
+  "videos": 1,
+  "in_crop_zero": 0.8539325842696629,
+  "in_crop_ge_half": 0.07865168539325842,
+  "in_crop_median": 0.0,
+  "area_ratio_lt_half": 0.02247191011235955,
+  "area_ratio_median": 6.41684434968017,
+  "gt_area_median_px": 4803.0,
+  "flowbox_hit": 0.33707865168539325
+ }
+}

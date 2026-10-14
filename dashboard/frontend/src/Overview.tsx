@@ -66,7 +66,7 @@ function Tasks({ nav }: { nav: Nav }) {
       <CardHeader>
         <CardTitle>현재 작업<Help k="overview.tasks" /></CardTitle>
         <CardDescription>
-          TASKS.json · 갱신 {data?.tasks?.updated_kst ?? '—'} · 진행률은 결과 파일 수를 실시간으로 셈<Help k="overview.taskProgress" /> · 15초마다 갱신 ({at?.toLocaleTimeString()})
+          TASKS.json · 갱신 {data?.tasks?.updated_kst ?? '—'} · 진행률은 결과 파일 수를 실시간으로 센 값<Help k="overview.taskProgress" /> · 15초마다 갱신 ({at?.toLocaleTimeString()})
           {error && <span className="text-red-600"> · 오류: {error}</span>}
         </CardDescription>
       </CardHeader>
@@ -133,11 +133,11 @@ export default function Overview({ nav }: { nav: Nav }) {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card>
-          <CardHeader><CardTitle>현 기준 알고리즘 (incumbent)<Help k="overview.incumbent" /></CardTitle><CardDescription>M7 최종 결정: KEEP_SGGL</CardDescription></CardHeader>
-          <CardContent><Stat label="incumbent" value="SGGL" sub="모든 arm은 같은 기계의 SGGL과 비교 (machine-matched)" /></CardContent>
+          <CardHeader><CardTitle>현재 기준 알고리즘 (incumbent)<Help k="overview.incumbent" /></CardTitle><CardDescription>M7 최종 결정: KEEP_SGGL</CardDescription></CardHeader>
+          <CardContent><Stat label="incumbent" value="SGGL" sub="모든 arm을 같은 기계의 SGGL과 비교 (machine-matched)" /></CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle>최고 causal 도전자<Help k="overview.bestChallenger" /></CardTitle><CardDescription>verdict = PROMISING 중 ΔJ&F 최대 (배포 가능)</CardDescription></CardHeader>
+          <CardHeader><CardTitle>최고 causal 도전자<Help k="overview.bestChallenger" /></CardTitle><CardDescription>배포 가능한 PROMISING arm 중 ΔJ&F가 가장 큰 것</CardDescription></CardHeader>
           <CardContent className="space-y-2">
             {best ? (
               <button className="text-left" onClick={() => nav('arms', best[0])}>
@@ -145,12 +145,12 @@ export default function Overview({ nav }: { nav: Nav }) {
               </button>
             ) : <div className="text-sm text-muted-foreground">PROMISING arm 없음</div>}
             {bestAny && bestAny !== best && (
-              <div className="text-xs text-muted-foreground">진단(ORACLE) 포함 시: <span className="font-mono">{bestAny[0]}</span> {signed(bestAny[1].dJF)}<Help k="overview.oracleNote" /></div>
+              <div className="text-xs text-muted-foreground">진단용(ORACLE)까지 넣으면: <span className="font-mono">{bestAny[0]}</span> {signed(bestAny[1].dJF)}<Help k="overview.oracleNote" /></div>
             )}
           </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle>Causal 진행 상황<Help k="overview.progress" /></CardTitle><CardDescription>arm별 완료 unit (기준 {EXPECTED_UNITS})</CardDescription></CardHeader>
+          <CardHeader><CardTitle>Causal 진행 상황<Help k="overview.progress" /></CardTitle><CardDescription>arm별 완료한 unit 수 (기준 {EXPECTED_UNITS})</CardDescription></CardHeader>
           <CardContent className="space-y-2">
             {Object.entries(runs).map(([m, byArm]) => (
               <div key={m}>
@@ -200,14 +200,14 @@ export default function Overview({ nav }: { nav: Nav }) {
       <Card>
         <CardHeader>
           <CardTitle>Causal arms forest plot — ΔJ&F (arm − machine-matched SGGL)<Help k="overview.forest" /></CardTitle>
-          <CardDescription>점 = 평균 ΔJ&F, 수염 = video-cluster bootstrap CI · 이름 옆 괄호 = unit 수 · 클릭하면 Causal arms 페이지</CardDescription>
+          <CardDescription>점은 평균 ΔJ&F, 수염은 video-cluster bootstrap CI · 이름 옆 괄호는 unit 수 · 클릭하면 Causal arms 페이지로 이동</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-2 flex flex-wrap gap-4 text-xs text-muted-foreground">
             <Swatch color={VERDICT_COLOR.PROMISING} label="▲ PROMISING" />
             <Swatch color={VERDICT_COLOR.INCONCLUSIVE} label="? INCONCLUSIVE" />
             <Swatch color={VERDICT_COLOR.REJECTED} label="✕ REJECTED" />
-            <Swatch color="#52514e" hollow label="◇ 속이 빈 마름모 = diagnostic/ORACLE (GT 사용, 배포 불가)" />
+            <Swatch color="#52514e" hollow label="◇ 빈 마름모는 diagnostic/ORACLE (GT를 써서 배포 불가)" />
             <Help k="overview.verdicts" />
           </div>
           <div className="cursor-pointer" onClick={() => nav('arms')}><Forest rows={forest} labelWidth={200} /></div>

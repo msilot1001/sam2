@@ -21,7 +21,7 @@
 | M3 | 신뢰된 crop 중심 제어 | 8, 3 | 중심 이력 | 없음 | escape frame | 낮음 | 0 | 높음 | 인과 rollout (근거가 있을 때만) | 조건부 |
 | R1 | 같은 crop·메모리에서 해상도만 낮춤 | 1 | 이미지 feature 재계산 | M5.6 해상도 가설 | 사건 frame | 중간 | +encoder (사건만) | 낮음–중간 | 기록 probe (진단 전용) | 진단 |
 | R2 | 중간 배율(2×) 독립 상태와의 일치 | 1, 3 | 상태 1개 추가 | 없음 | 재획득 사건 | 중간 | +50% | 낮음–중간 | 기록 + 재생 | 중간 |
-| T1 | 정렬된 frozen 특징 CNN 결합 | 5, 10 | 두 view 특징 | head 수렴 실패 (M6.1, 다른 설계) | crop 채택 frame | 높음 | head 1회 | 높음 (SAM2Refiner) | 양성 대조 → 화면 평가 | 중간 |
+| T1 | 정렬된 frozen 특징 CNN 결합 | 5, 10 | 두 view 특징 | head 수렴 실패 (M6.1, 다른 설계) | crop 채택 frame | 높음 | head 1회 | 높음 (SAM2Refiner) | 양성 대조 후 화면 평가 | 중간 |
 | T2 | 목표 token cross-attention (frame 0 token이 두 view를 따로 읽음) | 5, 6 | + backbone 특징, token | 없음 | 동일 | 높음 | +attention (K = 4 token) | 중간 (조합) | T1 대비 비교 | 중간 |
 | T3 | 기권 gate가 있는 전역→국소 전이 | 1, 4 | 동일 | 없음 | 동일 | 높음 | 동일 | 중간 | T2 대비 비교 | 중간 |
 | T4 | 신원 제약 전이 (목표와 닮은 G 셀만) | 6 | 동일 | 없음 | 동일 | 높음 | 동일 | 중간 | T3 대비 비교 | 낮음–중간 |
@@ -31,4 +31,4 @@
 
 ## 2. 결과 (실험 후 기록)
 
-[`FINAL_ALGORITHM_DECISION.md`](FINAL_ALGORITHM_DECISION.md) §2 표를 본다.
+[`FINAL_ALGORITHM_DECISION.md`](FINAL_ALGORITHM_DECISION.md) §2 표를 참고한다.

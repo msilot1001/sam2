@@ -9,7 +9,7 @@ export const help: HelpMap = {
 
 **한 frame의 처리 흐름:**
 1. **image encoder (Hiera + FPN neck):** 1024×1024 입력 → stride 4/8/16 특징 (FPN 단계 참조). 최상위 stride-16 특징은 64×64 격자다.
-2. **memory attention:** 현재 frame 특징이 메모리 뱅크의 과거 frame 특징·object pointer에 attention해서 '대상이 어디인지'를 조건화한다.
+2. **memory attention:** 현재 frame 특징이 메모리 뱅크의 과거 frame 특징·object pointer에 attention해서 '대상이 어디인지' 정보를 얻는다.
 3. **mask decoder:** 1×1×256×256 저해상도 logit, predicted IoU, object score logit을 낸다. logit을 원래 해상도로 키워 마스크를 만든다.
 4. **memory encoder:** 출력 마스크와 특징을 합쳐 메모리 뱅크에 넣는다(저장하지 않는 probe는 이 단계를 건너뜀).
 
@@ -38,7 +38,7 @@ export const help: HelpMap = {
 
 **규칙:**
 - **> 0** → 대상 존재. 마스크 logit을 그대로 쓴다.
-- **≤ 0** → 대상 부재. SAM 2가 마스크 logit을 매우 큰 음수로 덮어써서 **출력 마스크가 비게 된다**.
+- **≤ 0** → 대상 부재. SAM 2가 마스크 logit을 매우 큰 음수로 덮어써서 **출력 마스크가 빈다**.
 
 **이 연구에서 쓰이는 곳:**
 - SGGL self gate의 첫 조건(L score > 0).
@@ -73,7 +73,7 @@ export const help: HelpMap = {
     title: "P5 prompt 메모리",
     body: `**무엇:** M5.5에서 도입한 수정이다. prompt frame의 메모리를 SAM 2의 256×256 저해상도 logit 경로가 아니라 **전체 해상도 GT 마스크**로 인코딩한다.
 
-**왜:** 기본 경로는 prompt 마스크를 256 logit으로 줄였다가 메모리에 넣는다. 작은 대상은 이 과정에서 공간 상세를 잃는다(\`MILESTONE_5_5.md\`).
+**왜:** 기본 경로는 prompt 마스크를 256 logit으로 줄였다가 메모리에 넣는다. 작은 대상은 이 과정에서 공간 세부 정보를 잃는다(\`MILESTONE_5_5.md\`).
 
 **이 연구에서:**
 - SGGL의 G와 L 모두 P5로 prompt한다.
@@ -100,13 +100,13 @@ export const help: HelpMap = {
 
 **이 연구에서:** H 계열 \`H_s8\`은 A_cos와 같은 prototype 매칭을 **stride-8 특징**으로 한다. '해상도가 높은 특징이면 작은 대상을 더 잘 찾는다(표현 점유율 가설)'를 시험하는 진단이다.
 
-**결과 (2026-10-14 기준, \`STAGE1_DIAGNOSTIC_RESULTS.md\` §2):** H_s8은 A_cos보다 recall −0.153, 위치 정확도 −0.435로 **더 나빴다**. stride-8 특징은 memory/decoder가 쓰도록 학습된 표현이 아니라 매칭 공간으로 덜 적합하다는 해석과 일치한다. 이 비교에는 수정 2(H_s8 특징 버그 수정, 사전 등록 참조)가 적용됐다.`,
+**결과 (2026-10-14 기준, \`STAGE1_DIAGNOSTIC_RESULTS.md\` §2):** H_s8은 A_cos보다 recall −0.153, 위치 정확도 −0.435로 **더 나빴다**. stride-8 특징은 memory/decoder가 쓰도록 학습된 표현이 아니어서 매칭에 쓰기에 덜 적합하다는 해석과 맞는다. 이 비교에는 수정 2(H_s8 특징 버그 수정, 사전 등록 참조)가 적용됐다.`,
   },
 
   // ───────────────────────────── SGGL
   "glossary.sggl.sggl": {
     title: "SGGL (Self-Gated Global-Local)",
-    body: `**무엇:** 현재 기준 알고리즘(incumbent). M6에서 A2x로 정의되었고 M7 최종 결정이 **KEEP_SGGL**이었다. M8의 모든 arm은 SGGL과 비교한다.
+    body: `**무엇:** 현재 기준 알고리즘(incumbent). M6에서 A2x로 정의됐고 M7 최종 결정이 **KEEP_SGGL**이었다. M8의 모든 arm은 SGGL과 비교한다.
 
 **구성:** 고정된 SAM 2.1 Hiera-T 상태 두 개를 한 영상에 동시에 돌린다.
 - **G**: 전체 frame, P5 prompt 메모리.
@@ -164,7 +164,7 @@ export const help: HelpMap = {
 
 **왜 '고정'인가:** 변이 바뀌면 가상 영상의 배율이 바뀌어 메모리 좌표계가 어긋난다. 그래서 대상이 커지거나 작아져도 s는 그대로다. L2는 같은 중심에 변 2배(8×)인 두 번째 crop이다.
 
-**함의:** 대상이 한 frame에 crop 반 변(≈2× box) 이상 움직이면 crop 밖으로 나간다. 이것이 M3vel/FLOWVEL 같은 crop 중심 제어가 겨냥하는 실패다.`,
+**그 결과:** 대상이 한 frame에 crop 반 변(≈2× box) 이상 움직이면 crop 밖으로 나간다. 이것이 M3vel/FLOWVEL 같은 crop 중심 제어가 겨냥하는 실패다.`,
   },
   "glossary.sggl.l2_lp": {
     title: "L2 / Lp / Lt / Gp (M7 대체 후보)",
@@ -177,9 +177,9 @@ export const help: HelpMap = {
 | **Lt** (L-신뢰) | G와 L이 일치한 frame의 메모리만 읽는 probe |
 | **Gp** (G-보호) | G 상태에서 prompt 메모리만 읽는 probe |
 
-**M7 결과:** {G, L, L2, Lp, Lt} 선택 oracle은 +0.033이지만, 각각을 단독으로 L 대신 쓰면 오히려 나쁘다(L2 −0.008, Lp −0.076). 즉 '가끔 맞히지만 언제 맞는지 모른다'.
+**M7 결과:** {G, L, L2, Lp, Lt} 선택 oracle은 +0.033이지만, 각각을 단독으로 L 대신 쓰면 오히려 나쁘다(L2 −0.008, Lp −0.076). '가끔 맞히지만 언제 맞는지 모른다'는 뜻이다.
 
-**M8에서:** Gp, Lp는 Stage 1의 **기준 생성기**다. 진출 조건이 '같은 실행의 max(Gp, Lp) recall의 2배 이상'을 요구한다. 2026-10-14 기준 Gp/Lp recall은 0.069 / 0.061이다.`,
+**M8에서:** Gp, Lp는 Stage 1의 **기준 생성기**다. 진출하려면 recall이 '같은 실행의 max(Gp, Lp) recall의 2배 이상'이어야 한다. 2026-10-14 기준 Gp/Lp recall은 0.069 / 0.061이다.`,
   },
   "glossary.sggl.self_gate": {
     title: "self gate (자기 gate)",
@@ -190,7 +190,7 @@ export const help: HelpMap = {
 
 통과하면 L 마스크를 frame 좌표에 붙여 출력하고, 아니면 G 마스크를 출력한다. 외부 학습 파라미터나 threshold가 없다('self' = SAM 2 자신의 신호만 씀).
 
-**왜 이 정도로 충분한가:** M6.1 측정에서 self gate는 {G, L} 중 더 나은 쪽을 고르는 선택 상한의 **89%**에 이르렀다. 그래서 M7은 선택 규칙을 더 정교하게 만드는 것(S 계열)으로는 이득이 거의 없음을 확인했고, M8은 '두 view가 다 틀린 경우'에 집중했다.
+**왜 이 정도로 충분한가:** M6.1 측정에서 self gate는 {G, L} 중 더 나은 쪽을 고르는 선택 상한의 **89%**에 이르렀다. 그래서 M7은 선택 규칙을 다듬는 것(S 계열)으로는 이득이 거의 없다는 것을 확인했고, M8은 '두 view가 다 틀린 경우'에 집중했다.
 
 **한계:** gate는 '맞는 대상인가'를 모른다. L이 비슷한 방해물을 높은 score로 잡으면 그대로 통과한다(miami-surf obj5). 이를 막으려던 SGGL-V는 효과가 한 영상에 몰려 선택 사항으로 내려갔다.`,
   },
@@ -235,7 +235,7 @@ export const help: HelpMap = {
 
 **unit 점수:** 한 unit의 J&F = frame 1..n−1(prompt frame 제외)의 frame J&F **평균**.
 
-**해석:** 작은 대상은 경계 허용 거리(대각선의 0.8%)가 대상 크기에 비해 커서 F가 J보다 관대할 수 있다. 그래서 ΔJ와 ΔF를 함께 본다(예: FLOWVEL ΔJ +0.0106 / ΔF +0.0154, 2026-10-14 기준).`,
+**해석:** 작은 대상은 경계 허용 거리(대각선의 0.8%)가 대상 크기에 비해 커서 F가 J보다 후하게 나올 수 있다. 그래서 ΔJ와 ΔF를 함께 본다(예: FLOWVEL ΔJ +0.0106 / ΔF +0.0154, 2026-10-14 기준).`,
   },
   "glossary.metric.small_tiny": {
     title: "small / tiny (작은 / 극소 객체)",
@@ -246,7 +246,7 @@ export const help: HelpMap = {
 **쓰이는 곳:**
 - **판정은 small unit만으로 한다** (\`_pilot\`: \`S = U[U.small]\`). 2026-10-14 기준 DEV+REP에서 57 unit / 34 영상.
 - tiny는 7 unit뿐이다. \`tiny_dJF\`는 분층 보고용이며 판정에 쓰지 않는다. 7개라 한두 unit이 값을 좌우한다.
-- \`all_units_dJF\`는 small이 아닌 unit까지 포함한 64 unit 평균으로, 큰 대상에서 회귀가 없는지 확인용이다.
+- \`all_units_dJF\`는 small이 아닌 unit까지 포함한 64 unit 평균으로, 큰 대상에서 회귀가 없는지 확인하는 용도다.
 
 **주의:** 크기는 **frame 0 기준**이다. 이후 대상이 가려지거나 작아져도 분층은 바뀌지 않는다. 동시 부재 frame의 45%는 대상이 초기 면적의 절반 미만으로 줄어든 상태였다(\`FAILURE_EPISODE_ANALYSIS.md\`).`,
   },
@@ -280,7 +280,7 @@ export const help: HelpMap = {
 - 하한이 0에 '걸친' 경우(M3vel −0.0000)는 seed에 따라 부호가 바뀔 수 있는 수준이다.
 
 **주의:**
-- 이 CI는 **같은 개발 영상에서 여러 arm을 비교한 뒤의** 단일 arm CI다. 다중 비교 보정이 없다.
+- 이 CI는 **같은 개발 영상에서 여러 arm을 비교하면서** arm마다 따로 낸 CI다. 다중 비교 보정이 없다.
 - 영상이 적고 이득이 한두 영상에 몰리면 백분위 CI가 불안정하다.
 - VK는 scene이 2개뿐이라 영상 대신 **객체 군집** CI를 쓰며 서술용이다.`,
   },
@@ -296,7 +296,7 @@ export const help: HelpMap = {
 
 **예 (2026-10-14 기준, \`STAGE2_CAUSAL_RESULTS.md\`):** FLOWVEL lovo_min +0.0067. 가장 큰 기여 영상인 drone을 빼도 양수다. RESC_OCLR_ADMIT은 평균 +0.0046이지만 lovo_min −0.0019라 한 영상에 의존한다.
 
-**주의:** LOVO는 '한 영상'에 대한 견고성만 본다. 두 영상(drone + kite-surf)을 함께 빼는 경우는 보지 않는다.
+**주의:** LOVO는 영상을 하나씩 뺄 때만 본다. 두 영상(drone + kite-surf)을 함께 빼는 경우는 보지 않는다.
 
 **함께 보는 값 — miami-surf 제외 (\`without_miami\`):** \`davis/miami-surf\`의 unit을 모두 뺀 small unit의 d 평균. PROMISING 조건은 이 값 > 0이다.
 - miami-surf는 비슷한 서퍼가 여럿 있는 영상이다. SGGL의 대표 실패(obj5: L이 다른 서퍼를 잡는 거짓 재획득, P5 대비 −0.477)가 여기서 났다.
@@ -307,7 +307,7 @@ export const help: HelpMap = {
     title: "최악 단위 (worst unit)",
     body: `**정의:** small unit 중 d가 가장 작은 unit과 그 값(\`worst_unit = [unit, d]\`).
 
-**판정에서:** PROMISING이려면 최악 단위 ≥ **−0.05**. 평균이 좋아도 어떤 객체 하나를 크게 망치는 방법은 통과하지 못한다(재앙적 손실 금지).
+**판정에서:** PROMISING이려면 최악 단위 ≥ **−0.05**. 평균이 좋아도 어떤 객체 하나를 크게 망치는 방법은 통과하지 못한다(큰 손실 금지).
 
 **왜:** rescue나 메모리 기록은 잘못되면 **신원 전환**(다른 물체를 대상으로 착각하고 끝까지 따라감)을 일으킨다. 이런 손실은 평균에 묻히기 쉽지만 실제 사용에서는 치명적이다.
 
@@ -383,7 +383,7 @@ export const help: HelpMap = {
 
 **역할:** 평가. M6부터 반복해 본 데이터라 **탐색적**이다.
 
-**학습형 순위화기와의 관계:** 사전 등록은 'REP로 학습 → DEV로 판정'(REP→DEV)이었다. M8은 DEV→REP 방향도 추가해 두 split 모두 held-out 평가가 가능하게 했다(교차 적합).
+**학습형 순위화기와의 관계:** 사전 등록은 'REP로 학습 → DEV로 판정'(REP→DEV)이었다. M8은 DEV→REP 방향도 추가해 두 split 모두 held-out으로 평가할 수 있게 했다(교차 적합).
 
 **주의:** DEV의 라벨은 학습에 쓰지 않는다(M7 규칙). DEV→REP 방향은 사후에 추가한 것으로 공개되어 있다.`,
   },
@@ -412,7 +412,7 @@ export const help: HelpMap = {
 
 **판정 대신 보는 것:** 비회귀(\`non_regression_pass\`: dJF ≥ −0.005), scene별 값, 객체 ↑/↓.
 
-**예 (2026-10-14 기준):** FLOWVEL VK +0.0002 [−0.0006, +0.0008] — 비회귀 통과, 이득 없음. VK에는 crop 이탈 사건이 거의 없다.
+**예 (2026-10-14 기준):** FLOWVEL VK +0.0002 [−0.0006, +0.0008]. 비회귀는 통과했고 이득은 없다. VK에는 crop 이탈 사건이 거의 없다.
 
 **규칙:** VKITTI Scene02/18/20은 보류 scene이라 쓰지 않는다.`,
   },
@@ -471,9 +471,9 @@ export const help: HelpMap = {
 | 연속 사례 | 40 (GT 있는 사례 20) |
 | 완전 회수 시 상한 | 객체 평균 J&F **+0.028** |
 
-**왜 중요한가:** M7의 가장 큰 실패 범주다. M7은 '이미 맞는 위치의 분할 개선'(①)의 상한이 +0.002–0.006임을 보였고, M8은 이 ②번 실패를 겨냥했다.
+**왜 중요한가:** M7의 가장 큰 실패 범주다. M7은 '이미 맞는 위치의 분할 개선'(①)의 상한이 +0.002–0.006이라는 것을 보였고, M8은 이 ②번 실패를 겨냥했다.
 
-**핵심 어려움:** 진짜 부재가 놓친 frame의 **2.7배**다. GT가 빈 frame에 무언가를 출력하면 J가 1 → 0이 되어(−1), 회수 하나의 이득(+0.5~0.8)보다 손실이 크다. 그래서 '찾기'보다 '정말 있는지 판단하기'가 병목이었다.
+**가장 어려운 점:** 진짜 부재가 놓친 frame의 **2.7배**다. GT가 빈 frame에 무언가를 출력하면 J가 1 → 0이 되어(−1), 회수 하나의 이득(+0.5~0.8)보다 손실이 크다. 그래서 '찾기'보다 '정말 있는지 판단하기'가 병목이었다.
 
 **FLOWVEL과의 관계:** FLOWVEL은 놓친 동시 부재 frame 자체를 131 → 63으로 줄였다(RunPod 같은 기계 기준, 2026-10-14). 사후 회수가 아니라 예방이다.`,
   },
@@ -485,7 +485,7 @@ export const help: HelpMap = {
 
 **할 수 있는 것:** 다른 view 영상(crop, foveation), 다른 메모리 계획(보호 메모리 등), point/box prompt를 한 번에 줄 수 있다. 같은 view 영상의 backbone은 한 번만 계산해 공유한다(비트 동일, 약 1.7× 빠름).
 
-**한계 (중요):** probe는 '그 frame에서 후보를 낼 수 있는가'만 잰다. 그 후보를 실제로 출력하고 crop을 옮기고 메모리에 쓰면 다음 frame이 달라진다. 이 되먹임은 인과 rollout으로만 잴 수 있다.`,
+**한계:** probe는 '그 frame에서 후보를 낼 수 있는가'만 잰다. 그 후보를 실제로 출력하고 crop을 옮기고 메모리에 쓰면 다음 frame이 달라진다. 이 되먹임은 인과 rollout으로만 잴 수 있다.`,
   },
   "glossary.stage1.generator": {
     title: "생성기 (rescue generator)",
@@ -529,7 +529,7 @@ export const help: HelpMap = {
 - point prompt를 주는 생성기(A_cos, B_att, G_neg 등)는 거의 항상 '존재'를 출력한다(0.92–1.00). 점을 찍으면 SAM 2가 무언가를 분할한다.
 - \`F_oclr8_L\`은 0.014로 매우 보수적이다. 같은 배율 foveation \`F_cpfr8_L\`은 0.110(약 8배).
 
-**인과 단계의 대응:** 거짓 재획득.`,
+**인과 단계에서 대응하는 지표:** 거짓 재획득.`,
   },
   "glossary.stage1.rankers": {
     title: "순위화기 R0–R3",
@@ -568,7 +568,7 @@ export const help: HelpMap = {
     title: "교차 적합 (cross-fitting, REP→DEV / DEV→REP)",
     body: `**정의 (\`m8_analysis.rankers\`):** 순위화기를 한 split에서 학습하고 threshold를 고정한 뒤, **다른 split**에서 평가한다. 두 방향을 모두 한다.
 - **REP→DEV:** REP로 학습·threshold → DEV에서 held-out 평가. **사전 등록된 방향.**
-- **DEV→REP:** 반대 방향. 사후 추가(공개됨). 모든 64 unit에 대해 out-of-sample 평가가 가능해진다.
+- **DEV→REP:** 반대 방향. 사후 추가(공개됨). 64 unit 모두를 out-of-sample로 평가할 수 있다.
 - \`pooled_heldout\`: 두 held-out 결과의 합.
 
 **threshold 규칙:** 학습 split의 coabs frame에서 '진짜 부재 FP율 ≤ 0.10을 지키면서 net_dJ_frames 최대'인 값. 사전 등록 문구는 'FP ≤ 0.10'뿐이었고 '순 이득 최대'는 추가 규정이다(공개됨). R3는 학습 split 안에서 out-of-fold 점수로 threshold를 정한다.
@@ -587,9 +587,9 @@ export const help: HelpMap = {
 
 CSV의 \`adv_recall\`은 1–3번(recall 관련)만 확인한 값이다.
 
-**결과 (2026-10-14 기준):** **통과한 계열 없음.** A_cos/B_att는 recall은 높지만 3영상 적중이고 FP 조건을 못 지켰다.
+**결과 (2026-10-14 기준):** **통과한 계열 없음.** A_cos/B_att는 recall은 높지만 적중 영상이 3개이고 FP 조건을 못 지켰다.
 
-**그 다음:** 사전 등록에 따라, 통과가 없으면 정보가 가장 큰 탈락 후보를 '진단적 인과 실행'으로 명시해 돌릴 수 있다. 그래서 Stage 1 재생에서 순 이득이 양수였던 유일한 조합(F_oclr8_L + score > 0)과 그 짝(같은 배율 foveation)을 RESC_OCLR / RESC_CPFR로 고정했다. 판정에는 M7 pilot 규칙을 그대로 적용했다.`,
+**그 다음:** 사전 등록에 따라, 통과한 계열이 없으면 가장 정보가 많은 탈락 후보를 '진단적 인과 실행'으로 명시해 돌릴 수 있다. 그래서 Stage 1 재생에서 순 이득이 양수였던 유일한 조합(F_oclr8_L + score > 0)과 그 짝(같은 배율 foveation)을 RESC_OCLR / RESC_CPFR로 고정했다. 판정에는 M7 pilot 규칙을 그대로 적용했다.`,
   },
   "glossary.stage1.falsification": {
     title: "반증 시험 (paired falsification tests)",
@@ -650,7 +650,7 @@ CSV의 \`adv_recall\`은 1–3번(recall 관련)만 확인한 값이다.
 - 운동: FLOWVEL, M3vel
 - rescue: RESC_OCLR, RESC_OCLR_ADMIT, RESC_CPFR
 - 상한: ORACLE_POOL, ORACLE_POOL_ADMIT
-- 결합(Stage 3, **K_***): K_OCLR_M3, K_OCLR_FLOWVEL, K_ADMIT_FLOWVEL(FLOWVEL·RESC_OCLR_ADMIT 결과를 본 뒤 고정 — 사후 선택으로 공개됨)
+- 결합(Stage 3, **K_***): K_OCLR_M3, K_OCLR_FLOWVEL, K_ADMIT_FLOWVEL(FLOWVEL·RESC_OCLR_ADMIT 결과를 본 뒤 고정. 사후 선택이라고 공개함)
 - FLOWVEL ablation: FV_PRESENT, FLOWCARRY, CAMCARRY
 - SGGL: 각 기계의 기준선
 
@@ -748,7 +748,7 @@ CSV의 \`adv_recall\`은 1–3번(recall 관련)만 확인한 값이다.
   },
   "glossary.family.raft": {
     title: "RAFT 광류 (optical flow)",
-    body: `**무엇:** 연속 두 frame 사이 모든 화소의 이동 벡터(dense optical flow)를 추정하는 신경망이다. torchvision 0.29.1의 **RAFT-small**(가중치 4 MB, BSD, FlyingChairs+Things로 학습 — VOS 데이터와 겹치지 않음)을 쓴다.
+    body: `**무엇:** 연속 두 frame 사이 모든 화소의 이동 벡터(dense optical flow)를 추정하는 신경망이다. torchvision 0.29.1의 **RAFT-small**(가중치 4 MB, BSD, FlyingChairs+Things로 학습해 VOS 데이터와 겹치지 않음)을 쓴다.
 
 **사용 방식 (\`src/spatial/motion.py\`):** 긴 변 640으로 줄인 frame 쌍에 frame마다 1회. 결과로
 - 대상 영역의 평균 변위 → FLOWVEL·FV_PRESENT의 속도
@@ -779,7 +779,7 @@ CSV의 \`adv_recall\`은 1–3번(recall 관련)만 확인한 값이다.
     body: `**무엇:** 사람 눈의 중심와(fovea)처럼, 관심 영역은 확대하고 주변은 압축해 **전체 문맥을 한 view에 유지**하는 비균일 샘플링이다.
 
 **CPFR 구현 (\`F_cpfr{N}_{G|L}\`, \`rescue.axis_map(fovea=True)\`):**
-- 축(가로·세로)마다 분리된 1-D 사상. 중심 주변 창을 배율 α로 확대해 view의 절반(fovea)에 놓고, 나머지 영역은 양옆에 압축해 넣는다.
+- 축(가로·세로)마다 따로 하는 1-D 매핑. 중심 주변 창을 배율 α로 확대해 view의 절반(fovea)에 놓고, 나머지 영역은 양옆에 압축해 넣는다.
 - 출력 logit은 역변환으로 frame 좌표에 되돌린다.
 - **같은 배율의 OCLR과 짝**을 지어, '문맥 보존' 하나만 다르게 한다.
 
@@ -788,7 +788,7 @@ CSV의 \`adv_recall\`은 1–3번(recall 관련)만 확인한 값이다.
 **결과 (2026-10-14 기준):**
 - Stage 1: CPFR − OCLR recall 차이 ≈ 0(CI가 0 포함). 회수 이득 없음.
 - 원시 FP 0.110 vs 0.014: 주변의 비슷한 방해물(miami-surf 서퍼들)을 '존재'로 잡음.
-- 인과 RESC_CPFR: −0.0070, 거짓 재획득 118 vs 93, disc-jockey obj3 −0.330 신원 전환 → **REJECTED**. 문맥 보존 가설은 반증 방향이다.
+- 인과 RESC_CPFR: −0.0070, 거짓 재획득 118 vs 93, disc-jockey obj3 −0.330 신원 전환 → **REJECTED**. 결과는 문맥 보존 가설과 반대 방향이다.
 
 **선행연구:** Learning to Zoom(ECCV'18), FOVEA(ICCV'21), LZU(CVPR'23).`,
   },
@@ -972,7 +972,7 @@ CSV의 \`adv_recall\`은 1–3번(recall 관련)만 확인한 값이다.
 - 30초마다 다시 읽는다.
 
 **자주 보는 JSON (\`outputs/milestone8/\`):**
-- \`causal_report.json\`: arm별 판정 요약 — \`dJF\`, \`CI_video\`, \`videos_up_0.01\`, \`lovo_min\`, \`without_miami\`, \`worst_unit\`, \`verdict\`, \`per_video\`, \`machines\`. VK는 \`<arm>@VK\` key.
+- \`causal_report.json\`: arm별 판정 요약. \`dJF\`, \`CI_video\`, \`videos_up_0.01\`, \`lovo_min\`, \`without_miami\`, \`worst_unit\`, \`verdict\`, \`per_video\`, \`machines\`. VK는 \`<arm>@VK\` key.
 - \`arms.json\`: 고정된 arm spec과 \`frozen_kst\`.
 - \`stage1_report.json\`: trigger 수, recall, 반증 시험(\`tests\`), 지연 시간.
 - \`rankers_*.json\`: 순위화기별 \`fitREP\`/\`fitDEV\`의 threshold와 held-out 평가, \`pooled_heldout\`.
@@ -1039,7 +1039,7 @@ CSV의 \`adv_recall\`은 1–3번(recall 관련)만 확인한 값이다.
 | \`scripts/m8_analysis.py\` | Stage 1 recall/FP/반증 시험, 순위화기 교차 적합, \`net_dJ_frames\`, 인과 판정(\`_pilot\`), 같은 기계 기준선(\`_base_frames\`) |
 | \`src/spatial/sggl.py\` | SGGL 두 상태 rollout, \`self_gate\`, \`a2x\`(SGGL), \`a2v\`(SGGL-V) |
 | \`src/spatial/vcam.py\` | crop 변 규칙, 내부 경계 접촉(\`touches_border\`) |
-| \`src/spatial/rescue.py\` | heatmap(A/B), OCLR/CPFR view 사상, occupancy 배율, 비저장 probe |
+| \`src/spatial/rescue.py\` | heatmap(A/B), OCLR/CPFR view 매핑, occupancy 배율, 비저장 probe |
 | \`src/spatial/motion.py\` | RAFT 광류, 대상 box 운반 |
 | \`src/spatial/ranker.py\` | R1–R3 |
 | \`scripts/gpu_sync.py\` | worker → Ubuntu sync, ledger, audit |

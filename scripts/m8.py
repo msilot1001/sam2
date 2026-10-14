@@ -307,7 +307,8 @@ def diag(sets="DEV,REP"):
             continue
         torch.cuda.reset_peak_memory_stats()
         t0 = time.time()
-        df, cd, vec = diag_unit(pred, flow, s, u)
+        og = os.environ.get("M8_ONLY_GENS")                # e.g. "none": frame rows only (no generators)
+        df, cd, vec = diag_unit(pred, flow, s, u, only=None if og is None else {g for g in og.split(",") if g and g != "none"})
         np.save(DIAG / f"{m7.stem(u)}.vec.npy", vec)
         atomic_csv(cd, DIAG / f"{m7.stem(u)}.cand.csv")
         atomic_csv(df.assign(subset=x), f)
@@ -533,7 +534,7 @@ def run(arm, sets="DEV,REP"):
            "gpu": torch.cuda.get_device_name(0), "fill_hole_area": pred.fill_hole_area, "arm": A,
            "code": json.loads(Path("CODE_SYNC.json").read_text()) if Path("CODE_SYNC.json").exists() else "ubuntu working tree"}
     shard_tag = os.environ.get("M7_SHARD", "all").replace("/", "of")
-    atomic_json(env, dd / f"ENV_{env['machine']}_{shard_tag}.json")
+    atomic_json(env, dd / f"ENV_{env['machine']}_{sets.replace(',', '+')}_{shard_tag}.json")   # set in the name: VK runs never overwrite DEV/REP ENV
     us = m7.units(sets)
     if os.environ.get("M8_SUBSET"):                       # benchmarking: fixed unit subset k/m, then M7_SHARD within it
         k, m = map(int, os.environ["M8_SUBSET"].split("/"))
