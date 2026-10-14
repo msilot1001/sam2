@@ -69,7 +69,12 @@ def build_predictor():
     from sam2.build_sam import build_sam2_video_predictor
     torch.backends.cuda.matmul.allow_tf32 = False
     torch.backends.cudnn.allow_tf32 = False
-    return build_sam2_video_predictor(CFG, CKPT, device=torch.device("cuda"), apply_postprocessing=True)
+    pred = build_sam2_video_predictor(CFG, CKPT, device=torch.device("cuda"), apply_postprocessing=True)
+    # Environment parity (M7 migration): every M5-M7 result was produced where sam2._C is missing, so SAM 2 skips its
+    # hole-filling post-process. Make that explicit so machines WITH the extension (RTX 5090) give identical outputs
+    # (verified: outputs/milestone7/repro, 164/164 frames identical J&F with this setting, 1 differing frame without).
+    pred.fill_hole_area = 0
+    return pred
 
 
 def build_image_predictor():

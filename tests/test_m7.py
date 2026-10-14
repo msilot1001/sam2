@@ -127,6 +127,7 @@ def test_causal_policy_rollout_reproduces_sggl_and_sgglv():
     controlled.install(pred, None, {})
     u = m.m6._UNITS()["davis__davis/lab-coat__obj1"]
     ref = pd.read_csv(ROOT / "outputs/milestone6/runs/A2x/davis__davis_lab-coat__obj1.csv")
+    assert pred.fill_hole_area == 0                                               # parity with the _C-less RTX 2080 runs
     a = m.run_policy(pred, "DEV", u, policies.Policy, n=9)
     assert a.JF.round(10).tolist() == ref.JF.round(10).tolist()[:8]
     v = pd.read_csv(ROOT / "outputs/milestone61/trackA/A2v/davis__davis_lab-coat__obj1.csv")
