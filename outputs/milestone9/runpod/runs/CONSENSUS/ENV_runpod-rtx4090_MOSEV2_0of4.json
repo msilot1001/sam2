@@ -1,0 +1,35 @@
+{
+  "machine": "runpod-rtx4090",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "fill_hole_area": 0,
+  "arm": {
+    "name": "CONSENSUS",
+    "gens": [],
+    "center": "out",
+    "gate": "consensus",
+    "why": "M9 presence/abstention (evidence-driven, one rule, no threshold): SGGL, except that when the L self gate fails, the G mask is output only if L also claims presence (score_L > 0); otherwise the output is empty and the crop centre is held. Designed from the MOSEv2 DEV-split replay only (157 FP frames removed vs 124 GT-present frames emptied, J 43.4); judged on MOSEv2 conf and VOST.",
+    "frozen_kst": "2026-10-15 00:42"
+  },
+  "code": {
+    "ubuntu_head": "550f7c5fb1f4a3a0739251ac274a91ca39f7e9d4",
+    "uncommitted_paths": 17,
+    "pushed": "2026-10-15 00:42:32",
+    "items": [
+      "src",
+      "scripts",
+      "tests",
+      "configs",
+      "pyproject.toml",
+      "outputs/milestone8/preregistration.json",
+      "outputs/milestone8/preregistration_vk.json",
+      "outputs/milestone8/arms.json",
+      "outputs/milestone8/preregistration_vk_amend1.json",
+      "outputs/milestone8/preregistration_amend1.json",
+      "outputs/milestone8/preregistration_amend2.json",
+      "outputs/milestone9/arms.json",
+      "outputs/milestone9/preregistration_amend1.json"
+    ]
+  }
+}

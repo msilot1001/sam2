@@ -230,5 +230,121 @@
     "dJF_sum": -1.4892712718518952
    }
   }
+ },
+ "CONSENSUS:mosev2": {
+  "all": {
+   "OBSERVABILITY": {
+    "sggl_missed": 235,
+    "still_missed": 234,
+    "reduction": 0.004255319148936176,
+    "dJF_sum": -3.7463678324248852
+   },
+   "PARTIAL_SEGMENTATION": {
+    "sggl_missed": 298,
+    "still_missed": 297,
+    "reduction": 0.003355704697986628,
+    "dJF_sum": -21.022617392350178
+   },
+   "POSITION": {
+    "sggl_missed": 367,
+    "still_missed": 355,
+    "reduction": 0.032697547683923744,
+    "dJF_sum": 4.281986578635663
+   },
+   "PRESENCE_ABSENT_CLAIM": {
+    "sggl_missed": 145,
+    "still_missed": 142,
+    "reduction": 0.020689655172413834,
+    "dJF_sum": 2.492393037836213
+   },
+   "PRESENCE_WRONG_TARGET": {
+    "sggl_missed": 270,
+    "still_missed": 270,
+    "reduction": 0.0,
+    "dJF_sum": -4.788609149875095
+   },
+   "SCALE": {
+    "sggl_missed": 993,
+    "still_missed": 989,
+    "reduction": 0.004028197381671705,
+    "dJF_sum": -9.33570555445704
+   }
+  },
+  "conf": {
+   "OBSERVABILITY": {
+    "sggl_missed": 134,
+    "still_missed": 134,
+    "reduction": 0.0,
+    "dJF_sum": -0.5810454205956994
+   },
+   "PARTIAL_SEGMENTATION": {
+    "sggl_missed": 110,
+    "still_missed": 109,
+    "reduction": 0.009090909090909038,
+    "dJF_sum": -6.819998632870041
+   },
+   "POSITION": {
+    "sggl_missed": 264,
+    "still_missed": 257,
+    "reduction": 0.02651515151515149,
+    "dJF_sum": 0.9373151854510677
+   },
+   "PRESENCE_ABSENT_CLAIM": {
+    "sggl_missed": 97,
+    "still_missed": 96,
+    "reduction": 0.010309278350515427,
+    "dJF_sum": 0.887656628775986
+   },
+   "PRESENCE_WRONG_TARGET": {
+    "sggl_missed": 138,
+    "still_missed": 138,
+    "reduction": 0.0,
+    "dJF_sum": -0.4445624435929602
+   },
+   "SCALE": {
+    "sggl_missed": 594,
+    "still_missed": 594,
+    "reduction": 0.0,
+    "dJF_sum": -1.2277339995951473
+   }
+  },
+  "dev": {
+   "OBSERVABILITY": {
+    "sggl_missed": 101,
+    "still_missed": 100,
+    "reduction": 0.00990099009900991,
+    "dJF_sum": -3.165322411829186
+   },
+   "PARTIAL_SEGMENTATION": {
+    "sggl_missed": 188,
+    "still_missed": 188,
+    "reduction": 0.0,
+    "dJF_sum": -14.202618759480137
+   },
+   "POSITION": {
+    "sggl_missed": 103,
+    "still_missed": 98,
+    "reduction": 0.04854368932038833,
+    "dJF_sum": 3.3446713931845964
+   },
+   "PRESENCE_ABSENT_CLAIM": {
+    "sggl_missed": 48,
+    "still_missed": 46,
+    "reduction": 0.04166666666666663,
+    "dJF_sum": 1.604736409060227
+   },
+   "PRESENCE_WRONG_TARGET": {
+    "sggl_missed": 132,
+    "still_missed": 132,
+    "reduction": 0.0,
+    "dJF_sum": -4.344046706282135
+   },
+   "SCALE": {
+    "sggl_missed": 399,
+    "still_missed": 395,
+    "reduction": 0.010025062656641603,
+    "dJF_sum": -8.107971554861894
+   }
+  }
  }
 }

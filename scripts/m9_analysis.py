@@ -245,7 +245,11 @@ def causal(*arms):
             print(arm, "no units yet")
             continue
         U.to_csv(OUT / "reports" / f"causal_units_{arm}.csv", index=False)
-        S = U[U.small]
+        # one machine per dataset for the main test (runpod when present: every arm runs there); others = replication
+        prim = {ds: ("runpod" if (d.machine == "runpod").any() else d.machine.iloc[0]) for ds, d in U.groupby("dataset")}
+        S = U[U.small & (U.machine == U.dataset.map(prim))]
+        for (ds, mc), d in U[U.small & (U.machine != U.dataset.map(prim))].groupby(["dataset", "machine"]):
+            out.setdefault(f"{arm}@replication", {})[f"{ds}@{mc}"] = _summ(d, f"{ds}@{mc}")
         res = {"pooled": _summ(S, "pooled")}
         for ds, d in S.groupby("dataset"):
             res[ds] = _summ(d, ds)
@@ -260,6 +264,8 @@ def causal(*arms):
             run = max(run, min(1.0, (m - i) * pv))
             res[k]["holm_p"] = run
         out[arm] = res
+        for k, r in out.get(f"{arm}@replication", {}).items():
+            print(f"{arm:10s} {k:16s} (replication) n={r['n_units']}/{r['n_videos']}v dJF={r['dJF']:+.4f} CI=[{r['CI_video'][0]:+.4f},{r['CI_video'][1]:+.4f}] <-0.05:{r['n_units_lt_-0.05']}")
         for k, r in res.items():
             print(f"{arm:10s} {k:16s} n={r['n_units']:3d}/{r['n_videos']:3d}v dJF={r['dJF']:+.4f} CI=[{r['CI_video'][0]:+.4f},{r['CI_video'][1]:+.4f}] "
                   f"up/dn={r['videos_up_0.01']}/{r['videos_down_0.01']} sign_p={r['sign_test_p']:.3f} lovo={r['lovo_min']:+.4f} "

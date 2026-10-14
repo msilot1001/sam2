@@ -1,5 +1,5 @@
 {
- "updated_kst": "2026-10-15 01:10",
+ "updated_kst": "2026-10-15 01:58",
  "note": "M9 live task ledger (agent-maintained); progress = result files / expected units.",
  "tasks": [
   {
@@ -19,7 +19,7 @@
   {
    "id": "M9-DATA-LVOS",
    "title": "LVOS v2 확보",
-   "description": "Google Drive 할당량 초과로 거부(BLOCKED). Pod에서 20분 간격 6회 자동 재시도",
+   "description": "Google Drive 할당량 초과로 거부. Pod 자동 재시도 6회 모두 실패 → BLOCKED_USER_ACTION",
    "machine": "RunPod",
    "status": "BLOCKED"
   },
@@ -60,7 +60,7 @@
    "title": "SGGL 기준선 — VOST",
    "description": "VOST 74단위 SGGL 궤적(실패 분류용, 같은 기계 기준선)",
    "machine": "Ubuntu 2080",
-   "status": "RUNNING",
+   "status": "DONE",
    "progress": {
     "glob": "outputs/milestone9/runs/SGGL/vost*.csv",
     "total": 74
@@ -71,7 +71,7 @@
    "title": "FLOWVEL vs SGGL — VOST",
    "description": "VOST 74단위 FLOWVEL 인과 rollout",
    "machine": "Ubuntu 2080",
-   "status": "QUEUED",
+   "status": "RUNNING",
    "progress": {
     "glob": "outputs/milestone9/runs/FLOWVEL/vost*.csv",
     "total": 74
@@ -83,9 +83,9 @@
   {
    "id": "M9-SCALE-MOSE",
    "title": "SCALE vs SGGL — MOSEv2",
-   "description": "스케일만: crop 한 변이 믿을 만한 출력 크기를 따라감 (사전 등록 23:13)",
+   "description": "스케일만: crop 한 변이 믿을 만한 출력 크기를 따라감 (사전 등록 23:13) — 결과: +0.0116 [−0.0003,+0.0258], 스케일 범주 회복 18%(기준 30%), −0.05 미만 10단위 → 사전 기준 불통과",
    "machine": "RunPod 4090",
-   "status": "RUNNING",
+   "status": "DONE",
    "progress": {
     "glob": "outputs/milestone9/runpod/runs/SCALE/mosev2*.csv",
     "total": 139
@@ -97,9 +97,9 @@
   {
    "id": "M9-JOINT-MOSE",
    "title": "JOINT vs SGGL — MOSEv2",
-   "description": "FLOWVEL 이동 + SCALE 크기",
+   "description": "FLOWVEL 이동 + SCALE 크기 — FLOWVEL 단독이 해로워(CI<0) 실행하지 않음",
    "machine": "RunPod 4090",
-   "status": "BLOCKED",
+   "status": "NOT_RUN",
    "progress": {
     "glob": "outputs/milestone9/runpod/runs/JOINT/mosev2*.csv",
     "total": 139
@@ -111,7 +111,7 @@
   {
    "id": "M9-PCCARRY-MOSE",
    "title": "PCCARRY vs SGGL — MOSEv2",
-   "description": "값싼 운동: 부재 중 위상 상관 전역 이동만큼 crop 이동 (RAFT 없음)",
+   "description": "값싼 운동: 부재 중 위상 상관 전역 이동만큼 crop 이동 (RAFT 없음) — 우선순위 최하위, Pod q3 마지막",
    "machine": "RunPod 4090",
    "status": "QUEUED",
    "progress": {
@@ -138,6 +138,35 @@
    "title": "대시보드 M9 탭",
    "description": "M9 데이터셋·진행·결과·실패 분류 표시 (연구를 막지 않음)",
    "machine": "Ubuntu",
+   "status": "DONE"
+  },
+  {
+   "id": "M9-CONSENSUS-MOSE",
+   "title": "CONSENSUS vs SGGL — MOSEv2",
+   "description": "존재 합의: L gate 실패 시 score_L>0일 때만 G 출력 (수정 1, 00:50). 판정은 conf — 결과: conf −0.0503 [−0.0983,−0.0094], −0.05 미만 15단위 → 반증, 중단",
+   "machine": "RunPod 4090",
+   "status": "DONE",
+   "progress": {
+    "glob": "outputs/milestone9/runpod/runs/CONSENSUS/mosev2*.csv",
+    "total": 139
+   }
+  },
+  {
+   "id": "M9-VOST-POD",
+   "title": "VOST — Pod SGGL/SCALE/CONSENSUS",
+   "description": "Pod SGGL 기준선과 SCALE을 VOST 74단위에서 (CONSENSUS는 MOSE 반증으로 취소)",
+   "machine": "RunPod 4090",
+   "status": "RUNNING",
+   "progress": {
+    "glob": "outputs/milestone9/runpod/runs/SCALE/vost*.csv",
+    "total": 74
+   }
+  },
+  {
+   "id": "M9-MOTION-AGREE",
+   "title": "값싼 운동 일치 검사",
+   "description": "VOST 1,634쌍: 위상 상관 vs RAFT 끝점 오차 중앙값 3.1 px, 지연 14배 적음",
+   "machine": "Ubuntu 2080",
    "status": "DONE"
   }
  ]
