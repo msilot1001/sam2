@@ -1,0 +1,48 @@
+{
+  "machine": "runpod4-rtx4090",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "fill_hole_area": 0,
+  "model_cfg": "configs/sam2.1/sam2.1_hiera_t.yaml",
+  "ckpt": "checkpoints/sam2.1_hiera_tiny.pt",
+  "code": {
+    "ubuntu_head": "18fc361b4853c325092fd4b752e6def82fc747cf",
+    "uncommitted_paths": 2,
+    "pushed": "2026-10-15 22:10:22",
+    "items": [
+      "src",
+      "scripts",
+      "tests",
+      "configs",
+      "pyproject.toml",
+      "outputs/milestone8/preregistration.json",
+      "outputs/milestone8/preregistration_vk.json",
+      "outputs/milestone8/arms.json",
+      "outputs/milestone8/preregistration_vk_amend1.json",
+      "outputs/milestone8/preregistration_amend1.json",
+      "outputs/milestone8/preregistration_amend2.json",
+      "outputs/milestone10/preregistration.json",
+      "outputs/milestone10/preregistration_amend1.json",
+      "outputs/milestone10/preregistration_amend2.json",
+      "outputs/milestone10/preregistration_amend3.json",
+      "outputs/milestone10/preregistration_amend4.json",
+      "outputs/milestone10/preregistration_amend5.json",
+      "outputs/milestone10/preregistration_amend6.json",
+      "outputs/milestone10/preregistration_amend7.json",
+      "outputs/milestone10/preregistration_amend8.json",
+      "outputs/milestone10/preregistration_amend9.json",
+      "outputs/milestone10/preregistration_amend10.json",
+      "outputs/milestone9/manifests",
+      "outputs/milestone9/arms.json"
+    ]
+  },
+  "arm": {
+    "center": "sggl",
+    "side": "fixed",
+    "output": "sggl",
+    "admit": "all",
+    "memory": "native",
+    "extra": "k"
+  }
+}
