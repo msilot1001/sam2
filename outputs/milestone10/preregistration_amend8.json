@@ -1,0 +1,8 @@
+{
+  "created_kst": "2026-10-15 14:27",
+  "status": "EXPLORATORY; amends the decision criteria of amend6 (user instruction, to avoid the M8 FLOWVEL pattern of finding and passing on the same dataset)",
+  "seen_before_this_file": "VXM dev result WAS seen (about 14:50 KST: MOSEv2 -0.017 [-0.040,+0.007] on 60/62 synced units, VOST -0.001 [-0.091,+0.063], LVOS +0.023 [-0.007,+0.068]). VXO, N1M, N2X dev results NOT seen. These criteria are therefore preregistered for VXO/N1M/N2X and post hoc for VXM.",
+  "criteria_dev (replaces amend6 criteria_dev)": "(1) VER - OR0 video-bootstrap CI lower > 0 on BOTH VOST and LVOS v2; (2) MOSEv2 point estimate >= -0.005 (non-harm); (3) VXM > N1M and VXM > N2X point estimates on VOST and LVOS v2 (for the VXM claim); (4) units below -0.05 for VER <= N2X's count on each of VOST and LVOS v2.",
+  "conf (replaces amend6 conf)": "the dev winner (if any) and N2X run once on VOST:conf AND LVOSV2:conf (and MOSEV2:conf for the non-harm check), vs OR0 on the same conf units run on this pod. ADOPT only if criteria (1) and (4) hold on BOTH VOST:conf and LVOSV2:conf and (2) holds on MOSEV2:conf. Otherwise 'dev only'.",
+  "primary_exploratory_output (user)": "VXM is read as a degraded-oracle experiment, not pass/fail: per dataset, selector precision (offline on OR0F disagree frames: MOSEv2 0.24 / VOST 0.61 / LVOS 0.85; and realized online precision on VXM's own switch frames) against VXM dJ&F (all frames and GT-present frames), with VXO (output only) for contrast and reference points OR5M (GT selection, precision 1) and OR7R (uninformed memory intervention). Expected by the user before results: MOSEv2 negative, LVOS positive, VOST borderline. Reported in reports/degraded.json."
+}
