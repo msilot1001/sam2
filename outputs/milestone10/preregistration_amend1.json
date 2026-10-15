@@ -1,5 +1,5 @@
 {
-  "created_kst": "2026-10-15 09:12",
+  "created_kst": "2026-10-15 09:09", "created_kst_note": "corrected from a hand-typed 09:12 to the commit time (6944d71); no other field changed",
   "before_any_output_of": "capacity diagnostic (OR9cap)",
   "what": "Model-capacity diagnostic: arm OR0 (plain SGGL, same code) with SAM 2.1 Hiera tiny / small / base+ / large, all on the Ubuntu RTX 2080 (same machine for every model), runs dir outputs/milestone10/ubuntu/runs_<t|s|b+|l>/OR0. Checkpoints: official dl.fbaipublicfiles.com 092824 files, sha256 in checkpoints/sha256_m10.txt (not committed).",
   "subset": "VOST:dev first (data already on Ubuntu); MOSEV2:dev and LVOSV2:dev if time permits (dev videos copied from the pod).",

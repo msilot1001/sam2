@@ -1,5 +1,5 @@
 {
-  "created_kst": "2026-10-15 10:05",
+  "created_kst": "2026-10-15 09:35", "created_kst_note": "corrected from a hand-typed 10:05 to the commit time (8a10853); no other field changed",
   "before_any_output_of": "OR9",
   "what": "OR9 prompt/capacity oracle: SAM 2.1 tiny IMAGE predictor (no memory) with the GT bounding box as a box prompt on every GT-present frame of the dev units. Two variants per frame: full frame, and a square crop of the unit's SGGL side centred on the GT box (perfect geometry). multimask_output=False, fill_hole_area=0. Written by scripts/m10.py boxwork to <runs>/OR9.",
   "comparison": "OR9 J&F vs OR0 J&F on the SAME GT-present frames (video-equal); interpretation: prompt-assisted upper bound of per-frame segmentation capacity, not a tracking result.",
