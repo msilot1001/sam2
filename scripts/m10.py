@@ -363,6 +363,8 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
             d.set_center(vcam.center_of(out))    # SGGL: centre follows the output (held while it is empty)
     peak = torch.cuda.max_memory_allocated()
     d.close()
+    if any(np.isnan(r["score_G"]) for r in rows):         # corrupt worker state (amend10 incident): write nothing
+        raise SystemExit(f"NaN object scores in {u.name}: worker state is corrupt, not writing")
     if keep_tok is not None:                              # 6 x 256 decoder tokens per frame (float16)
         (RUNS / name).mkdir(parents=True, exist_ok=True)
         np.savez_compressed(RUNS / name / f"{m7.stem(u)}.tok.npz", tok=np.stack(keep_tok),
