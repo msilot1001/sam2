@@ -2,7 +2,7 @@
  "last_ok:outputs/milestone8/runpod/_synctest": "2026-10-14 17:05:59",
  "last_new:outputs/milestone8/runpod/_synctest": 1,
  "conflicts:outputs/milestone8/runpod/_synctest": 1,
- "updated": "2026-10-15 21:16:08",
+ "updated": "2026-10-15 21:23:05",
  "last_fail:outputs/milestone8/runpod/_synctest": "2026-10-14 17:06:00 manifest failed: ssh: connect to host 213.173.98.87 port 1: Connection refused",
  "last_ok:outputs/milestone8/runpod": "2026-10-14 21:23:34",
  "last_new:outputs/milestone8/runpod": 46,
@@ -21,8 +21,8 @@
  "last_new:outputs/milestone9/runpod": 0,
  "conflicts:outputs/milestone9/runpod": 0,
  "last_fail:outputs/milestone9/runpod": "2026-10-15 06:29:18 manifest failed: ssh: connect to host 213.173.108.90 port 11637: Connection refused",
- "last_ok:outputs/milestone10/runpod": "2026-10-15 21:16:08",
- "last_new:outputs/milestone10/runpod": 65,
+ "last_ok:outputs/milestone10/runpod": "2026-10-15 21:18:05",
+ "last_new:outputs/milestone10/runpod": 0,
  "conflicts:outputs/milestone10/runpod": 0,
- "last_fail:outputs/milestone10/runpod": "2026-10-15 20:46:14 manifest failed: ssh: connect to host 213.173.110.42 port 10058: Connection refused"
+ "last_fail:outputs/milestone10/runpod": "2026-10-15 21:23:05 manifest failed: ssh: connect to host 213.173.102.174 port 11977: Connection refused"
 }
