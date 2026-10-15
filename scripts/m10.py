@@ -112,7 +112,7 @@ def spec(name):
 def hook_decoder(pred):
     """Keep the raw decoder output of the last call (3 multimask logits BEFORE the no-object suppression)."""
     box = {}
-    pred.sam_mask_decoder.register_forward_hook(lambda m, a, o: box.update(lr=o[0].detach(), iou=o[1].detach()))
+    pred.sam_mask_decoder.register_forward_hook(lambda m, a, o: box.update(lr=o[0].detach(), iou=o[1].detach(), tok=o[2].detach()))
     return box
 
 
@@ -205,6 +205,7 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
     fired, rand, xrng = vxm_schedule(u, n) if A.get("after") == "VXM" else (set(), set(), None)
     other = getattr(m7, "other", None)
     rows, keep = [], {} if os.environ.get("M10_SAVE_MASKS") else None
+    keep_tok = [] if A.get("extra") else None
     for t in range(1, n):
         g = m7.gt(u, t)
         if A["center"] == "gt" and g.any():        # non-causal: GT of the frame being predicted
@@ -212,11 +213,16 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
         if A["side"] == "gt" and g.any():
             d.set_side("L", gt_side(g, hw))
         t0 = time.perf_counter()
-        V, C = {}, {}
+        V, C, EX = {}, {}, {}
         for v in "GL":
             planner = sggl._cond_only if A["memory"] == "cond0" else None
             V[v] = d.view(v, t, planner=planner)
             C[v] = cands(dec["lr"], V[v].box, hw, g)
+            if A.get("extra"):                              # amend7: per-hypothesis decoder-side signals
+                lr = dec["lr"][0].float()
+                EX[v] = {"stab": ((lr > 1).sum((1, 2)) / (lr > -1).sum((1, 2)).clamp(min=1)).cpu().numpy(),
+                         "mlogit": torch.stack([x[x > 0].mean() if (x > 0).any() else x.max() for x in lr]).cpu().numpy(),
+                         "tok": dec["tok"][0].float()}
             PI = dec["iou"][0].float().cpu().numpy() if v == "G" else PI
             if v == "L":
                 PI = np.concatenate([PI, dec["iou"][0].float().cpu().numpy()])
@@ -322,11 +328,28 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
         if keep is not None:                     # visualisation reruns only: bit-packed masks of every frame
             for k, m in (("out", out), ("G", mv["G"]), ("L", mv["L"])):
                 keep.setdefault(k, []).append(np.packbits(m))
+        if A.get("extra"):
+            for v, base in (("G", 0), ("L", 3)):
+                ptr = pred.obj_ptr_proj(EX[v]["tok"])                     # 3 x 256, as SAM 2 builds the object pointer
+                ref = d.S[v].od["cond_frame_outputs"][0]["obj_ptr"].float().reshape(1, -1)
+                pc = Fn.cosine_similarity(ptr, ref.expand_as(ptr), dim=1).cpu().numpy()
+                ksv = base + int(np.argmax(PI[base:base + 3]))
+                for i in range(3):
+                    k = base + i
+                    m, ms = C[v][i], (C["G"] + C["L"])[ksv]
+                    a1, a2 = R.proto(fG, m & ~ms), R.proto(fG, ms & ~m)       # disputed regions only
+                    dc = np.nan if k == ksv else (np.nan if a1 is None or a2 is None or p0 is None else float(a1 @ p0 - a2 @ p0))
+                    rows[-1].update({f"stab{k}": float(EX[v]["stab"][i]), f"mlogit{k}": float(EX[v]["mlogit"][i]),
+                                     f"ptrcos{k}": float(pc[i]), f"dcos{k}": dc})
+            if keep_tok is not None:
+                keep_tok.append(torch.cat([EX["G"]["tok"], EX["L"]["tok"]]).half().cpu().numpy())
         prev_out = out
         if A["center"] != "gt":
             d.set_center(vcam.center_of(out))    # SGGL: centre follows the output (held while it is empty)
     peak = torch.cuda.max_memory_allocated()
     d.close()
+    if keep_tok is not None:                              # 6 x 256 decoder tokens per frame (float16)
+        np.savez_compressed(RUNS / name / f"{m7.stem(u)}.tok.npz", tok=np.stack(keep_tok))
     if keep is not None:
         f = Path(os.environ["M10_SAVE_MASKS"]) / name / f"{m7.stem(u)}.npz"
         f.parent.mkdir(parents=True, exist_ok=True)

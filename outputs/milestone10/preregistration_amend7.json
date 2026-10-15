@@ -1,0 +1,9 @@
+{
+  "created_kst": "2026-10-15 13:57",
+  "status": "EXPLORATORY feature collection for a possible learned verification head (option b). No online arm today (independent-agent advice: within-view signal absent in current scalars; ~1,240 informative frames in ~49 videos; linear model is the ceiling).",
+  "before_any_output_of": "OR0T",
+  "arms": {"OR0T": {"extra": true}},
+  "definition": "OR0T = OR0 (identical decisions; parity with OR0 required) + per raw hypothesis k: stab (SAM stability score on low-res logits: |logit>1| / |logit>-1|), mlogit (mean positive logit), ptrcos (cosine between obj_ptr_proj(decoder token k) and the view's frame-0 prompt object pointer), dcos (frame-0 G-feature cosine of the region only in k minus that of the region only in the view's native pick; disputed region), plus the 6 x 256 decoder tokens per frame saved as <unit>.tok.npz (float16).",
+  "planned_offline_analysis (frozen now)": "pairwise within the output view: native pick vs each alternative; label = sign(J_alt - J_native) on GT-present active frames with |dJ| >= 0.1; ridge logistic with at most 20 features chosen from {piou diff, stab diff, mlogit diff, ptrcos diff, dcos, cos diff, xiou diff, log area ratio}; 2-fold video-grouped CV within dataset; within-frame label-permutation null; success = amend5 switch precision >= 0.60 on held-out videos on MOSEv2 and VOST. Tokens are kept for a later, separately registered analysis.",
+  "data": "MOSEV2:dev, VOST:dev, LVOSV2:dev"
+}
