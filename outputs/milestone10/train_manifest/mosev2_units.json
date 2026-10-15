@@ -1,0 +1,13 @@
+{
+ "created": "2026-10-15 13:08:53",
+ "dataset": "mosev2",
+ "rule": "amend10: freeze the TRAINING unit list for the learned selection head from GT ONLY (before any SAM 2 output on it).\n\n    M9_DATA=<root> python scripts/m10_train_manifest.py <dataset> <area0_max> [tag]\n\nSame unit rule as scripts/m9_manifest.py (first visible annotated frame = prompt, >= 10 annotated frames, crop_side not\nNone, at most 3 objects per video with seed 9, LVOS v2 first 300 frames) except: prompt-frame area < `area0_max`, and\nONLY videos that appear in no M9 dev/conf unit (whole video excluded if any of its objects is a dev/conf unit) and whose\nframes are on disk. Writes outputs/milestone10/train_manifest/<dataset>_units<tag>.json (split = \"train\").\n",
+ "area0_max": 0.005,
+ "seed": 9,
+ "n_videos_scanned": 78,
+ "excluded_dev_conf_videos": 102,
+ "n_units": 0,
+ "n_unit_videos": 0,
+ "n_frames_total": 0,
+ "units": []
+}

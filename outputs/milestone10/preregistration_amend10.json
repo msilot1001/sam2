@@ -1,0 +1,78 @@
+{
+  "created_kst": "2026-10-15 22:10",
+  "status": "exploration (learned selection head); dev-only evaluation; conf untouched",
+  "before_any_output_of": "OR0K, OR0K_train, head models, any online arm of amend10",
+  "hypotheses": {
+    "H1": "view calibration: G and L predicted IoU are on different scales (M5.6: zoomed input inflates predicted IoU). A score calibrated on view and crop scale picks the right view (G vs L) better than raw predicted IoU.",
+    "H2": "within-view selection: a head trained on the same inputs picks the right one of a view's 3 hypotheses better than raw predicted IoU (low expectation: every hand rule failed the amend5 gate)."
+  },
+  "prior_art": "docs/m10/PRIOR_ART_AMEND10.md. Direct overlap: UncertainSAM (ICML 2025) trains an MLP on frozen SAM mask+IoU tokens to regress IoU (image-only, single view) = close to model (c) for H2; SAMRefiner++ (ICLR 2025) LoRA on the IoU head. No learned cross-scale/view calibration + G-vs-L selector found (H1).",
+  "arms": {
+    "OR0K": {
+      "extra": "k"
+    },
+    "OR0K_train": {
+      "extra": "k"
+    }
+  },
+  "arms_doc": "OR0K = OR0 trajectory (SGGL decisions unchanged) + per-hypothesis logging of OR0T (piou, harea, tiou, cdist, xiou, cos, stab, mlogit, ptrcos; mask tokens 6x256 in <unit>.tok.npz) + IoU token per view (itok 2x256 in the npz), view-region J vJ0..vJ5, frame_long; dcos dropped (speed). OR0K must equal stored OR0 J and F frame by frame (else stop). OR0K_train = the same on the training units (set LVOSV2:train).",
+  "training_data": {
+    "rule": "scripts/m10_train_manifest.py <dataset> 0.005: only videos with NO M9 dev/conf unit and frames on disk; M9 unit rule (prompt = first visible annotated frame, >= 10 annotated frames, crop_side not None, <= 3 objects per video seed 9, LVOS first 300 frames) with prompt-frame area < 0.5%.",
+    "manifests_sha256": {
+      "lvosv2_units.json": "ce8a7b6b3450b74da0a5d9b468efb9c5a144a1a91e0fecfd21c85576f8bdb6d0",
+      "mosev2_units.json": "d7e02e18fa5eb617c81de009918ea3ed9c299fa9c03e06900feb26bba1ef184d",
+      "vost_units.json": "3010270334d584d26c19aa792e68a06308bb71c7701f46f4e2ea8df39f142f44"
+    },
+    "counts": {
+      "lvosv2_units.json": {
+        "n_videos_scanned": 113,
+        "n_units": 50,
+        "n_unit_videos": 36,
+        "n_frames_total": 13827
+      },
+      "mosev2_units.json": {
+        "n_videos_scanned": 78,
+        "n_units": 0,
+        "n_unit_videos": 0,
+        "n_frames_total": 0
+      },
+      "vost_units.json": {
+        "n_videos_scanned": 0,
+        "n_units": 0,
+        "n_unit_videos": 0,
+        "n_frames_total": 0
+      }
+    },
+    "disclosure": "MOSEv2 extras (78 extracted train videos not in the M9 manifest) and VOST extras yield ZERO eligible units: the M9 manifest already took every video with an eligible small (<1%) object. Only LVOS v2 valid extras (left out of M9 by the frame budget) remain, so the head is trained on LVOS v2 only (cross-dataset transfer to MOSEv2/VOST dev is part of the test). VOST train split is not used (user: val extras only; there are none). No download of new data. PUMaVOS C untouched. Step-5 fallback (area < 1%) gives 65 units / 47 videos (about 1.3x, not 2x).",
+    "no_leak": "No dev, conf or PUMaVOS C frame is used for training, model selection or tau. Dev is used only for the offline gate and online arms."
+  },
+  "labels": "cJ0..cJ5 exactly as m10.py (hypothesis pasted to the frame vs the full-frame GT; = view-region GT J for G); vJ (view-region GT) logged as secondary.",
+  "inputs": "per hypothesis: piou, view (G/L), crop scale (crop_side / frame long side; 1 for G), log area, tiou, cdist (nan->filled + missing flag), xiou, cos, ptrcos, stab, mlogit, vscore (the view's object score), and for (c) the 256-d mask token and the view's 256-d IoU token.",
+  "models": {
+    "a": "per-view affine calibration J ~ alpha_v * piou + beta_v (4 parameters, least squares). Monotone within a view, so it only changes H1.",
+    "b": "scalar-input MLP, 2 hidden layers of 64, regression to cJ (MSE), Adam, fixed epochs; same hyper-parameters for every fold",
+    "c": "(b) inputs + mask token + IoU token, MLP 2 hidden layers of 128",
+    "null": "same architecture as (b) and (c) trained with the labels shuffled among the hypotheses of the same frame (seeded)",
+    "R_piou": "raw predicted IoU (no training), the comparison rule",
+    "cv": "video-level 5-fold cross-validation on the training units -> out-of-fold scores; the reported dev scores come from the model refit on all training units"
+  },
+  "rules": {
+    "scope": "as amend5: only frames where the SGGL output is non-empty; never chooses the empty mask. k_sggl = argmax piou within the SGGL output view.",
+    "H1_rule": "candidates = each view's own SAM 2 pick (argmax piou within the view). Switch to the other view's pick iff s(other) - s(k_sggl) >= tau.",
+    "H2_rule": "candidates = the 3 hypotheses of the SGGL output view only. Switch to argmax s within that view iff s(pick) - s(k_sggl) >= tau.",
+    "tau": "per model and hypothesis, tau* = smallest tau on the grid {0} + quantiles 0.05..0.95 of positive margins where the switch precision (share of switches with cJ(pick) > cJ(k_sggl)) on the TRAINING out-of-fold scores >= 0.70 with >= 20 switches. No such tau -> that model fails. tau* is then frozen for dev and online."
+  },
+  "offline_gate_dev": {
+    "definitions": "as amend5 gate_eval: dJ per frame = cJ(pick) - cJ(k_sggl) on switches, 0 otherwise; mean over GT-present frames, unit -> video -> video-equal mean; 10k video bootstrap 95% CI.",
+    "criteria (each of H1, H2 separately)": "(1) pooled MOSEv2+VOST dev switch precision >= 0.70; (2) mean dJ on GT-present frames CI lower > 0 on VOST AND on LVOS v2; (3) MOSEv2 point estimate >= -0.005; (4) better than its null head: dJ point estimate > null's on VOST and LVOS v2 AND pooled precision > null's.",
+    "models_per_hypothesis": "H1: a, b, c. H2: b, c. A hypothesis passes if at least one model passes; if several pass, the one with the larger VOST+LVOS dJ sum, preferring the simpler model unless the larger one is ahead by > 0.005 on both.",
+    "reported": "R_piou at its own tau* (same rule), null heads, precision-tau curves (train OOF and dev), switch counts, drift/correct-frame dJ as amend5."
+  },
+  "online (only for a passing hypothesis)": {
+    "arms": "SEL_O: switch output only; SEL_M: switch output + re-encode the output view's frame-t memory from the picked hypothesis (VXM path); N2X_K: same number of switches per unit at seeded random frames to a random hypothesis of the candidate set (VXM-style control).",
+    "sets": "MOSEV2:dev, VOST:dev, LVOSV2:dev; tau* fixed from training OOF, never changed online",
+    "criteria": "arm - OR0 video-bootstrap CI lower > 0 on VOST AND LVOS v2; MOSEv2 point >= -0.005; arm > N2X_K point estimates (VOST, LVOS). Pass -> conf once only after the user approves in the morning. All marked exploratory."
+  },
+  "step5_fallback": "if neither H1 nor H2 passes: no online arm; rebuild the training list with area < 1% (tag _a01), dump, refit and re-gate ONCE with the same rules; if still failing, conclude 'a learned head does not reach selection precision 0.7' in docs/m10/HEAD_RESULTS.md.",
+  "machine": "OR0K dumps and online arms on the RunPod 4090 (pod c8p4h2wt5x9h9q, new pod). Parity first: OR0K on 2 dev units (VOST 4357_trim_dough obj1, MOSEv2 06ea172e obj10) must equal stored OR0 J/F; then all OR0K dev units are checked the same way. Training on the Ubuntu 2080/CPU."
+}
