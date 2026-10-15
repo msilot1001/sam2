@@ -473,9 +473,13 @@ def work(arms=None, sets=SETS):
                 atomic_json({**env, "arm": A}, ef)
             torch.cuda.reset_peak_memory_stats()
             w0 = time.time()
-            df = base_unit(pred, s, sp, u, a, A["p5"]) if "p5" in A else run_unit(pred, dec, s, sp, u, a, A)
-            if "score_G" in df and df.score_G.isna().any():
-                raise SystemExit(f"NaN object scores in {u.name}: worker state is corrupt, not writing")
+            try:
+                df = base_unit(pred, s, sp, u, a, A["p5"]) if "p5" in A else run_unit(pred, dec, s, sp, u, a, A)
+                if "score_G" in df and df.score_G.isna().any():
+                    raise SystemExit(f"NaN object scores in {u.name}: worker state is corrupt, not writing")
+            except SystemExit:
+                lock(f).unlink()                          # corrupt worker: free the unit for a healthy one
+                raise
             atomic_csv(df.assign(wall_s=time.time() - w0, machine=env["machine"]), f)
             lock(f).unlink()
             print(a, u.name, len(df), round(df.JF.mean(), 4), f"{len(df) / (time.time() - w0):.2f} fps", flush=True)
