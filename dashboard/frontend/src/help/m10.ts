@@ -343,4 +343,32 @@ CI는 영상을 다시 뽑아 네 값을 함께 계산한 bootstrap이다. 서�
   "m10.arm.OR8": arm("OR8 — 완벽한 기억", "frame t의 출력을 정한 뒤, 각 view의 frame t 기억을 **GT mask로** 다시 부호화한다(add_new_mask와 같은 SAM 2 경로). 현재 frame 출력에는 GT를 쓰지 않는다. 다음 frame부터 '과거가 모두 정답인 기억'으로 예측한다. 기억 내용의 상한이다. OR7(기록 거부)이 약하고 OR8이 강하면, 올바른 대상 정보를 다시 공급하는 문제가 남아 있다는 뜻이다."),
   "m10.arm.OR8C0": arm("OR8C0 — frame 0 기억만", "두 view 모두 처음 prompt frame의 기억만 읽는다. 이후 기록은 무시한다. GT는 쓰지 않는다. 최근 기억이 도움이 되는지, 오염원인지 본다."),
   "m10.arm.OR9": arm("OR9 — GT box prompt 분할 용량", "이미지 모드 SAM 2에 frame마다 GT box를 준다. 추적이 아니라 분할 능력의 상한이다. 별도 카드에서 같은 frame의 OR0와 비교한다."),
+  "m10.baselines": {
+    title: "기준선: 공식 SAM 2.1 → P5 → SGGL (수정 9)",
+    body: `\`reports/baselines.json\`, \`docs/m10/BASELINES.md\` (\`scripts/m10_analysis.py baselines\`). 논문 주 표의 세 칸.
+
+- **B0:** 공식 SAM 2.1 Hiera-T 비디오 예측기. frame 0 GT mask prompt, 전체 frame, crop 없음, FP32, fill_hole_area=0. 새 RunPod 4090에서 dev 109단위를 돌렸다.
+- **P5:** B0 + frame 0 prompt 기억을 full-res GT mask로 다시 부호화. SGGL의 G 상태가 L을 전혀 읽지 않음을 코드로 확인했으므로, OR0의 \`JF_G\`가 곧 P5다. 독립 실행 P5와 차이 0.
+- **SGGL:** OR0.
+- **기계:** OR0는 이전 Pod에서 나왔다. 새 Pod에서 OR0 2단위를 다시 돌려 저장값과 J·F 차이 0을 확인했다.
+- **Δ:** 같은 frame끼리 짝지은 단위 평균 → 영상 평균 → 영상 동일 가중 평균. CI는 영상 bootstrap 10k. ↑/↓는 Δ가 ±0.01을 넘는 영상 수, LOVO min은 영상 하나를 뺐을 때 평균의 최솟값.
+- Fable 서브에이전트가 SGGL − B0와 P5 = JF_G를 독립 재계산해 일치를 확인했다.`,
+  },
+  "m10.baselines.t1": {
+    title: "표 1. 전체 단위",
+    body: "데이터셋별 세 방법의 절대 J&F(영상 동일 가중)와 짝지은 차이 세 개. SGGL − B0가 음수면 SGGL이 공식 SAM 2.1보다 나쁘다는 뜻이다. VOST에서 CI가 0 아래에 있다.",
+  },
+  "m10.baselines.t2": {
+    title: "표 2. 극소 단위 (area0 < 0.001)",
+    body: "frame 0 객체 면적이 화면의 0.1% 미만인 단위만. SGGL이 노린 대상이다. 단위·영상 수가 작아(VOST 5/3, LVOS 8/6) CI가 넓다.",
+  },
+  "m10.baselines.t3": {
+    title: "표 3. 상태별 손실 분해",
+    body: `각 frame을 GT로 사후 분류하고 (1 − J&F)를 상태별로 더한 뒤 frame 수로 나눴다. 열을 모두 더하면 1 − frame 평균 J&F다(영상 가중이 아니라 frame 가중).
+
+- **correct:** J ≥ 0.5인 frame의 남은 손실. **partial:** 출력이 GT와 겹치지만 J < 0.5. **empty:** GT가 있는데 출력이 빔.
+- **wrong_region:** 출력의 절반 이상이 GT 밖. **wrong_object:** 그중 절반 이상이 주석된 다른 객체 위. **false_present:** GT가 없는데 출력이 있음.
+- **P5:** OR0에 G 출력과 다른 객체의 교집합이 기록되지 않아 wrong_region과 wrong_object를 나눌 수 없다. 합친 열만 비교한다.`,
+  },
+  "m10.arm.B0": arm("B0 — 공식 SAM 2.1", "기준선(수정 9). crop·P5 없는 공식 비디오 예측기. 오라클 표의 B0 행은 B0 − SGGL이다(다른 arm과 같은 방향). 논문 표는 기준선 카드를 본다."),
 }

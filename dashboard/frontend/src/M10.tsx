@@ -18,6 +18,7 @@ const ARM_LABEL: Record<string, string> = {
   OR8: '완벽한 기억 (GT 재부호화)', OR8C0: 'frame 0 기억만', OR8K10: '완벽한 기억, 10 frame마다',
   C48: '기하 + 완벽한 기억', C58: '선택 + 완벽한 기억', C47: '기하 + 기록 허용', C75: '선택 + 기록 허용',
   OR0F: 'OR0 + 가설별 신호 기록', OR0T: 'OR0 + 디코더 신호 기록 (탐색)',
+  B0: '기준선: 공식 SAM 2.1 (차이 = B0 − SGGL)',
   VXO: '[탐색] view 불일치 시 전환, 출력만', VXM: '[탐색] view 불일치 시 전환 + 기억', N1M: '[탐색 대조] 같은 frame 자기 재부호화', N2X: '[탐색 대조] 같은 횟수 무작위 전환',
 }
 const STATES = ['correct', 'partial', 'empty', 'wrong_region', 'wrong_object', 'false_present']
@@ -258,6 +259,50 @@ function Gate({ d }: { d: any }) {
   )
 }
 
+function Baselines({ d }: { d: any }) {
+  const g = d.reports?.baselines
+  if (!g) return null
+  const ci = (x: any) => `${signed(x.dJF, 3)} [${signed(x.ci?.[0], 3)}, ${signed(x.ci?.[1], 3)}]`
+  const T = (tag: string, title: string, hk: string) => (
+    <div className="space-y-1">
+      <p className="font-medium">{title}<Help k={hk} /></p>
+      <Table className="text-xs">
+        <TableHeader><TableRow><TableHead>데이터셋</TableHead><TableHead>단위/영상</TableHead><TableHead>B0</TableHead><TableHead>P5</TableHead><TableHead>SGGL</TableHead>
+          {['SGGL-B0', 'SGGL-P5', 'P5-B0'].map((k) => <TableHead key={k}>{k.replace('-', ' − ')} [CI] · ↑/↓ · LOVO min</TableHead>)}</TableRow></TableHeader>
+        <TableBody>{DS.filter((k) => g.tables?.[tag]?.[k]).map((k) => { const r = g.tables[tag][k]; return (
+          <TableRow key={k}>
+            <TableCell>{ds(k)}</TableCell><TableCell>{r.units}/{r.videos}</TableCell>
+            {['B0', 'P5', 'SGGL'].map((a) => <TableCell key={a}>{num(r.abs?.[a], 3)}</TableCell>)}
+            {['SGGL-B0', 'SGGL-P5', 'P5-B0'].map((p) => <TableCell key={p} className="whitespace-nowrap">{ci(r.delta[p])} · {r.delta[p].videos_up}/{r.delta[p].videos_down} · {signed(r.delta[p].lovo_min, 3)}</TableCell>)}
+          </TableRow>) })}</TableBody>
+      </Table>
+    </div>
+  )
+  const cols = ['correct', 'partial', 'empty', 'wrong_region', 'wrong_object', 'wrong_region+wrong_object', 'false_present']
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>기준선: 공식 SAM 2.1 (B0) → P5 → SGGL (수정 9)<Help k="m10.baselines" /></CardTitle>
+        <CardDescription>reports/baselines.json · dev · 영상 동일 가중 J&F, 영상 bootstrap 95% CI · Δ = 앞 − 뒤 · P5 = OR0의 G 상태(JF_G)</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {T('all', '표 1. 전체 단위', 'm10.baselines.t1')}
+        {T('tiny', '표 2. 극소 단위 (area0 < 0.001)', 'm10.baselines.t2')}
+        <div className="space-y-1">
+          <p className="font-medium">표 3. 상태별 손실 (frame당 기여, 합 = 1 − frame 평균 J&F)<Help k="m10.baselines.t3" /></p>
+          <Table className="text-xs">
+            <TableHeader><TableRow><TableHead>데이터셋 · arm</TableHead><TableHead>frame J&F</TableHead>{cols.map((c) => <TableHead key={c}>{c}</TableHead>)}</TableRow></TableHeader>
+            <TableBody>{DS.filter((k) => g.states?.[k]).flatMap((k) => Object.entries(g.states[k]).map(([a, x]: [string, any]) => (
+              <TableRow key={k + a}><TableCell>{ds(k)} · {a}</TableCell><TableCell>{num(x.JF_frame_mean, 3)}</TableCell>
+                {cols.map((c) => <TableCell key={c}>{a === 'P5' && (c === 'wrong_region' || c === 'wrong_object') ? '—' : num(x[c], 3)}</TableCell>)}</TableRow>
+            )))}</TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 function Degraded({ d }: { d: any }) {
   const g = d.reports?.degraded
   if (!g) return null
@@ -338,6 +383,7 @@ export default function M10({ nav }: { nav: Nav }) {
           </CardContent>
         </Card>
       </div>
+      <Baselines d={d} />
       <Degraded d={d} />
       <Gate d={d} />
       <OracleTable d={d} />
