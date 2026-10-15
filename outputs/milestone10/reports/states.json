@@ -535,6 +535,72 @@
     "frames": 3619
    }
   },
+  "OR0K": {
+   "lvosv2": {
+    "gain_by_state": {
+     "absent_ok": 0.0,
+     "correct": 0.0,
+     "empty": 0.0,
+     "false_present": 0.0,
+     "partial": 0.0,
+     "wrong_object": 0.0,
+     "wrong_region": 0.0
+    },
+    "recovered_frac_by_state": {
+     "absent_ok": null,
+     "correct": 0.0,
+     "empty": 0.0,
+     "false_present": 0.0,
+     "partial": 0.0,
+     "wrong_object": 0.0,
+     "wrong_region": 0.0
+    },
+    "frames": 4564
+   },
+   "mosev2": {
+    "gain_by_state": {
+     "absent_ok": 0.0,
+     "correct": 0.0,
+     "empty": 0.0,
+     "false_present": 0.0,
+     "partial": 0.0,
+     "wrong_object": 0.0,
+     "wrong_region": 0.0
+    },
+    "recovered_frac_by_state": {
+     "absent_ok": null,
+     "correct": 0.0,
+     "empty": 0.0,
+     "false_present": 0.0,
+     "partial": 0.0,
+     "wrong_object": 0.0,
+     "wrong_region": 0.0
+    },
+    "frames": 4806
+   },
+   "vost": {
+    "gain_by_state": {
+     "absent_ok": 0.0,
+     "correct": 0.0,
+     "empty": 0.0,
+     "false_present": 0.0,
+     "partial": 0.0,
+     "wrong_object": 0.0,
+     "wrong_region": 0.0
+    },
+    "recovered_frac_by_state": {
+     "absent_ok": null,
+     "correct": 0.0,
+     "empty": 0.0,
+     "false_present": 0.0,
+     "partial": 0.0,
+     "wrong_object": 0.0,
+     "wrong_region": 0.0
+    },
+    "frames": 3619
+   }
+  },
+  "OR0K_train": {},
   "OR0T": {
    "lvosv2": {
     "gain_by_state": {
