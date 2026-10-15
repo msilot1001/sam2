@@ -1,0 +1,72 @@
+{
+  "created_kst": "2026-10-15 09:02",
+  "created_before_any_m10_output": true,
+  "arms": {
+    "OR0": {},
+    "OR7": {
+      "admit": "gt"
+    },
+    "OR7W": {
+      "admit": "region"
+    },
+    "OR8": {
+      "memory": "gt"
+    },
+    "OR4": {
+      "center": "gt",
+      "side": "gt"
+    },
+    "OR5M": {
+      "output": "select",
+      "memory": "cand"
+    },
+    "OR6": {
+      "output": "correct",
+      "admit": "gt"
+    },
+    "OR2": {
+      "center": "gt"
+    },
+    "OR3": {
+      "side": "gt"
+    },
+    "OR1M": {
+      "admit": "presence"
+    },
+    "OR5S": {
+      "output": "select"
+    },
+    "OR8C0": {
+      "memory": "cond0"
+    },
+    "OR7R": {
+      "admit": "random"
+    }
+  },
+  "default": {
+    "center": "sggl",
+    "side": "fixed",
+    "output": "sggl",
+    "admit": "all",
+    "memory": "native"
+  },
+  "sets": "MOSEV2:dev,VOST:dev,LVOSV2:dev",
+  "tau_J": 0.5,
+  "plan": {
+    "subset": "M9 frozen manifests, dev split only (MOSEv2 62 / VOST 31 / LVOS v2 16 units; LVOS first 300 frames). conf split is not used for any oracle in phase 2; it may be used once for a fixed list of arms (declared by amendment before launch) as a replication. PUMaVOS C sealed.",
+    "baseline": "OR0 = SGGL rerun on the SAME pod with the extended logging; parity vs M9 rows reported.",
+    "offline_oracles_from_OR0_rows": {
+      "OR1off": "output := empty on GT-absent frames, unchanged elsewhere",
+      "OR5off": "framewise hindsight best of the 7-member pool (by J; J&F of that member)",
+      "OR6off": "perfect target-region detector on the logged G/L masks (same rule as output=correct)",
+      "note": "framewise hindsight; no rollout, no claim about future frames"
+    },
+    "primary": "per dataset, video-equal-weighted mean of (arm - OR0) J&F (unit means -> video means), dev split",
+    "ci": "95% video-cluster bootstrap (10k resamples of videos, video-equal weights); LOVO min/max; top-2 video share of net gain; sign counts. Datasets reported separately; pooled only as a secondary number.",
+    "secondary": "dJ, dF, unit-weighted dJ&F, tiny (area0 < 0.001) dJ&F, wrong-region loss, drift episodes (onset/duration/recovery), worst-video regression, latency/VRAM",
+    "recovered_loss": "dJ&F / (1 - OR0 J&F) per dataset (fraction of the baseline's missing J&F)",
+    "stopping": "an arm is not expanded beyond dev if its dev effect is |dJ&F| < 0.005 on all three datasets, or if a leak check fails (output equals a GT mask). Negative results are not grounds to stop. Combinations (phase 3) are declared by amendment after phase 2, chosen by single-oracle headroom.",
+    "machine": "all phase-2 arms on one RunPod RTX 4090 pod; comparisons only within that pod"
+  },
+  "doc": "M10: oracle-driven bottleneck decomposition of SGGL (CUDA FP32, frozen SAM 2.1 Hiera-T).\n\n    uv run python scripts/m10.py prereg                       # freeze arms/subsets/metrics (before any M10 output)\n    M9_DATA=<root> uv run python scripts/m10.py work          # worker: claim (arm, unit) tasks until none are left\n\nEvery arm is the SGGL rollout (scripts/m8.py run_arm, centre/side/output/memory as in M9) with ONE kind of\nGT-informed intervention switched on. GT is used only as the arm spec says; the output mask is always a SAM 2\nprediction (or empty), never a GT mask. Knobs (default = SGGL):\n  center : sggl | gt          L crop centre for frame t = GT box centre of frame t (non-causal; held while GT absent)\n  side   : fixed | gt         L crop side for frame t = M6 crop-side rule (vcam.crop_side) applied to GT of frame t\n  output : sggl | select | correct\n           select  = GT-best (by J) of the fixed pool {G x3, L x3 raw decoder hypotheses, empty}; ties keep SGGL\n           correct = perfect target-region detector with executable actions only: keep the SGGL output if correct;\n                     else switch to the other view's mask if that is correct; else abstain (empty) if the output is\n                     wrong-region (precision < 0.5, incl. any output while GT is absent); else keep (partial target)\n  admit  : all | gt | region | presence | random\n           gt       = a view's frame-t prediction enters its memory iff it is correct in that view\n           region   = blocked only if the view's mask is wrong-region (non-empty, precision < 0.5 in that view)\n           presence = blocked only when GT is absent in the view and the view's mask is non-empty\n           random   = per unit-view, the same NUMBER of blocked frames as arm OR7, at seeded random frames\n  memory : native | gt | cand | cond0\n           gt    = frame t's memory of each view re-encoded from the GT mask (SAM 2 mask-input path), after output t\n           cand  = re-encoded from the view's own GT-best raw hypothesis (candidate-constrained)\n           cond0 = only the frame-0 prompt memory is ever read\n\"correct\" (view v, mask m): GT inside v's region empty and m empty, or J(m, GT in v) >= 0.5.\nWorkers claim tasks by atomic lock files, so any number of workers on any number of GPUs can share one queue.\n"
+}
