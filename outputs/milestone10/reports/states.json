@@ -363,6 +363,50 @@
     "frames": 3619
    }
   },
+  "OR5S": {
+   "mosev2": {
+    "gain_by_state": {
+     "absent_ok": 0.0,
+     "correct": 55.0,
+     "empty": 142.88,
+     "false_present": 320.0,
+     "partial": 46.1,
+     "wrong_object": 21.92,
+     "wrong_region": 117.78
+    },
+    "recovered_frac_by_state": {
+     "absent_ok": null,
+     "correct": 0.2027,
+     "empty": 0.5761,
+     "false_present": 1.0,
+     "partial": 0.2806,
+     "wrong_object": 0.4819,
+     "wrong_region": 0.3973
+    },
+    "frames": 4806
+   },
+   "vost": {
+    "gain_by_state": {
+     "absent_ok": 0.0,
+     "correct": 29.73,
+     "empty": 79.35,
+     "false_present": 107.0,
+     "partial": 119.47,
+     "wrong_object": 81.08,
+     "wrong_region": 134.21
+    },
+    "recovered_frac_by_state": {
+     "absent_ok": null,
+     "correct": 0.1449,
+     "empty": 0.4613,
+     "false_present": 1.0,
+     "partial": 0.4455,
+     "wrong_object": 0.1949,
+     "wrong_region": 0.1675
+    },
+    "frames": 3619
+   }
+  },
   "OR6": {
    "mosev2": {
     "gain_by_state": {
@@ -632,6 +676,50 @@
      "partial": 0.742,
      "wrong_object": 0.6785,
      "wrong_region": 0.7259
+    },
+    "frames": 3619
+   }
+  },
+  "OR8K10": {
+   "mosev2": {
+    "gain_by_state": {
+     "absent_ok": -5.0,
+     "correct": 35.67,
+     "empty": 129.86,
+     "false_present": 60.0,
+     "partial": 34.21,
+     "wrong_object": 5.19,
+     "wrong_region": 86.12
+    },
+    "recovered_frac_by_state": {
+     "absent_ok": null,
+     "correct": 0.1314,
+     "empty": 0.5236,
+     "false_present": 0.1875,
+     "partial": 0.2082,
+     "wrong_object": 0.1142,
+     "wrong_region": 0.2905
+    },
+    "frames": 4806
+   },
+   "vost": {
+    "gain_by_state": {
+     "absent_ok": -3.0,
+     "correct": 4.63,
+     "empty": 88.17,
+     "false_present": 22.0,
+     "partial": 22.79,
+     "wrong_object": 97.07,
+     "wrong_region": 187.28
+    },
+    "recovered_frac_by_state": {
+     "absent_ok": null,
+     "correct": 0.0226,
+     "empty": 0.5126,
+     "false_present": 0.2056,
+     "partial": 0.085,
+     "wrong_object": 0.2334,
+     "wrong_region": 0.2338
     },
     "frames": 3619
    }
