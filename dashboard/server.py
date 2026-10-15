@@ -8,19 +8,21 @@ LAN:  DASH_HOST=<lan-ip> DASH_TOKEN=$(openssl rand -hex 16) uv run python dashbo
 import copy
 import csv
 import hmac
+import html
 import ipaddress
 import json
 import math
 import mimetypes
 import os
 import re
+import subprocess
 import sys
 import time
 from functools import lru_cache
 from http.cookies import CookieError, SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, parse_qsl, urlencode, urlparse
+from urllib.parse import parse_qs, parse_qsl, unquote, urlencode, urlparse
 
 REPO = Path(__file__).resolve().parent.parent
 DIST = (REPO / "dashboard/frontend/dist").resolve()
@@ -415,6 +417,52 @@ def m10():
             "logs": latest_logs("m10", n=6, lines=6)}
 
 
+# ---- /public/: unauthenticated READ-ONLY mirror for external research agents (GitHub robots.txt blocks them).
+# Serves only files that are (a) tracked by git, i.e. already in the public GitHub repo at HEAD, and (b) pass the
+# same allow-list/deny rules as the dashboard. No token, no data/, no checkpoints, nothing uncommitted.
+_tracked = {"at": 0.0, "files": frozenset()}
+PUBLIC_INDEX = "docs/m10/RESEARCH_DATA_INDEX.md"
+GH_RAW = "https://raw.githubusercontent.com/msilot1001/sam2/exp/m10-oracle-bottleneck-decomposition/"
+GH_TREE = "https://github.com/msilot1001/sam2/tree/exp/m10-oracle-bottleneck-decomposition/"
+
+
+def tracked():
+    if time.time() - _tracked["at"] > 60:
+        out = subprocess.run(["git", "ls-files", "-z"], cwd=REPO, capture_output=True).stdout.decode()
+        _tracked.update(at=time.time(), files=frozenset(f for f in out.split("\0") if f))
+    return _tracked["files"]
+
+
+def public_file(r):
+    p = safe(r)
+    if r not in tracked() or not p.is_file() or size_only(p):
+        raise Denied(r)
+    return p
+
+
+def public_page(title, body_html):
+    return (f"<!doctype html><html><head><meta charset='utf-8'><title>{html.escape(title)}</title></head>"
+            f"<body style='font-family:sans-serif;max-width:1100px;margin:auto;line-height:1.5'>{body_html}</body></html>")
+
+
+def public_index():
+    md = (REPO / PUBLIC_INDEX).read_text().replace(GH_RAW, "/public/f/").replace(GH_TREE, "/public/ls/")
+    out = []
+    for line in md.splitlines():
+        h = html.escape(line)
+        h = re.sub(r"\[([^\]]+)\]\(([^)\s]+)\)", lambda m: f"<a href='{m.group(2)}'>{m.group(1)}</a>", h)
+        out.append(h)
+    return public_page("SAM 2 research data index", "<pre style='white-space:pre-wrap'>" + "\n".join(out) + "</pre>")
+
+
+def public_ls(r):
+    r = r.strip("/")
+    safe(r)
+    files = sorted(f for f in tracked() if f.startswith(r + "/") and is_listable(REPO / f) and not size_only(REPO / f))
+    items = "".join(f"<li><a href='/public/f/{html.escape(f)}'>{html.escape(f)}</a></li>" for f in files[:5000])
+    return public_page(r, f"<h3>{html.escape(r)} ({len(files)} files)</h3><ul>{items}</ul>")
+
+
 _index = {"at": 0.0, "files": []}
 
 
@@ -499,9 +547,33 @@ class H(BaseHTTPRequestHandler):
         self.send(401, "401 unauthorized: open this site once with ?token=<DASH_TOKEN>\n", "text/plain; charset=utf-8")
         return False
 
+    def public(self, path):
+        if path in ("/robots.txt",):
+            return self.send(200, "User-agent: *\nAllow: /public/\nDisallow: /\n", "text/plain; charset=utf-8")
+        rest = unquote(path[len("/public/"):]) if path.startswith("/public/") else ""
+        if path in ("/public", "/public/"):
+            return self.send(200, public_index(), "text/html; charset=utf-8")
+        if rest.startswith("ls/"):
+            return self.send(200, public_ls(rest[3:]), "text/html; charset=utf-8")
+        if rest.startswith("f/"):
+            p = public_file(rest[2:])
+            if p.suffix.lower() == ".json":
+                return self.send(200, jsonf(p))
+            if p.stat().st_size > MAX_BYTES:
+                return self.send(413, {"error": "too large"})
+            return self.send(200, p.read_bytes(), "text/plain; charset=utf-8")    # never html -> no script
+        raise FileNotFoundError(path)
+
     def do_GET(self):
         u = urlparse(self.path)
         q = {k: v[0] for k, v in parse_qs(u.query).items()}
+        if u.path == "/robots.txt" or u.path == "/public" or u.path.startswith("/public/"):
+            try:
+                return self.public(u.path)
+            except Denied:
+                return self.send(403, {"error": "forbidden"})
+            except (FileNotFoundError, NotADirectoryError):
+                return self.send(404, {"error": "not found"})
         if not self.authorized(u, q):
             return
         try:

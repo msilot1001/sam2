@@ -114,6 +114,19 @@ try:
     assert get(f"{base}/api/file?path=.gpu_worker.env", {"Cookie": cookie})[0] == 403  # token never bypasses the guard
     assert get(f"{base}/api/file?path={meta}", {"Cookie": cookie})[0] == 403
     assert get(f"{base}/api/m9")[0] == 401 and get(f"{base}/api/tasks?ms=m9")[0] == 401
+    # /public/: no token, read-only, only git-tracked allow-listed files
+    untracked = "outputs/milestone10/_untracked_probe.txt"
+    (server.REPO / untracked).write_text("not committed")
+    assert get(f"{base}/public/")[0] == 200 and get(f"{base}/robots.txt")[0] == 200
+    assert get(f"{base}/public/f/docs/m10/ORACLE_DEFINITIONS.md")[0] == 200
+    assert get(f"{base}/public/f/outputs/milestone10/preregistration.json")[0] == 200
+    assert get(f"{base}/public/ls/outputs/milestone10/reports")[0] == 200
+    for bad in ["dashboard/.token", ".gpu_worker.env", "data/vost/Annotations", "checkpoints/sam2.1_hiera_tiny.pt",
+                "outputs/milestone10/../../dashboard/.token", meta, untracked]:
+        assert get(f"{base}/public/f/{bad}")[0] in (403, 404), bad
+    assert get(f"{base}/public/ls/data")[0] == 403
+    assert get(f"{base}/public/../api/docs")[0] in (401, 404)
+    (server.REPO / untracked).unlink()
 finally:
     httpd.shutdown()
 print("ok")

@@ -191,42 +191,44 @@
    "mosev2": {
     "gain_by_state": {
      "absent_ok": 0.0,
-     "correct": 17.83,
-     "empty": 0.89,
-     "false_present": 44.0,
-     "partial": 9.53,
-     "wrong_region": 47.98
+     "correct": 64.98,
+     "empty": 111.6,
+     "false_present": 262.0,
+     "partial": 76.26,
+     "wrong_object": 3.67,
+     "wrong_region": 146.3
     },
     "recovered_frac_by_state": {
      "absent_ok": null,
-     "correct": 0.336,
-     "empty": 0.8855,
+     "correct": 0.4105,
+     "empty": 0.8391,
      "false_present": 1.0,
-     "partial": 0.8448,
-     "wrong_region": 0.7528
+     "partial": 0.7559,
+     "wrong_object": 0.6377,
+     "wrong_region": 0.7326
     },
-    "frames": 730
+    "frames": 2830
    },
    "vost": {
     "gain_by_state": {
      "absent_ok": 0.0,
-     "correct": 62.33,
-     "empty": 52.62,
-     "false_present": 54.0,
-     "partial": 48.68,
-     "wrong_object": 205.2,
-     "wrong_region": 471.74
+     "correct": 93.94,
+     "empty": 144.34,
+     "false_present": 94.0,
+     "partial": 171.74,
+     "wrong_object": 352.55,
+     "wrong_region": 616.84
     },
     "recovered_frac_by_state": {
      "absent_ok": null,
-     "correct": 0.5536,
-     "empty": 0.8627,
+     "correct": 0.542,
+     "empty": 0.8801,
      "false_present": 1.0,
-     "partial": 0.7585,
-     "wrong_object": 0.8522,
-     "wrong_region": 0.817
+     "partial": 0.8236,
+     "wrong_object": 0.8736,
+     "wrong_region": 0.8201
     },
-    "frames": 1919
+    "frames": 3152
    }
   },
   "OR4": {
@@ -528,22 +530,24 @@
   "OR8": {
    "lvosv2": {
     "gain_by_state": {
-     "absent_ok": -6.0,
-     "correct": 17.56,
+     "absent_ok": -7.0,
+     "correct": 44.6,
      "empty": 47.4,
-     "false_present": 2.0,
-     "partial": 2.06,
-     "wrong_region": 0.8
+     "false_present": 8.0,
+     "partial": 3.11,
+     "wrong_object": 0.78,
+     "wrong_region": 159.91
     },
     "recovered_frac_by_state": {
      "absent_ok": null,
-     "correct": 0.1396,
+     "correct": 0.1953,
      "empty": 0.7181,
-     "false_present": 0.1667,
-     "partial": 0.4412,
-     "wrong_region": 0.2972
+     "false_present": 0.3077,
+     "partial": 0.4257,
+     "wrong_object": 0.7845,
+     "wrong_region": 0.7486
     },
-    "frames": 2392
+    "frames": 3588
    },
    "mosev2": {
     "gain_by_state": {
