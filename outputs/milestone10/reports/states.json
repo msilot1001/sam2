@@ -364,48 +364,113 @@
    },
    "mosev2": {
     "gain_by_state": {
-     "absent_ok": 0.0,
-     "correct": 3.15,
-     "empty": 0.0,
-     "false_present": 1.0,
-     "partial": 1.99,
-     "wrong_object": 0.0,
-     "wrong_region": 0.57
+     "absent_ok": -14.0,
+     "correct": -58.64,
+     "empty": 0.6,
+     "false_present": 6.0,
+     "partial": -4.58,
+     "wrong_object": 0.5,
+     "wrong_region": 1.93
     },
     "recovered_frac_by_state": {
      "absent_ok": null,
-     "correct": 0.0276,
-     "empty": 0.0,
-     "false_present": 0.0069,
-     "partial": 0.095,
-     "wrong_object": 0.0,
-     "wrong_region": 0.0083
+     "correct": -0.216,
+     "empty": 0.0024,
+     "false_present": 0.0188,
+     "partial": -0.0279,
+     "wrong_object": 0.011,
+     "wrong_region": 0.0065
     },
-    "frames": 1485
+    "frames": 4806
    },
    "vost": {
     "gain_by_state": {
      "absent_ok": 0.0,
-     "correct": -26.32,
+     "correct": -32.42,
      "empty": 3.06,
-     "false_present": 4.0,
-     "partial": -3.93,
-     "wrong_object": 1.07,
-     "wrong_region": -17.12
+     "false_present": 5.0,
+     "partial": 1.05,
+     "wrong_object": 7.01,
+     "wrong_region": -3.37
     },
     "recovered_frac_by_state": {
      "absent_ok": null,
-     "correct": -0.2049,
-     "empty": 0.0204,
-     "false_present": 0.0741,
-     "partial": -0.0318,
-     "wrong_object": 0.0044,
-     "wrong_region": -0.0276
+     "correct": -0.158,
+     "empty": 0.0178,
+     "false_present": 0.0467,
+     "partial": 0.0039,
+     "wrong_object": 0.0169,
+     "wrong_region": -0.0042
     },
-    "frames": 2276
+    "frames": 3619
    }
   },
   "OR0F": {
+   "lvosv2": {
+    "gain_by_state": {
+     "absent_ok": 0.0,
+     "correct": 0.0,
+     "empty": 0.0,
+     "false_present": 0.0,
+     "partial": 0.0,
+     "wrong_object": 0.0,
+     "wrong_region": 0.0
+    },
+    "recovered_frac_by_state": {
+     "absent_ok": null,
+     "correct": 0.0,
+     "empty": 0.0,
+     "false_present": 0.0,
+     "partial": 0.0,
+     "wrong_object": 0.0,
+     "wrong_region": 0.0
+    },
+    "frames": 4564
+   },
+   "mosev2": {
+    "gain_by_state": {
+     "absent_ok": 0.0,
+     "correct": 0.0,
+     "empty": 0.0,
+     "false_present": 0.0,
+     "partial": 0.0,
+     "wrong_object": 0.0,
+     "wrong_region": 0.0
+    },
+    "recovered_frac_by_state": {
+     "absent_ok": null,
+     "correct": 0.0,
+     "empty": 0.0,
+     "false_present": 0.0,
+     "partial": 0.0,
+     "wrong_object": 0.0,
+     "wrong_region": 0.0
+    },
+    "frames": 4806
+   },
+   "vost": {
+    "gain_by_state": {
+     "absent_ok": 0.0,
+     "correct": 0.0,
+     "empty": 0.0,
+     "false_present": 0.0,
+     "partial": 0.0,
+     "wrong_object": 0.0,
+     "wrong_region": 0.0
+    },
+    "recovered_frac_by_state": {
+     "absent_ok": null,
+     "correct": 0.0,
+     "empty": 0.0,
+     "false_present": 0.0,
+     "partial": 0.0,
+     "wrong_object": 0.0,
+     "wrong_region": 0.0
+    },
+    "frames": 3619
+   }
+  },
+  "OR0T": {
    "lvosv2": {
     "gain_by_state": {
      "absent_ok": 0.0,
