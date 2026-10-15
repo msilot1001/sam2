@@ -789,6 +789,71 @@
     "frames": 3619
    }
   },
+  "VXM": {
+   "lvosv2": {
+    "gain_by_state": {
+     "absent_ok": 0.0,
+     "correct": -3.84,
+     "empty": 0.0,
+     "false_present": 0.0,
+     "partial": 75.81,
+     "wrong_object": -0.11,
+     "wrong_region": 53.71
+    },
+    "recovered_frac_by_state": {
+     "absent_ok": null,
+     "correct": -0.0136,
+     "empty": 0.0,
+     "false_present": 0.0,
+     "partial": 0.819,
+     "wrong_object": -0.0263,
+     "wrong_region": 0.242
+    },
+    "frames": 4564
+   },
+   "mosev2": {
+    "gain_by_state": {
+     "absent_ok": -15.0,
+     "correct": -97.67,
+     "empty": 5.12,
+     "false_present": 3.0,
+     "partial": -11.59,
+     "wrong_object": -0.86,
+     "wrong_region": -0.8
+    },
+    "recovered_frac_by_state": {
+     "absent_ok": null,
+     "correct": -0.3598,
+     "empty": 0.0206,
+     "false_present": 0.0094,
+     "partial": -0.0705,
+     "wrong_object": -0.0189,
+     "wrong_region": -0.0027
+    },
+    "frames": 4806
+   },
+   "vost": {
+    "gain_by_state": {
+     "absent_ok": 0.0,
+     "correct": -78.58,
+     "empty": 4.0,
+     "false_present": 3.0,
+     "partial": 22.64,
+     "wrong_object": 34.14,
+     "wrong_region": 29.55
+    },
+    "recovered_frac_by_state": {
+     "absent_ok": null,
+     "correct": -0.383,
+     "empty": 0.0233,
+     "false_present": 0.028,
+     "partial": 0.0844,
+     "wrong_object": 0.0821,
+     "wrong_region": 0.0369
+    },
+    "frames": 3619
+   }
+  },
   "OR1off": {
    "lvosv2": {
     "gain_by_state": {

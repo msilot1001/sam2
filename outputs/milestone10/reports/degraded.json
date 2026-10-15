@@ -1,0 +1,152 @@
+{
+ "offline_disagree_precision": {
+  "lvosv2": {
+   "precision": 0.8484848484848485,
+   "precision_no_ties": 0.8588957055214724,
+   "switches": 165,
+   "dJ_sum": 110.52449629121706
+  },
+  "mosev2": {
+   "precision": 0.2425531914893617,
+   "precision_no_ties": 0.32947976878612717,
+   "switches": 235,
+   "dJ_sum": -10.057256153393308
+  },
+  "vost": {
+   "precision": 0.6074074074074074,
+   "precision_no_ties": 0.82,
+   "switches": 270,
+   "dJ_sum": 66.23187125341876
+  }
+ },
+ "arms": {
+  "VXM": {
+   "lvosv2": {
+    "dJF": 0.023121138842270014,
+    "ci": [
+     -0.006977041700045057,
+     0.0682791219299748
+    ],
+    "dJF_present_part": 0.023121138842269986,
+    "units": 16,
+    "complete": true,
+    "realized_precision": 0.1875,
+    "realized_precision_no_ties": 0.2,
+    "switches": 32,
+    "switch_per_100f": 0.7011393514461,
+    "units_below_m005": 0
+   },
+   "mosev2": {
+    "dJF": -0.01796765009627547,
+    "ci": [
+     -0.041611368059739307,
+     0.00535009357098609
+    ],
+    "dJF_present_part": -0.01567206105241259,
+    "units": 62,
+    "complete": true,
+    "realized_precision": 0.20833333333333334,
+    "realized_precision_no_ties": 0.29850746268656714,
+    "switches": 96,
+    "switch_per_100f": 1.9975031210986267,
+    "units_below_m005": 9
+   },
+   "vost": {
+    "dJF": -0.001444015997205041,
+    "ci": [
+     -0.09091193845624781,
+     0.06297825710471469
+    ],
+    "dJF_present_part": -0.0021731509733737683,
+    "units": 31,
+    "complete": true,
+    "realized_precision": 0.4732142857142857,
+    "realized_precision_no_ties": 0.654320987654321,
+    "switches": 112,
+    "switch_per_100f": 3.094777562862669,
+    "units_below_m005": 3
+   }
+  },
+  "VXO": {
+   "lvosv2": {
+    "dJF": -0.0005312530133402549,
+    "ci": [
+     -0.003366282943989607,
+     0.0018164888788962108
+    ],
+    "dJF_present_part": -0.0005312530133402865,
+    "units": 10,
+    "complete": false,
+    "realized_precision": 0.41025641025641024,
+    "realized_precision_no_ties": 0.43243243243243246,
+    "switches": 39,
+    "switch_per_100f": 1.3043478260869565,
+    "units_below_m005": 0
+   }
+  },
+  "OR5M": {
+   "mosev2": {
+    "dJF": 0.16969101885452972,
+    "ci": [
+     0.12323547617553539,
+     0.2186247092954912
+    ],
+    "dJF_present_part": 0.11233475069416105,
+    "units": 62,
+    "complete": true,
+    "realized_precision": null,
+    "realized_precision_no_ties": null,
+    "switches": 0,
+    "switch_per_100f": 0.0,
+    "units_below_m005": 0
+   },
+   "vost": {
+    "dJF": 0.29894915429286134,
+    "ci": [
+     0.23995383811582346,
+     0.36238844204441567
+    ],
+    "dJF_present_part": 0.2740159041561256,
+    "units": 31,
+    "complete": true,
+    "realized_precision": null,
+    "realized_precision_no_ties": null,
+    "switches": 0,
+    "switch_per_100f": 0.0,
+    "units_below_m005": 0
+   }
+  },
+  "OR7R": {
+   "mosev2": {
+    "dJF": -0.014500044356247332,
+    "ci": [
+     -0.039219598858799956,
+     0.007022880090528026
+    ],
+    "dJF_present_part": -0.01064248615247166,
+    "units": 62,
+    "complete": true,
+    "realized_precision": null,
+    "realized_precision_no_ties": null,
+    "switches": 0,
+    "switch_per_100f": 0.0,
+    "units_below_m005": 6
+   },
+   "vost": {
+    "dJF": -0.006419453134904654,
+    "ci": [
+     -0.02805904435494978,
+     0.01483547912914125
+    ],
+    "dJF_present_part": -0.008047963349850218,
+    "units": 31,
+    "complete": true,
+    "realized_precision": null,
+    "realized_precision_no_ties": null,
+    "switches": 0,
+    "switch_per_100f": 0.0,
+    "units_below_m005": 4
+   }
+  }
+ }
+}

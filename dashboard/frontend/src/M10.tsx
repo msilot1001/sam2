@@ -1,4 +1,4 @@
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis } from 'recharts'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -258,6 +258,52 @@ function Gate({ d }: { d: any }) {
   )
 }
 
+function Degraded({ d }: { d: any }) {
+  const g = d.reports?.degraded
+  if (!g) return null
+  const pts = (arm: string, key: 'offline' | 'online') => DS.filter((k) => g.arms?.[arm]?.[k]).map((k) => ({
+    ds: ds(k), x: key === 'offline' ? g.offline_disagree_precision?.[k]?.precision : g.arms[arm][k].realized_precision,
+    y: g.arms[arm][k].dJF, n: g.arms[arm][k].switches,
+  })).filter((p) => typeof p.x === 'number')
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>선택기 정밀도 vs 기억 쓰기 이득 (VXM, degraded oracle)<Help k="m10.degraded" /></CardTitle>
+        <CardDescription>reports/degraded.json · 점 = 데이터셋 · x = 선택 정밀도 (속 찬 점: OR0F 오프라인 불일치 frame, 빈 점: VXM 자신의 전환 frame 실측) · y = VXM ΔJ&F (vs OR0) · 참고: OR5M(GT 선택, 정밀도 1) MOSEv2 +0.170 / VOST +0.299, OR7R(정보 없는 기억 개입) −0.015 / −0.006</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <ResponsiveContainer width="100%" height={260}>
+          <ScatterChart margin={{ left: 10, right: 20, top: 10 }}>
+            <CartesianGrid stroke={INK.grid} />
+            <XAxis type="number" dataKey="x" domain={[0, 1]} name="정밀도" tick={tick} label={{ value: '선택 정밀도', position: 'insideBottom', offset: -2, fontSize: 11 }} />
+            <YAxis type="number" dataKey="y" name="ΔJ&F" tick={tick} tickFormatter={(v) => v.toFixed(2)} />
+            <ZAxis type="number" dataKey="n" range={[60, 60]} name="전환 수" />
+            <Tooltip formatter={(v: any, n: any) => [typeof v === 'number' ? v.toFixed(3) : v, n]} labelFormatter={() => ''} />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+            <Scatter name="VXM: 오프라인 정밀도" data={pts('VXM', 'offline')} fill={SERIES[0]} />
+            <Scatter name="VXM: 온라인 실측 정밀도" data={pts('VXM', 'online')} fill="#fff" stroke={SERIES[0]} />
+            <Scatter name="VXO (출력만): 실측" data={pts('VXO', 'online')} fill="#fff" stroke={SERIES[1]} />
+          </ScatterChart>
+        </ResponsiveContainer>
+        <Table className="text-xs">
+          <TableHeader><TableRow><TableHead>arm · 데이터셋</TableHead><TableHead>ΔJ&F [CI]</TableHead><TableHead>GT 있는 frame 몫</TableHead><TableHead>전환 수</TableHead><TableHead>실측 정밀도 (동점 제외)</TableHead><TableHead>오프라인 정밀도 (동점 제외)</TableHead><TableHead>&lt; −0.05 단위</TableHead></TableRow></TableHeader>
+          <TableBody>{Object.entries(g.arms ?? {}).flatMap(([a, by]: [string, any]) => DS.filter((k) => by[k]).map((k) => (
+            <TableRow key={a + k}>
+              <TableCell className="font-mono whitespace-nowrap">{a}<Help k={`m10.arm.${a}`} /> · {ds(k)}{by[k].complete ? '' : ' *'}</TableCell>
+              <TableCell>{signed(by[k].dJF, 3)} [{signed(by[k].ci?.[0], 3)}, {signed(by[k].ci?.[1], 3)}]</TableCell>
+              <TableCell>{signed(by[k].dJF_present_part, 3)}</TableCell>
+              <TableCell>{by[k].switches || '—'}</TableCell>
+              <TableCell>{by[k].realized_precision == null ? '—' : `${num(by[k].realized_precision, 2)} (${num(by[k].realized_precision_no_ties, 2)})`}</TableCell>
+              <TableCell>{['VXM', 'VXO'].includes(a) ? `${num(g.offline_disagree_precision?.[k]?.precision, 2)} (${num(g.offline_disagree_precision?.[k]?.precision_no_ties, 2)})` : '—'}</TableCell>
+              <TableCell>{by[k].units_below_m005}</TableCell>
+            </TableRow>
+          )))}</TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  )
+}
+
 function Json({ title, obj }: { title: string; obj: any }) {
   return (
     <details className="rounded-md border p-2 text-xs">
@@ -292,6 +338,7 @@ export default function M10({ nav }: { nav: Nav }) {
           </CardContent>
         </Card>
       </div>
+      <Degraded d={d} />
       <Gate d={d} />
       <OracleTable d={d} />
       <div className="grid gap-4 xl:grid-cols-2">

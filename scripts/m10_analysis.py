@@ -524,6 +524,65 @@ def gate(arm="OR0F"):
     save(res, "selector_gate.json")
 
 
+def switch_precision(x):
+    """Realized precision of the disagree-gated switch on an arm's own rows (xsw = picked hypothesis, -1 if none)."""
+    sw = x[x.xsw >= 0]
+    if not len(sw):
+        return None, 0
+    P = sw[[f"piou{k}" for k in range(6)]].to_numpy()
+    J = sw[[f"cJ{k}" for k in range(6)]].to_numpy()
+    kv = np.where(sw.acc.to_numpy(), 3, 0)
+    ks = kv + np.argmax(np.stack([P[np.arange(len(sw)), kv + i] for i in range(3)], 1), 1)
+    r = np.arange(len(sw))
+    jp, js = J[r, sw.xsw.to_numpy().astype(int)], J[r, ks]
+    nt = jp != js
+    switch_precision.last_no_ties = float((jp[nt] > js[nt]).mean()) if nt.any() else None
+    return float((jp > js).mean()), int(len(sw))
+
+
+def degraded():
+    """amend8: VXM as a degraded oracle. Per dataset: selector precision (offline OR0F disagree frames; realized on the
+    arm's own switch frames) vs dJ&F (all frames, GT-present part), with VXO and reference points."""
+    b = load("OR0")
+    o = load("OR0F")
+    o["state"] = state(o)
+    H = rule_scores(hyp_table(o))
+    F = frame_choices(o, H, "R_piou")
+    X = H.pivot_table(index=["unit", "video_idx"], columns="k", values="xiou").reindex(pd.MultiIndex.from_frame(F[["unit", "video_idx"]])).to_numpy()
+    F["xiou_sg"] = X[np.arange(len(F)), F.k_sggl]
+    off = F[F.active & (F.pick != F.k_sggl) & (F.margin > 0) & (F.xiou_sg < 0.5)]
+    rng = np.random.default_rng(10)
+    nt = lambda g: float((g.J_pick > g.J_sggl)[g.J_pick != g.J_sggl].mean())
+    res = {"offline_disagree_precision": {ds: {"precision": float((g.J_pick > g.J_sggl).mean()), "precision_no_ties": nt(g), "switches": len(g),
+                                               "dJ_sum": float((g.J_pick - g.J_sggl).sum())} for ds, g in off.groupby("ds")},
+           "arms": {}}
+    for arm in ("VXM", "VXO", "N1M", "N2X", "OR5M", "OR7R"):
+        x = load(arm)
+        if not len(x):
+            continue
+        res["arms"][arm] = {}
+        for ds, g in x.groupby("ds"):
+            g0 = b[b.ds == ds]
+            u = paired(g, g0)
+            st = vstats(u, rng)
+            m = g[["unit", "video_idx", "JF", "gt_empty"]].merge(g0[["unit", "video_idx", "JF"]], on=["unit", "video_idx"], suffixes=("", "_0"))
+            m["d"] = m.JF - m.JF_0
+            pres = m.groupby("unit").apply(lambda q: q.d[~q.gt_empty].sum() / len(q))
+            vid = g.groupby("unit").video.first()
+            dpres = pres.groupby(vid).mean().mean()
+            prec, nsw = switch_precision(g) if "xsw" in g else (None, 0)
+            prec_nt = switch_precision.last_no_ties if "xsw" in g and nsw else None
+            res["arms"][arm][ds] = {"dJF": st["dJF"], "ci": st["ci"], "dJF_present_part": float(dpres), "units": st["n_units"],
+                                    "complete": g.unit.nunique() == g0.unit.nunique(),
+                                    "realized_precision": prec, "realized_precision_no_ties": prec_nt, "switches": nsw,
+                                    "switch_per_100f": 100 * nsw / len(g) if nsw else 0.0,
+                                    "units_below_m005": st["units_below_m005"]}
+    for arm, r in res["arms"].items():
+        print(arm, {ds: (round(v["dJF"], 4), [round(c, 4) for c in v["ci"]], v["realized_precision"] and round(v["realized_precision"], 2), v["switches"], v["units"]) for ds, v in r.items()})
+    print("offline", {ds: round(v["precision"], 2) for ds, v in res["offline_disagree_precision"].items()})
+    save(res, "degraded.json")
+
+
 def parity():
     b = load("OR0")
     res = {}
