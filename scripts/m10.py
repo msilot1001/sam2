@@ -330,9 +330,10 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
                 keep.setdefault(k, []).append(np.packbits(m))
         if A.get("extra"):
             for v, base in (("G", 0), ("L", 3)):
-                ptr = pred.obj_ptr_proj(EX[v]["tok"])                     # 3 x 256, as SAM 2 builds the object pointer
-                ref = d.S[v].od["cond_frame_outputs"][0]["obj_ptr"].float().reshape(1, -1)
-                pc = Fn.cosine_similarity(ptr, ref.expand_as(ptr), dim=1).cpu().numpy()
+                with torch.inference_mode():                              # hook tensors are inference tensors
+                    ptr = pred.obj_ptr_proj(EX[v]["tok"])                 # 3 x 256, as SAM 2 builds the object pointer
+                    ref = d.S[v].od["cond_frame_outputs"][0]["obj_ptr"].float().reshape(1, -1)
+                    pc = Fn.cosine_similarity(ptr, ref.expand_as(ptr), dim=1).cpu().numpy()
                 ksv = base + int(np.argmax(PI[base:base + 3]))
                 for i in range(3):
                     k = base + i
@@ -349,6 +350,7 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
     peak = torch.cuda.max_memory_allocated()
     d.close()
     if keep_tok is not None:                              # 6 x 256 decoder tokens per frame (float16)
+        (RUNS / name).mkdir(parents=True, exist_ok=True)
         np.savez_compressed(RUNS / name / f"{m7.stem(u)}.tok.npz", tok=np.stack(keep_tok))
     if keep is not None:
         f = Path(os.environ["M10_SAVE_MASKS"]) / name / f"{m7.stem(u)}.npz"
