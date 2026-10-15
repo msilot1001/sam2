@@ -46,6 +46,14 @@
 | | - Fable 서브에이전트가 독립 구현으로 재현. 버그 없음 |
 | | - 데이터 결함: OR0F의 `area0` 열이 가설 0 면적으로 덮임(관문에는 무관) |
 | 14:00 | 최종 보고서 `FINAL_REPORT.md`. 사용자 지시로 탐색 단계(사전 기준 밖) 준비 |
+| 20:50 | **수정 9 (사용자 지시): 기준선 B0(공식 SAM 2.1)·P5 추가.** 결과 출력 전 사전 등록 (`31d44d7`). 이전 M10 Pod는 꺼져 있었다(연결 거부). 새 Pod `aqg09likkdsw3z`(RTX 4090, 같은 /workspace 볼륨)를 사용했고, 이 사실을 파일에 공개했다 |
+| 20:51 | 2단계: SGGL의 G 상태가 L을 읽지 않음을 코드로 확인 → P5 = OR0 `JF_G` (`c06aa5e`, 근거 줄 번호는 amend9 `P5_derivation`) |
+| 20:53 | B0 러너 `base_unit` 추가 (`f52f1c6`). Ubuntu 2080 smoke test: VOST 1단위 46 frame. 독립 실행 P5 = Ubuntu OR0 `JF_G` (차이 0) |
+| 20:56 | 새 Pod machine parity: OR0 2단위(VOST·MOSEv2)를 다시 돌린 결과 저장된 OR0와 J·F·JF 차이 0. 독립 실행 P5 = 저장된 `JF_G` (차이 0). 결과는 `runpod/parity/`에만 두고 판정에는 쓰지 않음 |
+| 21:00–21:13 | B0 dev 109단위 / 12,989 frame. 워커 10개(OMP 3), 합 약 18 frame/s, 오류 0. 21:14 pull, SYNC_LEDGER에 CSV 109개 기록 |
+| 21:16 | 분석 `baselines` → `reports/baselines.json`, `docs/m10/BASELINES.md` (`4042794`) |
+| 21:17 | Fable 서브에이전트 독립 재계산: SGGL − B0 Δ·CI·↑/↓·LOVO(세 데이터셋)와 P5 = JF_G 등식 모두 **MATCH** |
+| 21:18 | `gpu_sync.py audit outputs/milestone10/runpod` exit 0 (미동기화 0) → Pod **정지**(삭제 아님), 이후 연결 거부로 정지 확인 |
 
 ## 2. 처리량
 
