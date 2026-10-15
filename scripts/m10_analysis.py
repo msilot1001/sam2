@@ -4,6 +4,7 @@
     uv run python scripts/m10_analysis.py states [arm ...]    # where (tracker state x scene category) each arm recovers
     uv run python scripts/m10_analysis.py episodes [arm ...]  # wrong-region / loss episodes: onset, duration, recovery
     uv run python scripts/m10_analysis.py parity              # OR0 vs M9 SGGL rows (same frames)
+    uv run python scripts/m10_analysis.py baselines           # amend9: B0 (official) / P5 / SGGL tables -> docs/m10/BASELINES.md
 
 Primary estimand (preregistration.json): per dataset, video-equal mean of (arm - OR0) J&F; 95% video-cluster
 bootstrap. All JSON is written with allow_nan=False (non-finite -> null).
@@ -602,6 +603,94 @@ def parity():
                    "m9_source": str(src)}
     print(res)
     save(res, "parity.json")
+
+
+LOSS_STATES = ("correct", "partial", "empty", "wrong_region", "wrong_object", "false_present")
+
+
+def p5_rows(b):
+    """amend9: P5 = SGGL's G state (verified independent of L), so its frame rows are OR0's G columns."""
+    p = b.copy()
+    p["J"], p["JF"] = p.J_G, p.JF_G
+    p["F"] = 2 * p.JF_G - p.J_G
+    p["out_area"], p["out_inter_gt"], p["out_inter_other"] = p.G_area, p.G_inter_gt, np.nan   # no G-vs-other column
+    return p
+
+
+def baselines():
+    """amend9 Tables 1-3: B0 (official SAM 2.1) / P5 / SGGL (OR0), dev, video-equal, video bootstrap."""
+    rng = np.random.default_rng(9)
+    b = load("OR0")
+    A = {"B0": load("B0"), "P5": p5_rows(b), "SGGL": b}
+    done = A["B0"].groupby("ds").unit.unique().to_dict()
+    A = {k: v[v.unit.isin(np.concatenate(list(done.values())))] for k, v in A.items()}
+    pairs = (("SGGL", "B0"), ("SGGL", "P5"), ("P5", "B0"))
+    res = {"note": "dev split; P5 derived from OR0 JF_G (amend9); paired on identical frames; d = first - second",
+           "tables": {}}
+    for tag, keep in (("all", lambda g: g), ("tiny", lambda g: g[g.area0 < 0.001])):
+        T = res["tables"][tag] = {}
+        for ds in DSETS:
+            G = {k: keep(v[v.ds == ds]) for k, v in A.items()}
+            if not len(G["B0"]):
+                continue
+            r = T[ds] = {"units": int(G["B0"].unit.nunique()), "videos": int(G["B0"].video.nunique()),
+                         "units_total": int(b[b.ds == ds].pipe(keep).unit.nunique()), "abs": {}, "delta": {}}
+            for k, g in G.items():
+                r["abs"][k] = g.groupby(["video", "unit"]).JF.mean().groupby("video").mean().mean()
+            for x, y in pairs:
+                st = vstats(paired(G[x], G[y]), rng)
+                r["delta"][f"{x}-{y}"] = {c: st[c] for c in ("dJF", "ci", "dJF_unit_weighted", "videos_up", "videos_down",
+                                                            "lovo_min", "lovo_max", "n_videos", "n_units", "dJ", "dF")}
+    S = res["states"] = {}
+    for ds in DSETS:
+        S[ds] = {}
+        for k, g in A.items():
+            g = g[g.ds == ds]
+            if not len(g):
+                continue
+            st = pd.Series(state(g), index=g.index)
+            if k == "P5":                                    # wrong_object vs wrong_region not separable for P5
+                st = st.replace("wrong_object", "wrong_region")
+            loss = (1 - g.JF).groupby(st).sum() / len(g)     # per-frame loss contribution; sums to 1 - frame-mean J&F
+            S[ds][k] = {"frames": len(g), "JF_frame_mean": g.JF.mean(),
+                        **{c: (None if (k == "P5" and c == "wrong_object") else float(loss.get(c, 0.0))) for c in LOSS_STATES},
+                        "wrong_region+wrong_object": float(loss.get("wrong_region", 0.0) + loss.get("wrong_object", 0.0)),
+                        "absent_ok": float(loss.get("absent_ok", 0.0))}
+    save(res, "baselines.json")
+    md(res)
+    print({ds: {k: round(v, 3) for k, v in r["abs"].items()} for ds, r in res["tables"]["all"].items()})
+
+
+def md(res):
+    f3 = lambda x: "—" if x is None or (isinstance(x, float) and not math.isfinite(x)) else f"{x:+.3f}"
+    L = ["# M10 기준선: 공식 SAM 2.1 (B0) / P5 / SGGL (amend9)", "",
+         "- dev split만 사용 (M9 고정 manifest). 같은 프레임끼리 짝지어 비교. 영상 동일 가중, 영상 bootstrap 95% CI (10k).",
+         "- B0: 새 RunPod RTX 4090 (aqg09likkdsw3z). OR0(SGGL)는 이전 4090 Pod. 새 Pod에서 OR0 2단위를 다시 돌려 저장값과 J·F 차이 0을 확인했다(machine parity).",
+         "- P5 = OR0의 G 상태(JF_G). G가 L을 읽지 않음을 코드로 확인했다 (amend9 P5_derivation). 같은 기계에서 독립 실행 P5 = JF_G (차이 0).",
+         "- ↑/↓ = Δ > +0.01 / < −0.01 영상 수. LOVO = 영상 하나씩 뺀 평균의 최솟값.", ""]
+    names = {"mosev2": "MOSEv2", "vost": "VOST", "lvosv2": "LVOS v2"}
+    for tag, title in (("all", "표 1. 전체 단위"), ("tiny", "표 2. 극소 단위 (area0 < 0.001)")):
+        L += [f"## {title}", "",
+              "| 데이터셋 | 단위/영상 | B0 | P5 | SGGL | SGGL − B0 [CI] | ↑/↓ | LOVO min | SGGL − P5 [CI] | ↑/↓ | LOVO min | P5 − B0 [CI] | ↑/↓ | LOVO min |",
+              "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+        for ds, r in res["tables"][tag].items():
+            row = [names[ds], f"{r['units']}/{r['videos']}" + ("" if r["units"] == r["units_total"] else f" (전체 {r['units_total']})")]
+            row += [f"{r['abs'][k]:.3f}" for k in ("B0", "P5", "SGGL")]
+            for p in ("SGGL-B0", "SGGL-P5", "P5-B0"):
+                d = r["delta"][p]
+                row += [f"{f3(d['dJF'])} [{f3(d['ci'][0])}, {f3(d['ci'][1])}]", f"{d['videos_up']}/{d['videos_down']}", f3(d["lovo_min"])]
+            L.append("| " + " | ".join(row) + " |")
+        L.append("")
+    L += ["## 표 3. 상태별 손실 분해 (frame당 손실 기여, 합 = 1 − frame 평균 J&F)", "",
+          "P5는 G와 다른 객체의 교집합이 기록되지 않아 wrong_region과 wrong_object를 나눌 수 없다 (합친 열만).", "",
+          "| 데이터셋 | arm | frame J&F | correct 잔여 | partial | empty | wrong_region | wrong_object | 이탈 합 (region+object) | false_present |",
+          "|---|---|---|---|---|---|---|---|---|---|"]
+    for ds, r in res["states"].items():
+        for k, x in r.items():
+            c = lambda n: "—" if x[n] is None else f"{x[n]:.3f}"
+            L.append(f"| {names[ds]} | {k} | {x['JF_frame_mean']:.3f} | {c('correct')} | {c('partial')} | {c('empty')} | "
+                     f"{c('wrong_region') if k != 'P5' else '—'} | {c('wrong_object')} | {c('wrong_region+wrong_object')} | {c('false_present')} |")
+    Path("docs/m10/BASELINES.md").write_text("\n".join(L) + "\n")
 
 
 if __name__ == "__main__":
