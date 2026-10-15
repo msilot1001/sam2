@@ -409,6 +409,120 @@ def selector(arm="OR0F"):
     save(res, "selector_offline.json")
 
 
+RULES = ("R_piou", "R_sum4", "R_anchor", "R_cos", "R_lr")
+
+
+def rule_scores(H):
+    """Add s_<rule> columns (amend5). z within frame over the 6 hypotheses; R_lr cross-fitted by video within dataset."""
+    key = ["unit", "video_idx"]
+    z = lambda c: (H[c] - H.groupby(key)[c].transform("mean")) / (H.groupby(key)[c].transform("std") + 1e-6)
+    H["s_R_piou"] = H.piou
+    H["s_R_sum4"] = z("piou") + z("cos") + z("tiou") - z("cdist")
+    H["s_R_anchor"] = z("piou") + z("cos") + z("xiou")
+    H["s_R_cos"] = H["cos"]
+    X = np.c_[H[list(FEATS)].to_numpy(), (H.view == "L").to_numpy(), H.vscore.to_numpy()]
+    y = (H.cJ >= TAU).to_numpy().astype(float)
+    H["s_R_lr"] = np.nan
+    for ds in H.ds.unique():
+        vids = np.array(sorted(H[H.ds == ds].video.unique()))
+        fold = {v: i % 2 for i, v in enumerate(np.random.default_rng(10).permutation(vids))}
+        for f in (0, 1):
+            tr = ((H.ds == ds) & (H.video.map(fold) != f)).to_numpy()
+            te = ((H.ds == ds) & (H.video.map(fold) == f)).to_numpy()
+            H.loc[te, "s_R_lr"] = logit_fit(X[tr], y[tr])(X[te])
+    return H
+
+
+def frame_choices(o, H, rule):
+    """Per frame: SGGL hypothesis, rule pick, margin, J of both (GT used only for scoring the choice)."""
+    F = o[["ds", "video", "unit", "video_idx", "gt_empty", "acc", "out_area", "J", "state"]].copy().reset_index(drop=True)
+    S = H.pivot_table(index=["unit", "video_idx"], columns="k", values=f"s_{rule}").reindex(pd.MultiIndex.from_frame(F[["unit", "video_idx"]])).to_numpy()
+    P = H.pivot_table(index=["unit", "video_idx"], columns="k", values="piou").reindex(pd.MultiIndex.from_frame(F[["unit", "video_idx"]])).to_numpy()
+    Jc = H.pivot_table(index=["unit", "video_idx"], columns="k", values="cJ").reindex(pd.MultiIndex.from_frame(F[["unit", "video_idx"]])).to_numpy()
+    view0 = np.where(F.acc.to_numpy(), 3, 0)
+    k_sg = view0 + np.argmax(np.stack([P[np.arange(len(F)), view0 + i] for i in range(3)], 1), 1)
+    pick = np.argmax(S, 1)
+    r = np.arange(len(F))
+    F["k_sggl"], F["pick"] = k_sg, pick
+    F["margin"] = S[r, pick] - S[r, k_sg]
+    F["J_sggl"], F["J_pick"] = Jc[r, k_sg], Jc[r, pick]
+    F["active"] = F.out_area > 0
+    return F
+
+
+def gate_eval(F, tau, rng):
+    sw = F.active & (F.pick != F.k_sggl) & (F.margin >= tau)
+    dJ = np.where(sw, F.J_pick - F.J_sggl, 0.0)
+    G = F.assign(dJ=dJ, sw=sw)
+    out = {}
+    for ds, g in G.groupby("ds"):
+        pres = g[~g.gt_empty]
+        v = pres.groupby(["video", "unit"]).dJ.mean().groupby("video").mean().to_numpy()
+        bs = v[rng.integers(0, len(v), (B_, len(v)))].mean(1)
+        s_ = g[g.sw]
+        drift = pres[pres.state.isin(["wrong_region", "wrong_object", "empty"])]
+        corr = pres[pres.state == "correct"]
+        out[ds] = {"dJ_present": v.mean(), "ci": [np.percentile(bs, 2.5), np.percentile(bs, 97.5)],
+                   "switches": int(len(s_)), "switch_rate_active": float(len(s_) / max(g.active.sum(), 1)),
+                   "precision": float((s_.J_pick > s_.J_sggl).mean()) if len(s_) else None,
+                   "worse_share": float((s_.J_pick < s_.J_sggl).mean()) if len(s_) else None,
+                   "dJ_drift_frames": float(drift.dJ.mean()) if len(drift) else None,
+                   "dJ_correct_frames": float(corr.dJ.mean()) if len(corr) else None,
+                   "dJ_sum_switches": float(s_.eval("J_pick - J_sggl").sum()) if len(s_) else 0.0}
+    return out
+
+
+def gate(arm="OR0F"):
+    """amend5 offline gate (review 11d-1). Writes reports/selector_gate.json."""
+    o = load(arm)
+    o["state"] = state(o)
+    H = rule_scores(hyp_table(o))
+    rng = np.random.default_rng(10)
+    res = {"amend": "preregistration_amend5.json", "rules": {}}
+    for rule in RULES:
+        F = frame_choices(o, H, rule)
+        pool = F[F.ds.isin(["mosev2", "vost"]) & F.active & (F.pick != F.k_sggl)]
+        pos = pool.margin[pool.margin > 0].to_numpy()
+        grid = [0.0] + (list(np.quantile(pos, np.arange(0.05, 1.0, 0.05))) if len(pos) else [])
+        curve, tau_star = [], None
+        for tau in grid:
+            sw = pool[pool.margin >= tau]
+            prec = float((sw.J_pick > sw.J_sggl).mean()) if len(sw) else None
+            curve.append({"tau": float(tau), "switches": int(len(sw)), "precision_pooled": prec})
+            if tau_star is None and prec is not None and prec >= 0.70:
+                tau_star = float(tau)
+        r = {"tau_star": tau_star, "curve": curve, "at_tau0": gate_eval(F, 0.0, rng)}
+        if tau_star is not None:
+            ev = gate_eval(F, tau_star, rng)
+            r["at_tau_star"] = ev
+            md, vo = ev.get("mosev2"), ev.get("vost")
+            r["pass"] = bool(md and vo and md["ci"][0] > 0 and vo["ci"][0] > 0
+                             and (md["precision"] or 0) >= 0.6 and (vo["precision"] or 0) >= 0.6
+                             and (md["dJ_drift_frames"] or 0) > 0 and (vo["dJ_drift_frames"] or 0) > 0
+                             and (md["dJ_correct_frames"] or 0) >= -0.005 and (vo["dJ_correct_frames"] or 0) >= -0.005)
+        else:
+            r["pass"] = False
+        res["rules"][rule] = r
+        e = r.get("at_tau_star", {})
+        print(rule, "tau*", None if tau_star is None else round(tau_star, 4), "PASS" if r["pass"] else "fail",
+              {ds: (round(x["dJ_present"], 4), [round(c, 4) for c in x["ci"]], x["switches"], x["precision"] and round(x["precision"], 3),
+                    x["dJ_drift_frames"] and round(x["dJ_drift_frames"], 4), x["dJ_correct_frames"] and round(x["dJ_correct_frames"], 4)) for ds, x in e.items()})
+    passing = [k for k, v in res["rules"].items() if v["pass"]]
+    tot = lambda k: sum(res["rules"][k]["at_tau_star"][d]["dJ_present"] for d in ("mosev2", "vost"))
+    best = None
+    if passing:
+        best = max(passing, key=tot)
+        simple = [k for k in passing if k != "R_lr"]
+        if best == "R_lr" and simple:
+            alt = max(simple, key=tot)
+            lr, al = res["rules"]["R_lr"]["at_tau_star"], res["rules"][alt]["at_tau_star"]
+            if not all(lr[d]["dJ_present"] - al[d]["dJ_present"] > 0.005 for d in ("mosev2", "vost")):
+                best = alt
+    res["passing"], res["chosen"] = passing, best
+    print("passing", passing, "chosen", best)
+    save(res, "selector_gate.json")
+
+
 def parity():
     b = load("OR0")
     res = {}
