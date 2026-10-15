@@ -1,0 +1,216 @@
+Traceback (most recent call last):
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 550, in <module>
+    globals()[sys.argv[1]](*sys.argv[2:])
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 476, in work
+    df = base_unit(pred, s, sp, u, a, A["p5"]) if "p5" in A else run_unit(pred, dec, s, sp, u, a, A)
+                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 206, in run_unit
+    d = sggl.Dual(pred, m7.paths(u), g0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/src/spatial/sggl.py", line 75, in __init__
+    self.S = {"G": self._start(start_dir, gt0, None, None, p5=True)}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/src/spatial/sggl.py", line 92, in _start
+    st, od = start_dir(self.pred, "lazy", gt0[y0:y1, x0:x1], p5=p5)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/src/spatial/sggl.py", line 55, in start_dir
+    state = pred.init_state(video_path=str(vdir), offload_video_to_cpu=True)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/sam2_video_predictor.py", line 98, in init_state
+    self._get_image_feature(inference_state, frame_idx=0, batch_size=1)
+  File "/workspace/sam2-smoke-test/sam2/sam2_video_predictor.py", line 714, in _get_image_feature
+    backbone_out = self.forward_image(image)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/modeling/sam2_base.py", line 469, in forward_image
+    backbone_out = self.image_encoder(img_batch)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/modeling/backbones/image_encoder.py", line 31, in forward
+    features, pos = self.neck(self.trunk(sample))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/modeling/backbones/image_encoder.py", line 114, in forward
+    lateral_features = self.convs[n - i](x)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/container.py", line 253, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 553, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 548, in _conv_forward
+    return F.conv2d(
+           ^^^^^^^^^
+RuntimeError: GET was unable to find an engine to execute this computation
+Traceback (most recent call last):
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 550, in <module>
+    globals()[sys.argv[1]](*sys.argv[2:])
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 476, in work
+    df = base_unit(pred, s, sp, u, a, A["p5"]) if "p5" in A else run_unit(pred, dec, s, sp, u, a, A)
+                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 206, in run_unit
+    d = sggl.Dual(pred, m7.paths(u), g0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/src/spatial/sggl.py", line 75, in __init__
+    self.S = {"G": self._start(start_dir, gt0, None, None, p5=True)}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/src/spatial/sggl.py", line 92, in _start
+    st, od = start_dir(self.pred, "lazy", gt0[y0:y1, x0:x1], p5=p5)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/src/spatial/sggl.py", line 55, in start_dir
+    state = pred.init_state(video_path=str(vdir), offload_video_to_cpu=True)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/sam2_video_predictor.py", line 98, in init_state
+    self._get_image_feature(inference_state, frame_idx=0, batch_size=1)
+  File "/workspace/sam2-smoke-test/sam2/sam2_video_predictor.py", line 714, in _get_image_feature
+    backbone_out = self.forward_image(image)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/modeling/sam2_base.py", line 469, in forward_image
+    backbone_out = self.image_encoder(img_batch)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/modeling/backbones/image_encoder.py", line 31, in forward
+    features, pos = self.neck(self.trunk(sample))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/modeling/backbones/image_encoder.py", line 114, in forward
+    lateral_features = self.convs[n - i](x)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/container.py", line 253, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 553, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 548, in _conv_forward
+    return F.conv2d(
+           ^^^^^^^^^
+RuntimeError: GET was unable to find an engine to execute this computation
+Traceback (most recent call last):
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 550, in <module>
+    globals()[sys.argv[1]](*sys.argv[2:])
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 476, in work
+    df = base_unit(pred, s, sp, u, a, A["p5"]) if "p5" in A else run_unit(pred, dec, s, sp, u, a, A)
+                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 206, in run_unit
+    d = sggl.Dual(pred, m7.paths(u), g0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/src/spatial/sggl.py", line 75, in __init__
+    self.S = {"G": self._start(start_dir, gt0, None, None, p5=True)}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/src/spatial/sggl.py", line 92, in _start
+    st, od = start_dir(self.pred, "lazy", gt0[y0:y1, x0:x1], p5=p5)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/src/spatial/sggl.py", line 55, in start_dir
+    state = pred.init_state(video_path=str(vdir), offload_video_to_cpu=True)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/sam2_video_predictor.py", line 98, in init_state
+    self._get_image_feature(inference_state, frame_idx=0, batch_size=1)
+  File "/workspace/sam2-smoke-test/sam2/sam2_video_predictor.py", line 714, in _get_image_feature
+    backbone_out = self.forward_image(image)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/modeling/sam2_base.py", line 469, in forward_image
+    backbone_out = self.image_encoder(img_batch)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/modeling/backbones/image_encoder.py", line 31, in forward
+    features, pos = self.neck(self.trunk(sample))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/modeling/backbones/image_encoder.py", line 114, in forward
+    lateral_features = self.convs[n - i](x)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/container.py", line 253, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 553, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 548, in _conv_forward
+    return F.conv2d(
+           ^^^^^^^^^
+RuntimeError: GET was unable to find an engine to execute this computation

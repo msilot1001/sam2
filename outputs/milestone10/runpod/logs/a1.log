@@ -1,0 +1,42 @@
+Traceback (most recent call last):
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 550, in <module>
+    globals()[sys.argv[1]](*sys.argv[2:])
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 476, in work
+    df = base_unit(pred, s, sp, u, a, A["p5"]) if "p5" in A else run_unit(pred, dec, s, sp, u, a, A)
+                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 225, in run_unit
+    V[v] = d.view(v, t, planner=planner)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/src/spatial/sggl.py", line 110, in view
+    out, mask, _, score = engine.predict(self.pred, s.st, s.od, t)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/src/memint/engine.py", line 35, in predict
+    current_out, pred_masks_gpu = predictor._run_single_frame_inference(
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/sam2_video_predictor.py", line 762, in _run_single_frame_inference
+    current_out = self.track_step(
+                  ^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/modeling/sam2_base.py", line 835, in track_step
+    current_out, sam_outputs, _, _ = self._track_step(
+                                     ^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/modeling/sam2_base.py", line 779, in _track_step
+    sam_outputs = self._forward_sam_heads(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/src/spatial/sggl.py", line 186, in f
+    pred._m7_iou_box[0] = float(ious.max().item()) if ious.shape[-1] > 1 else float(ious.reshape(-1)[0].item())
+                                ^^^^^^^^^^^^^^^^^
+torch.AcceleratorError: CUDA error: unspecified launch failure
+Search for `cudaErrorLaunchFailure' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+OR0K_train lvosv2__lvosv2/KhDr3o6f__obj1 299 0.439 1.00 fps
+OR0K_train lvosv2__lvosv2/VhwRKgVS__obj1 299 0.9198 0.93 fps
+OR0K_train lvosv2__lvosv2/vjppUgbB__obj2 299 0.9214 0.93 fps
+OR0K_train lvosv2__lvosv2/UZzAPST3__obj4 265 0.8635 0.83 fps
+OR0K_train lvosv2__lvosv2/73e0wRka__obj2 234 0.9228 0.98 fps
+OR0K_train lvosv2__lvosv2/pyq6I5Hh__obj4 195 0.9301 1.14 fps
