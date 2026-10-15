@@ -1,0 +1,16 @@
+{
+  "created_kst": "2026-10-15 20:50",
+  "status": "BASELINE ADDITION (user instruction), not exploration; no new method or arm beyond B0 and P5",
+  "before_any_output_of": "B0, P5",
+  "why": "논문 주 표(공식 SAM 2.1 → P5 → SGGL)의 공식 SAM 2.1 칸이 MOSEv2·VOST·LVOS에 없음. M6.1에서는 DAVIS 계열·VKITTI만 측정했음.",
+  "arms": {
+    "B0": "공식 SAM 2.1 Hiera-T 비디오 예측기, frame 0 GT 마스크 prompt, 전체 frame 1회 추론, P5 없음, crop 없음. FP32, fill_hole_area=0, M9/M10과 같은 체크포인트 (configs/sam2.1/sam2.1_hiera_t.yaml, checkpoints/sam2.1_hiera_tiny.pt).",
+    "P5": "B0 + P5 교정만 (frame 0 prompt memory를 full-res GT mask로 재부호화, scripts/m56.py start_dir p5=True). crop 없음."
+  },
+  "data": "M9 고정 manifest dev split만 (MOSEv2 62u/48v, VOST 31u/19v, LVOS v2 16u/12v 첫 300 frame). conf와 PUMaVOS C는 건드리지 않는다.",
+  "primary": "데이터셋별 영상 동일 가중 J&F와 Δ(SGGL − arm), 영상 bootstrap 95% CI (10k).",
+  "secondary": "극소 단위(area0 < 0.001) Δ, 단위 가중 Δ, 상태별 손실 분해(states), ±0.01 영상 수 (↑/↓), LOVO 최솟값.",
+  "machine": "같은 RunPod 4090. 비교는 같은 Pod의 OR0와만.",
+  "machine_disclosure": "The M10 pod (xiad2lw7xihhe6) that produced OR0 is gone (connection refused at amend9 time); the user supplied a new RunPod RTX 4090 pod (aqg09likkdsw3z) on the same /workspace network volume. Same-pod comparison is therefore not literally possible. Plan: before B0, rerun OR0 on ONE VOST dev unit and ONE MOSEv2 dev unit on the new pod as a machine-parity check only (written to runs/_parity_OR0, never used as results); B0 vs stored OR0 is reported as same-machine-equivalent only if the parity rows match the stored OR0 rows exactly (J, F per frame). Precedent: M10 OR0 on pod xiad2lw7xihhe6 matched M9 SGGL rows from pod j8kzvm72ssk505 frame for frame. If parity fails: stop and report.",
+  "not_done": "no other arm; no rerun of existing arms (except the 2-unit parity check above); conf split and PUMaVOS C not opened; dashboard only after all steps."
+}
