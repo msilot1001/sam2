@@ -1,0 +1,21 @@
+{
+  "created_kst": "2026-10-15 10:44",
+  "before_any_output_of": "C48, C58, C47, C75, OR8K10",
+  "why": "Phase-2 singles on MOSEv2+VOST dev (OR0, OR7, OR7W, OR8, OR4 complete): OR8 (GT-re-encoded memory) +0.149 / +0.330 is by far the largest; OR7 (GT admission) +0.054 / +0.049; OR4 (GT geometry) +0.021 / +0.062. Under OR8 drift episodes still START about as often as OR0 (92 vs 106, 124 vs 140) but last 1.6 frames instead of 4.2 / 9.7. Combinations are chosen to answer: what remains when memory is perfect (geometry? selection?), and whether geometry adds to admission.",
+  "arms": {
+    "C48": {"center": "gt", "side": "gt", "memory": "gt"},
+    "C58": {"output": "select", "memory": "gt"},
+    "C47": {"center": "gt", "side": "gt", "admit": "gt"},
+    "C75": {"output": "select", "admit": "gt"},
+    "OR8K10": {"memory": "gt", "every": 10}
+  },
+  "definitions": {
+    "C48": "OR4 + OR8: perfect geometry AND perfect memory -> residual = per-frame decoding/capacity",
+    "C58": "OR5S + OR8: GT-best of the 7-member pool as output, with perfect memory -> are remaining drift onsets selectable?",
+    "C47": "OR4 + OR7: perfect geometry AND GT memory admission (interaction of geometry with admission)",
+    "C75": "OR5S + OR7: candidate selection AND GT memory admission (no GT mask anywhere)",
+    "OR8K10": "OR8 but the GT re-encoding happens only on frames t % 10 == 0 (sparse perfect refresh; other frames native)"
+  },
+  "metrics": "same as preregistration.json; interaction = dAB - (dA + dB) per dataset, video-equal, bootstrap over videos",
+  "order": "appended after the 13 singles in queue order; dev split; same pod"
+}

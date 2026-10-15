@@ -226,9 +226,10 @@ def episodes(*arms):
     b["state"] = state(b)
     res = {"OR0_all": {ds: stats(g) for ds, g in b.groupby("ds")}}
     for arm in arms:                                        # each arm next to OR0 on exactly the same units
-        a = load(arm).sort_values(["unit", "video_idx"]).reset_index(drop=True)
+        a = load(arm)
         if not len(a):
             continue
+        a = a.sort_values(["unit", "video_idx"]).reset_index(drop=True)
         a["state"] = state(a)
         res[arm] = {}
         for ds, g in a.groupby("ds"):

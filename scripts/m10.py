@@ -96,8 +96,16 @@ PLAN = {
 }
 
 
+def all_arms():
+    """Frozen arms: preregistration + every amendment that declares `arms` (in file order)."""
+    a = dict(json.loads(PREREG.read_text())["arms"])
+    for f in sorted(PREREG.parent.glob("preregistration_amend*.json")):
+        a.update(json.loads(f.read_text()).get("arms", {}))
+    return a
+
+
 def spec(name):
-    return {**DEFAULT, **json.loads(PREREG.read_text())["arms"][name]}
+    return {**DEFAULT, **all_arms()[name]}
 
 
 # ----------------------------------------------------------------------------- SAM 2 hooks
@@ -231,7 +239,7 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
             rew[v] = False
             box = V[v].box
             crop = (lambda m: m) if box is None else (lambda m: m[box[0]:box[1], box[2]:box[3]])
-            if A["memory"] == "gt":
+            if A["memory"] == "gt" and t % A.get("every", 1) == 0:
                 rewrite_memory(pred, st.st, st.od, t, crop(gv[v]))
                 rew[v] = True
             elif A["memory"] == "cand":
@@ -303,7 +311,7 @@ def claim(f):
 
 
 def work(arms=None, sets=SETS):
-    arms = (",".join(json.loads(PREREG.read_text())["arms"]) if arms in (None, "all") else arms).split(",")
+    arms = (",".join(all_arms()) if arms in (None, "all") else arms).split(",")
     if os.environ.get("M10_MODEL"):                     # capacity diagnostic (amend1): t | s | b+ | l
         k = os.environ["M10_MODEL"]
         m55.CFG = f"configs/sam2.1/sam2.1_hiera_{k}.yaml"
