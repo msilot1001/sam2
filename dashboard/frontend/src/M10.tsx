@@ -20,6 +20,7 @@ const ARM_LABEL: Record<string, string> = {
 const STATES = ['correct', 'partial', 'empty', 'wrong_region', 'wrong_object', 'false_present']
 const POOL = ['none', 'own_view_misselect', 'own_view_suppressed', 'other_view_output', 'other_view_hyp']
 const ds = (k: string) => DS_LABEL[k] ?? k
+const dsLabel = ds
 const pct = (v: any) => (typeof v === 'number' ? `${(100 * v).toFixed(1)}%` : '—')
 
 function Progress({ d }: { d: any }) {
@@ -193,6 +194,32 @@ function Or9({ d }: { d: any }) {
   )
 }
 
+function Interactions({ d }: { d: any }) {
+  const x = d.reports?.interactions
+  if (!x || !Object.keys(x).length) return null
+  const ci = (c: any) => (c ? `[${signed(c[0], 3)}, ${signed(c[1], 3)}]` : '')
+  return (
+    <Card>
+      <CardHeader><CardTitle>조합: 독립 · 조건부 · 상호작용<Help k="m10.interactions" /></CardTitle><CardDescription>reports/interactions.json · 네 arm 모두 끝난 같은 단위만 · 영상 동일 가중</CardDescription></CardHeader>
+      <CardContent className="overflow-x-auto">
+        <Table className="text-xs">
+          <TableHeader><TableRow><TableHead>조합</TableHead><TableHead>데이터셋</TableHead><TableHead>단위</TableHead><TableHead>ΔA</TableHead><TableHead>ΔB</TableHead><TableHead>ΔA+B</TableHead><TableHead>B | A (조건부)</TableHead><TableHead>A | B (조건부)</TableHead><TableHead>상호작용</TableHead></TableRow></TableHeader>
+          <TableBody>{Object.entries(x).flatMap(([k, r]: [string, any]) => DS.filter((ds) => r[ds]).map((ds) => (
+            <TableRow key={k + ds}>
+              <TableCell className="font-mono whitespace-nowrap">{k}<Help k={`m10.arm.${k}`} /> = {r.A} + {r.B}</TableCell><TableCell>{dsLabel(ds)}</TableCell><TableCell>{r[ds].units}</TableCell>
+              <TableCell>{signed(r[ds].dA, 3)}</TableCell><TableCell>{signed(r[ds].dB, 3)}</TableCell>
+              <TableCell>{signed(r[ds].dAB, 3)} {ci(r[ds].ci_AB)}</TableCell>
+              <TableCell>{signed(r[ds].cond_B_given_A, 3)} {ci(r[ds].ci_cond_B_given_A)}</TableCell>
+              <TableCell>{signed(r[ds].cond_A_given_B, 3)} {ci(r[ds].ci_cond_A_given_B)}</TableCell>
+              <TableCell>{signed(r[ds].interaction, 3)} {ci(r[ds].ci_interaction)}</TableCell>
+            </TableRow>
+          )))}</TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  )
+}
+
 function Json({ title, obj }: { title: string; obj: any }) {
   return (
     <details className="rounded-md border p-2 text-xs">
@@ -237,6 +264,7 @@ export default function M10({ nav }: { nav: Nav }) {
       <Recovery d={d} />
       <Episodes d={d} />
       <Or9 d={d} />
+      <Interactions d={d} />
       {(d.figures ?? []).length > 0 && (
         <Card><CardHeader><CardTitle>실패 에피소드 그림<Help k="m10.figures" /></CardTitle></CardHeader>
           <CardContent className="space-y-3">{d.figures.map((p: string) => (

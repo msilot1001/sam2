@@ -22,6 +22,8 @@ REP = OUT / "reports"
 TAU = 0.5
 B = 10000
 OFFLINE = ("OR1off", "OR5off", "OR6off")
+DSETS = ("mosev2", "vost", "lvosv2")
+B_ = 10000
 
 
 def finite(o):
@@ -288,6 +290,46 @@ def or9():
         res[ds]["frames"], res[ds]["units"] = len(g), int(g.unit.nunique())
         print(ds, {v: (round(res[ds][v]["JF_oracle"], 3), round(res[ds][v]["JF0"], 3)) for v in ("full", "crop")})
     save(res, "or9.json")
+
+
+PAIRS = {"C48": ("OR4", "OR8"), "C58": ("OR5S", "OR8"), "C47": ("OR4", "OR7"), "C75": ("OR5S", "OR7")}
+
+
+def interact():
+    """Per dataset on units common to OR0, A, B, AB: standalone dA, dB; joint dAB; conditional (dAB - dA, dAB - dB);
+    interaction dAB - dA - dB. Video-equal; one bootstrap over videos resamples all four jointly."""
+    b = load("OR0")
+    rng = np.random.default_rng(10)
+    res = {}
+    for ab, (A, B) in PAIRS.items():
+        X = {k: load(k) for k in (A, B, ab)}
+        if any(not len(x) for x in X.values()):
+            continue
+        res[ab] = {"A": A, "B": B}
+        for ds in DSETS:
+            common = set(b[b.ds == ds].unit)
+            for x in X.values():
+                common &= set(x[x.ds == ds].unit)
+            if not common:
+                continue
+            V = {}
+            for k, x in X.items():
+                u = paired(x[x.unit.isin(common)], b[b.unit.isin(common)])
+                V[k] = u.groupby("video").d.mean()
+            v = pd.DataFrame(V)
+            n = len(v)
+            idx = rng.integers(0, n, (B_, n))
+            def ci(col):
+                bs = col.to_numpy()[idx].mean(1)
+                return [np.percentile(bs, 2.5), np.percentile(bs, 97.5)]
+            inter = v[ab] - v[A] - v[B]
+            res[ab][ds] = {"units": len(common), "videos": n, "dA": v[A].mean(), "dB": v[B].mean(), "dAB": v[ab].mean(),
+                           "ci_AB": ci(v[ab]), "cond_B_given_A": (v[ab] - v[A]).mean(), "ci_cond_B_given_A": ci(v[ab] - v[A]),
+                           "cond_A_given_B": (v[ab] - v[B]).mean(), "ci_cond_A_given_B": ci(v[ab] - v[B]),
+                           "interaction": inter.mean(), "ci_interaction": ci(inter)}
+            r = res[ab][ds]
+            print(ab, ds, r["units"], f"dA {r['dA']:+.3f} dB {r['dB']:+.3f} dAB {r['dAB']:+.3f} int {r['interaction']:+.3f}")
+    save(res, "interactions.json")
 
 
 def parity():
