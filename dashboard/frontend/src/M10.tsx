@@ -220,6 +220,41 @@ function Interactions({ d }: { d: any }) {
   )
 }
 
+function Gate({ d }: { d: any }) {
+  const g = d.reports?.selector_gate
+  if (!g) return null
+  const rules = Object.keys(g.rules ?? {})
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>개선 단계: GT 없는 선택기 오프라인 관문 (수정 5)<Help k="m10.gate" /></CardTitle>
+        <CardDescription>reports/selector_gate.json · OR0F 궤적 · 6개 원시 가설만 (빈 mask 제외) · 통과 기준: τ*에서 MOSEv2·VOST 각각 ΔJ CI 하한 &gt; 0, 스위치 정밀도 ≥ 0.6, 이탈 frame ΔJ &gt; 0, 맞던 frame ΔJ ≥ −0.005 · 선택된 규칙: <b>{g.chosen ?? '없음'}</b></CardDescription>
+      </CardHeader>
+      <CardContent className="overflow-x-auto">
+        <Table className="text-xs">
+          <TableHeader><TableRow><TableHead>규칙</TableHead><TableHead>τ* (정밀도 0.70)</TableHead><TableHead>판정</TableHead>
+            {DS.map((k) => <TableHead key={k}>{ds(k)} τ=0: ΔJ · 스위치 · 정밀도 / 악화</TableHead>)}<TableHead>합동 정밀도 곡선 (τ: 스위치, 정밀도)</TableHead></TableRow></TableHeader>
+          <TableBody>{rules.map((r) => {
+            const x = g.rules[r]
+            return (
+              <TableRow key={r}>
+                <TableCell className="font-mono whitespace-nowrap">{r}<Help k={`m10.rule.${r}`} /></TableCell>
+                <TableCell>{x.tau_star == null ? '도달 못 함' : num(x.tau_star, 3)}</TableCell>
+                <TableCell><Badge variant={x.pass ? 'default' : 'outline'}>{x.pass ? 'PASS' : 'FAIL'}</Badge></TableCell>
+                {DS.map((k) => {
+                  const e = x.at_tau0?.[k]
+                  return <TableCell key={k} className="tabular-nums whitespace-nowrap">{e ? `${signed(e.dJ_present, 3)} · ${e.switches} · ${num(e.precision, 2)} / ${num(e.worse_share, 2)}` : '—'}</TableCell>
+                })}
+                <TableCell className="tabular-nums text-[11px]">{(x.curve ?? []).filter((_: any, i: number) => i % 4 === 0).map((c: any) => `${num(c.tau, 2)}: ${c.switches}, ${num(c.precision_pooled, 2)}`).join(' · ')}</TableCell>
+              </TableRow>
+            )
+          })}</TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  )
+}
+
 function Json({ title, obj }: { title: string; obj: any }) {
   return (
     <details className="rounded-md border p-2 text-xs">
@@ -254,6 +289,7 @@ export default function M10({ nav }: { nav: Nav }) {
           </CardContent>
         </Card>
       </div>
+      <Gate d={d} />
       <OracleTable d={d} />
       <div className="grid gap-4 xl:grid-cols-2">
         <Stacked title="OR0 손실의 상태별 비중" desc="reports/states.json · (1 − J&F) 합 기준 · GT 기반 사후 분류"
