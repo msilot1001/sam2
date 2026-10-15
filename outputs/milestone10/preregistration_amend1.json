@@ -1,0 +1,8 @@
+{
+  "created_kst": "2026-10-15 09:12",
+  "before_any_output_of": "capacity diagnostic (OR9cap)",
+  "what": "Model-capacity diagnostic: arm OR0 (plain SGGL, same code) with SAM 2.1 Hiera tiny / small / base+ / large, all on the Ubuntu RTX 2080 (same machine for every model), runs dir outputs/milestone10/ubuntu/runs_<t|s|b+|l>/OR0. Checkpoints: official dl.fbaipublicfiles.com 092824 files, sha256 in checkpoints/sha256_m10.txt (not committed).",
+  "subset": "VOST:dev first (data already on Ubuntu); MOSEV2:dev and LVOSV2:dev if time permits (dev videos copied from the pod).",
+  "metrics": "per dataset video-equal dJ&F of each model vs tiny (same machine), plus the OR0 state decomposition per model (wrong-region / wrong-object / partial / empty loss shares) to see WHICH failure a larger model reduces.",
+  "why_2080": "the pod GPU is saturated by the phase-2 oracle queue; the 2080 was idle."
+}

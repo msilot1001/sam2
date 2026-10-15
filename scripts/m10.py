@@ -294,11 +294,16 @@ def claim(f):
 
 def work(arms=None, sets=SETS):
     arms = (arms or ",".join(json.loads(PREREG.read_text())["arms"])).split(",")
+    if os.environ.get("M10_MODEL"):                     # capacity diagnostic (amend1): t | s | b+ | l
+        k = os.environ["M10_MODEL"]
+        m55.CFG = f"configs/sam2.1/sam2.1_hiera_{k}.yaml"
+        m55.CKPT = f"checkpoints/sam2.1_hiera_{dict(t='tiny', s='small', l='large').get(k, 'base_plus')}.pt"
     pred = m55.build_predictor()
     controlled.install(pred, None, {})
     dec = hook_decoder(pred)
     env = {"machine": os.environ.get("M8_MACHINE", socket.gethostname()), "torch": torch.__version__,
            "cuda": torch.version.cuda, "gpu": torch.cuda.get_device_name(0), "fill_hole_area": pred.fill_hole_area,
+           "model_cfg": m55.CFG, "ckpt": m55.CKPT,
            "code": json.loads(Path("CODE_SYNC.json").read_text()) if Path("CODE_SYNC.json").exists() else "working tree"}
     left = tasks(arms, sets)
     while left:
