@@ -315,8 +315,9 @@ def work(arms=None, sets=SETS):
                 continue
             if not claim(f):
                 continue
-            if not (dd / f"ENV_{env['machine']}.json").exists():
-                atomic_json({**env, "arm": A}, dd / f"ENV_{env['machine']}.json")
+            ef = dd / f"ENV_{env['machine']}_{socket.gethostname()}_{os.getpid()}.json"   # per worker: no write race
+            if not ef.exists():
+                atomic_json({**env, "arm": A}, ef)
             torch.cuda.reset_peak_memory_stats()
             w0 = time.time()
             df = run_unit(pred, dec, s, sp, u, a, A)
