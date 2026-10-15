@@ -40,7 +40,7 @@ import torch
 import torch.nn.functional as Fn
 
 from baseline.dropout_runner import atomic_csv, atomic_json
-from memint import controlled
+from memint import controlled, engine
 from spatial import rescue as R, sggl, vcam
 
 _s = importlib.util.spec_from_file_location("m7", Path(__file__).with_name("m7.py"))
@@ -100,12 +100,15 @@ def all_arms():
     """Frozen arms: preregistration + every amendment that declares `arms` (in file order)."""
     a = dict(json.loads(PREREG.read_text())["arms"])
     for f in sorted(PREREG.parent.glob("preregistration_amend*.json")):
-        a.update(json.loads(f.read_text()).get("arms", {}))
+        a.update({k: v for k, v in json.loads(f.read_text()).get("arms", {}).items() if isinstance(v, dict)})   # amend9: prose
     return a
 
 
+BASE = {"B0": {"p5": False}, "P5": {"p5": True}}     # amend9 baselines (not SGGL rollouts): see base_unit
+
+
 def spec(name):
-    return {**DEFAULT, **all_arms()[name]}
+    return {**DEFAULT, **(BASE.get(name) or all_arms()[name])}
 
 
 # ----------------------------------------------------------------------------- SAM 2 hooks
@@ -359,6 +362,36 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
     return pd.DataFrame(rows).assign(peak_vram_bytes=peak)
 
 
+def base_unit(pred, s, sp, u, name, p5, n=None):
+    """amend9 baselines: ONE full-frame SAM 2 state, frame-0 GT mask prompt, no crop. p5=False = official SAM 2.1 (B0);
+    p5=True = + P5 prompt memory (identical to SGGL's G state). Built exactly like sggl.Dual G (identity lazy loader ==
+    official frames, M6 test). Columns follow run_unit so m10_analysis reads them unchanged."""
+    n = n or len(u.frames)
+    g0 = m7.gt(u, 0)
+    hw = g0.shape
+    fr = vcam.LazyCropFrames(m7.paths(u))
+    fr.box = (0, hw[0], 0, hw[1])
+    with vcam.lazy_loader(fr, hw):
+        st, od = sggl.start_dir(pred, "lazy", g0, p5=p5)
+    other = getattr(m7, "other", None)
+    rows = []
+    for t in range(1, n):
+        t0 = time.perf_counter()
+        o, out, _, score = engine.predict(pred, st, od, t)
+        od["non_cond_frame_outputs"][t] = o
+        torch.cuda.synchronize()
+        lat = time.perf_counter() - t0
+        g = m7.gt(u, t)
+        oth = other(u, t) if other is not None else np.zeros(hw, bool)
+        rows.append({"set": s, "split": sp, "unit": u.name, "video": u.video, "arm": name, "video_idx": t,
+                     "latency_s": lat, "score": score, "gt_empty": not g.any(), "area0": float(g0.mean()), **m55.jf(out, g),
+                     "gt_area": int(g.sum()), "out_area": int(out.sum()), "out_inter_gt": int((out & g).sum()),
+                     "out_inter_other": int((out & oth).sum()), "other_area": int(oth.sum())})
+    peak = torch.cuda.max_memory_allocated()
+    pred.reset_state(st)
+    return pd.DataFrame(rows).assign(peak_vram_bytes=peak)
+
+
 # ----------------------------------------------------------------------------- queue
 def prereg():
     assert not PREREG.exists(), "preregistration is frozen"
@@ -424,7 +457,7 @@ def work(arms=None, sets=SETS):
                 atomic_json({**env, "arm": A}, ef)
             torch.cuda.reset_peak_memory_stats()
             w0 = time.time()
-            df = run_unit(pred, dec, s, sp, u, a, A)
+            df = base_unit(pred, s, sp, u, a, A["p5"]) if "p5" in A else run_unit(pred, dec, s, sp, u, a, A)
             atomic_csv(df.assign(wall_s=time.time() - w0, machine=env["machine"]), f)
             lock(f).unlink()
             print(a, u.name, len(df), round(df.JF.mean(), 4), f"{len(df) / (time.time() - w0):.2f} fps", flush=True)
@@ -488,7 +521,9 @@ def rerun(listfile):
     want = [ln.split() for ln in Path(listfile).read_text().splitlines() if ln.strip()]
     for a, name in want:
         s, sp, u = next(x for x in m7.units(name.split("__")[0].upper()) if x[2].name == name)
-        df = run_unit(pred, dec, s, sp, u, a, spec(a))
+        A = spec(a)
+        df = base_unit(pred, s, sp, u, a, A["p5"]) if "p5" in A else run_unit(pred, dec, s, sp, u, a, A)
+        (Path(os.environ["M10_SAVE_MASKS"]) / a).mkdir(parents=True, exist_ok=True)
         atomic_csv(df, Path(os.environ["M10_SAVE_MASKS"]) / a / f"{m7.stem(u)}.csv")
         print("rerun", a, name, round(df.JF.mean(), 4), flush=True)
 
