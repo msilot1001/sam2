@@ -442,6 +442,84 @@ def upper():
     return out
 
 
+def verdict_of(p):
+    """amend12 verdict sentences, fixed before the run."""
+    if p <= 0.45:
+        return "OOF 정밀도 ≤ 0.45: 얕은 head로는 데이터가 있어도 안 된다"
+    return "OOF 정밀도 ≥ 0.70: 데이터 부족이 원인일 수 있다" if p >= 0.70 else "OOF 정밀도 0.45–0.70: 구분 불가"
+
+
+def within():
+    """amend12 diagnostic (never adopted): per dataset, heads fitted and scored inside that dataset only (video 5-fold OOF)."""
+    D = load_runs([DEV_DIR])
+    rng = np.random.default_rng(HYPER["bootstrap_seed"])
+    out = {"amend": "preregistration_amend12.json", "diagnostic_only": True, "hyper": HYPER, "device": DEVICE, "datasets": {}}
+    for ds in A.DSETS:
+        m = (D[0].ds == ds).to_numpy()
+        df, dev = D[0][m].reset_index(drop=True), (D[0][m].reset_index(drop=True), D[1][m], D[2][m])
+        fold = folds(df.video.to_numpy())
+        scope, y = df.active.to_numpy(), labels(df)
+        y_null = shuffled(y)
+        res = {}
+        for mdl in MODELS:
+            if mdl == "R_piou":
+                S = piou(df)
+            else:
+                S = np.zeros(y.shape, np.float32)             # out of scope: never used by any rule
+                S[scope] = cv_scores(mdl, inputs(*dev, mdl)[scope], (y_null if mdl.startswith("null") else y)[scope], fold[scope])
+            res[mdl] = {}
+            for hyp in ("H1", "H2"):
+                F = frame_table(df, S, hyp)
+                d = F[F.active & (F.pick != F.k_sggl)]
+                pos = d.margin[d.margin > 0].to_numpy()
+                grid = [0.0] + (sorted(np.quantile(pos, np.arange(0.05, 1.0, 0.05)).tolist()) if len(pos) else [])
+                c = curve(F, grid)
+                ok = [x for x in c if x["switches"] >= MIN_SW]
+                res[mdl][hyp] = {"curve_oof": c, "max_precision": max(ok, key=lambda x: x["precision"]) if ok else None,
+                                 "at_tau0": A.gate_eval(F, 0.0, rng).get(ds)}
+                mp = res[mdl][hyp]["max_precision"]
+                print(ds, mdl, hyp, "max", mp and (round(mp["precision"], 3), mp["switches"]), flush=True)
+        verdict = {}
+        for hyp in ("H1", "H2"):
+            best = max((mm for mm in CANDS["H1"] if res[mm][hyp]["max_precision"]), default=None,
+                       key=lambda mm: res[mm][hyp]["max_precision"]["precision"])
+            p = res[best][hyp]["max_precision"]["precision"] if best else None
+            verdict[hyp] = {"best_model": best, "max_precision": p,
+                            "verdict": None if p is None else verdict_of(p)}
+        out["datasets"][ds] = {**counts(df), "folds": {v: int(f) for v, f in zip(df.video, fold)}, "models": res, "verdict": verdict}
+        print(ds, verdict, flush=True)
+    A.save(out, "head_within.json")
+    within_md(out)
+    return out
+
+
+def within_md(res=None):
+    """Append/replace the amend12 section of docs/m10/HEAD_RESULTS.md from reports/head_within.json."""
+    import json
+    res = res or json.loads((A.REP / "head_within.json").read_text())
+    names = {"mosev2": "MOSEv2", "vost": "VOST", "lvosv2": "LVOS v2"}
+    mp = lambda r: "—" if r["max_precision"] is None else f"{r['max_precision']['precision']:.3f} ({r['max_precision']['switches']})"
+    L = ["## 같은 데이터셋 안 상한 (진단)", "",
+         "`preregistration_amend12.json` (실행 전 커밋 `b10d301`). **진단 전용, 채택 근거 아님.** 데이터셋마다 그 데이터셋의 dev 영상만으로 "
+         "영상 단위 5-fold 교차검증(OOF)을 했다. 모델·하이퍼파라미터는 수정 10과 같다. 정밀도는 전환 20회 이상인 τ 중 최댓값(전환 수)이며, "
+         "τ를 같은 OOF 점수로 골랐으므로 낙관적이다. 수정 11(dev 전체 풀 학습) 결과를 본 뒤 등록했다(공개). 원자료 `reports/head_within.json`.", "",
+         "| 데이터셋 (단위/영상) | 가설 | R_piou | a | b | c | null_b | null_c | 판정 (최고 학습 모델) |", "|---|---|---|---|---|---|---|---|---|"]
+    for ds, r in res["datasets"].items():
+        for hyp in ("H1", "H2"):
+            v = r["verdict"][hyp]
+            L.append(f"| {names[ds]} ({r['units']}/{r['videos']}) | {hyp} | " + " | ".join(mp(r["models"][m][hyp]) for m in MODELS)
+                     + f" | {v['verdict'] or '—'} ({v['best_model']}) |")
+    L += ["", "τ=0 ΔJ (GT 있는 frame, 영상 동일 가중 [CI]):", "", "| 데이터셋 | 가설 | R_piou | b | c | null_b |", "|---|---|---|---|---|---|"]
+    f = lambda e: "—" if not e else f"{e['dJ_present']:+.3f} [{e['ci'][0]:+.3f}, {e['ci'][1]:+.3f}]"
+    for ds, r in res["datasets"].items():
+        for hyp in ("H1", "H2"):
+            L.append(f"| {names[ds]} | {hyp} | " + " | ".join(f(r["models"][m][hyp]["at_tau0"]) for m in ("R_piou", "b", "c", "null_b")) + " |")
+    doc = Path("docs/m10/HEAD_RESULTS.md")
+    t = doc.read_text()
+    t = t[:t.index(L[0])].rstrip() + "\n" if L[0] in t else t
+    doc.write_text(t + "\n" + "\n".join(L) + "\n")
+
+
 # ----------------------------------------------------------------------------- selftest
 def synth(n_videos, frames, rng, set_="LVOSV2:train", prefix="v"):
     rows, n = [], n_videos * frames
@@ -486,6 +564,7 @@ def selftest():
     ts = [{(m, h): r[h]["tau_star"] for m, r in run(tr, d)["models"].items() for h in ("H1", "H2")} for d in devs]
     assert ts[0] == ts[1], "tau* depends on dev rows"
     assert ts[0][("R_piou", "H2")] is None
+    assert [verdict_of(x)[:13] for x in (0.45, 0.46, 0.70)] == ["OOF 정밀도 ≤ 0.45"[:13], "OOF 정밀도 0.45–0.70"[:13], "OOF 정밀도 ≥ 0.70"[:13]]
     print("selftest ok", ts[0])
 
 
