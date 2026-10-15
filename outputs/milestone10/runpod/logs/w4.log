@@ -1,0 +1,100 @@
+OR0 vost__vost/7359_fold_tape_measure__obj1 128 0.4253 1.20 fps
+OR0 vost__vost/1206_cut_mango__obj1 96 0.5028 1.03 fps
+OR0 vost__vost/9673_cut_tomato__obj1 50 0.5306 1.28 fps
+Traceback (most recent call last):
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 333, in <module>
+    globals()[sys.argv[1]](*sys.argv[2:])
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 303, in work
+    left = tasks(arms, sets)
+           ^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 277, in tasks
+    us = m7.units(sets)
+         ^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/scripts/m7.py", line 173, in units
+    out += [(s, sp, u) for sp, u in _xd().units(ds.lower(), part or None) if vcam.crop_side(gt(u, 0)) is not None]
+                                                                                            ^^^^^^^^
+  File "/workspace/sam2-m7-test/scripts/m7.py", line 136, in gt
+    return _xd().gt(u, t)
+           ^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/src/rfeas/xdata.py", line 38, in gt
+    a = _ann(u.dataset, _vid(u), u.frames[t])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/src/rfeas/xdata.py", line 34, in _ann
+    return np.array(Image.open(root(dataset) / "Annotations" / vid / f"{frame}.png"))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/PIL/Image.py", line 3639, in open
+    fp = builtins.open(filename, "rb")
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/data/lvosv2/Annotations/7K7WVzGG/00000001.png'
+OR0 mosev2__mosev2/0442a954__obj1 135 0.4778 1.29 fps
+OR0 mosev2__mosev2/sbyfhl5a__obj1 125 0.5434 1.20 fps
+OR0 mosev2__mosev2/4b9223ee__obj1 85 0.5089 1.27 fps
+OR0 mosev2__mosev2/5ten05az__obj1 78 0.8393 1.09 fps
+OR0 mosev2__mosev2/662a1846__obj9 64 0.9365 1.20 fps
+OR0 mosev2__mosev2/af5666b2__obj1 51 0.1224 1.30 fps
+OR0 mosev2__mosev2/4023fc77__obj3 47 0.9878 1.36 fps
+OR0 mosev2__mosev2/qx4i482e__obj4 41 1.0 1.41 fps
+OR7 vost__vost/4031_cut_broccoli__obj2 176 0.6645 1.09 fps
+OR7 mosev2__mosev2/0442a954__obj2 135 0.9041 1.41 fps
+OR7 vost__vost/7359_fold_tape_measure__obj1 128 0.5618 1.34 fps
+OR7 vost__vost/1201_cut_chili__obj1 106 0.4837 1.20 fps
+OR7 mosev2__mosev2/70xyb5u3__obj1 99 0.8673 1.46 fps
+OR7 vost__vost/1169_peel_onion__obj1 85 0.1322 1.36 fps
+OR7 mosev2__mosev2/5i5fi97n__obj1 76 0.6249 1.14 fps
+OR7 mosev2__mosev2/6ec5da3a__obj1 65 0.8007 1.32 fps
+OR7 mosev2__mosev2/9ee59f51__obj2 60 0.6967 1.14 fps
+OR7 mosev2__mosev2/1339321a__obj1 50 0.8309 1.19 fps
+OR7 mosev2__mosev2/fa3e0b85__obj6 47 0.973 0.98 fps
+OR7 mosev2__mosev2/da7dee28__obj1 40 0.9502 1.12 fps
+OR7W vost__vost/3559_break_egg__obj1 173 0.3234 1.11 fps
+OR7W vost__vost/1186_cut_chilli__obj4 157 0.7703 1.08 fps
+OR7W mosev2__mosev2/1d7a23e0__obj5 125 0.546 1.25 fps
+OR7W vost__vost/1201_cut_chili__obj1 106 0.5375 0.98 fps
+OR7W mosev2__mosev2/6042d64a__obj1 96 0.4157 0.89 fps
+OR7W vost__vost/1169_peel_onion__obj1 85 0.1537 0.89 fps
+OR7W mosev2__mosev2/5i5fi97n__obj1 76 0.6656 0.87 fps
+OR7W mosev2__mosev2/662a1846__obj8 64 0.8202 0.89 fps
+OR7W mosev2__mosev2/e2qxuriu__obj1 60 0.9108 0.85 fps
+OR7W vost__vost/9673_cut_tomato__obj2 50 0.9095 0.89 fps
+OR7W mosev2__mosev2/fa3e0b85__obj8 47 0.0686 0.93 fps
+OR7W mosev2__mosev2/06ea172e__obj8 39 0.3164 0.91 fps
+OR8 vost__vost/3559_break_egg__obj3 173 0.795 0.83 fps
+OR8 vost__vost/1186_cut_chilli__obj4 157 0.9176 0.82 fps
+OR8 mosev2__mosev2/sbyfhl5a__obj1 125 0.7877 0.84 fps
+OR8 mosev2__mosev2/atwg18fz__obj1 103 0.7152 0.81 fps
+OR8 mosev2__mosev2/vmd1krxq__obj1 95 0.8308 0.86 fps
+OR8 vost__vost/1169_peel_onion__obj1 85 0.7016 0.77 fps
+OR8 vost__vost/8024_divide_dough__obj1 74 0.5783 0.80 fps
+OR8 mosev2__mosev2/662a1846__obj9 64 0.9231 0.85 fps
+OR8 mosev2__mosev2/9ee59f51__obj3 60 0.8416 0.82 fps
+OR8 mosev2__mosev2/82ucmhmx__obj2 49 0.9591 0.79 fps
+OR8 vost__vost/4357_trim_dough__obj3 46 0.9043 0.78 fps
+OR4 vost__vost/4031_cut_broccoli__obj1 176 0.1809 0.77 fps
+OR4 vost__vost/1186_cut_chilli__obj1 157 0.0777 0.86 fps
+OR4 mosev2__mosev2/c047a092__obj1 127 0.7598 0.83 fps
+OR4 vost__vost/1211_cut_garlic__obj1 102 0.6544 0.84 fps
+OR4 mosev2__mosev2/vmd1krxq__obj1 95 0.3999 0.93 fps
+OR4 vost__vost/1169_peel_onion__obj1 85 0.1227 0.81 fps
+OR4 vost__vost/8024_divide_dough__obj1 74 0.4222 0.88 fps
+OR4 mosev2__mosev2/662a1846__obj9 64 0.9371 0.91 fps
+OR4 mosev2__mosev2/e2qxuriu__obj1 60 0.8371 0.88 fps
+OR4 mosev2__mosev2/82ucmhmx__obj2 49 0.9442 0.85 fps
+OR4 vost__vost/4357_trim_dough__obj1 46 0.9148 0.85 fps
+OR5M vost__vost/4031_cut_broccoli__obj1 176 0.2988 0.77 fps
+OR5M vost__vost/1186_cut_chilli__obj1 157 0.4943 0.89 fps
+OR5M vost__vost/7359_fold_tape_measure__obj1 128 0.835 0.87 fps
+OR5M vost__vost/3993_cut_tomato__obj1 109 0.8829 0.83 fps
+OR5M mosev2__mosev2/yzjaxyfg__obj1 100 0.9513 0.79 fps
+OR5M mosev2__mosev2/10552818__obj1 93 0.6908 0.84 fps
+OR5M mosev2__mosev2/6ba9e61f__obj1 84 0.9661 0.85 fps
+OR5M mosev2__mosev2/vkl7ibk1__obj1 75 0.9276 0.89 fps
+OR5M mosev2__mosev2/8bb9a221__obj1 70 0.9169 0.93 fps
+OR5M mosev2__mosev2/662a1846__obj8 64 0.9347 0.87 fps
+OR5M mosev2__mosev2/9ee59f51__obj2 60 0.9172 0.89 fps
+OR5M mosev2__mosev2/vxgldw4f__obj1 52 0.9525 0.86 fps
+OR5M mosev2__mosev2/82ucmhmx__obj2 49 0.9518 0.79 fps
+OR5M mosev2__mosev2/fa3e0b85__obj8 47 0.9006 0.83 fps
+OR5M mosev2__mosev2/da7dee28__obj1 40 0.9573 0.93 fps
+OR6 vost__vost/4031_cut_broccoli__obj2 176 0.6534 0.86 fps
+OR6 vost__vost/1186_cut_chilli__obj4 157 0.7774 0.94 fps
+OR6 mosev2__mosev2/935b5ad8__obj1 134 0.8049 0.84 fps

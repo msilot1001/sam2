@@ -1,0 +1,17 @@
+{
+  "machine": "ubuntu-rtx2080",
+  "torch": "2.14.1+cu130",
+  "cuda": "13.0",
+  "gpu": "NVIDIA GeForce RTX 2080",
+  "fill_hole_area": 0,
+  "model_cfg": "configs/sam2.1/sam2.1_hiera_b+.yaml",
+  "ckpt": "checkpoints/sam2.1_hiera_base_plus.pt",
+  "code": "working tree",
+  "arm": {
+    "center": "sggl",
+    "side": "fixed",
+    "output": "sggl",
+    "admit": "all",
+    "memory": "native"
+  }
+}

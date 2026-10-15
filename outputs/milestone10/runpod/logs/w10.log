@@ -1,0 +1,83 @@
+Traceback (most recent call last):
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 416, in <module>
+    globals()[sys.argv[1]](*sys.argv[2:])
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 346, in work
+    df = run_unit(pred, dec, s, sp, u, a, A)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/scripts/m10.py", line 191, in run_unit
+    d = sggl.Dual(pred, m7.paths(u), g0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/src/spatial/sggl.py", line 80, in __init__
+    self.S["L"] = self._start(start_dir, gt0, self.side, self.center, p5=True)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/src/spatial/sggl.py", line 92, in _start
+    st, od = start_dir(self.pred, "lazy", gt0[y0:y1, x0:x1], p5=p5)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-m7-test/src/spatial/sggl.py", line 55, in start_dir
+    state = pred.init_state(video_path=str(vdir), offload_video_to_cpu=True)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/sam2_video_predictor.py", line 98, in init_state
+    self._get_image_feature(inference_state, frame_idx=0, batch_size=1)
+  File "/workspace/sam2-smoke-test/sam2/sam2_video_predictor.py", line 714, in _get_image_feature
+    backbone_out = self.forward_image(image)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/modeling/sam2_base.py", line 469, in forward_image
+    backbone_out = self.image_encoder(img_batch)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/modeling/backbones/image_encoder.py", line 31, in forward
+    features, pos = self.neck(self.trunk(sample))
+                              ^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/modeling/backbones/hieradet.py", line 292, in forward
+    x = blk(x)
+        ^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/modeling/backbones/hieradet.py", line 165, in forward
+    x = x + self.drop_path(self.mlp(self.norm2(x)))
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/sam2-smoke-test/sam2/modeling/sam2_utils.py", line 133, in forward
+    x = self.act(layer(x)) if i < self.num_layers - 1 else layer(x)
+        ^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venvs/m7/lib/python3.12/site-packages/torch/nn/modules/activation.py", line 816, in forward
+    return F.gelu(input, approximate=self.approximate)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 96.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 85.81 MiB is free. Process 14582 has 1.96 GiB memory in use. Process 14588 has 1.93 GiB memory in use. Process 14585 has 1.96 GiB memory in use. Process 14575 has 1.87 GiB memory in use. Process 14570 has 1.94 GiB memory in use. Process 14593 has 2.03 GiB memory in use. Process 14601 has 2.14 GiB memory in use. Process 14597 has 1.96 GiB memory in use. Process 14605 has 2.14 GiB memory in use. Process 14579 has 1.93 GiB memory in use. Process 14614 has 1.27 GiB memory in use. Process 28812 has 1.12 GiB memory in use. Including non-PyTorch memory, this process has 1.12 GiB memory in use. Of the allocated memory 597.20 MiB is allocated by PyTorch, and 84.80 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+C48 lvosv2__lvosv2/8lxxCA5h__obj1 299 0.9026 0.87 fps
+C48 lvosv2__lvosv2/N6CONZUW__obj1 299 0.932 0.84 fps
+C48 lvosv2__lvosv2/ikcMMycg__obj1 299 0.9537 0.84 fps
+C48 lvosv2__lvosv2/raql9H7f__obj1 299 0.8972 0.93 fps
+C48 lvosv2__lvosv2/raql9H7f__obj3 299 0.9094 0.89 fps
