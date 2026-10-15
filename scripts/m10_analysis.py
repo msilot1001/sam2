@@ -332,6 +332,83 @@ def interact():
     save(res, "interactions.json")
 
 
+FEATS = ("piou", "cos", "tiou", "cdist", "xiou", "larea")
+
+
+def hyp_table(o):
+    """Long table: one row per (frame, hypothesis k=0..5) with GT-free features and the GT J (cJk)."""
+    rows = []
+    for k in range(6):
+        h = o[["ds", "video", "unit", "video_idx", "gt_empty", "J", "acc", "score_G", "score_L"]].copy()
+        h["k"], h["view"] = k, "G" if k < 3 else "L"
+        for f in ("piou", "cos", "tiou", "cdist", "xiou", "area"):
+            h[f] = o[f"{f}{k}"].to_numpy()
+        h["cJ"] = o[f"cJ{k}"].to_numpy()
+        h["vscore"] = np.where(k < 3, o.score_G, o.score_L)
+        rows.append(h)
+    H = pd.concat(rows, ignore_index=True)
+    H["larea"] = np.log1p(H.area)
+    H["cos"] = H["cos"].fillna(-1)
+    H["cdist"] = H["cdist"].fillna(H.cdist.max())
+    return H
+
+
+def logit_fit(X, y, lam=1.0, it=25):
+    """Ridge logistic regression by Newton/IRLS on standardised features; returns a scoring function (log-odds)."""
+    mu, sd = X.mean(0), X.std(0) + 1e-9
+    Z = np.c_[np.ones(len(X)), (X - mu) / sd]
+    w = np.zeros(Z.shape[1])
+    R = lam * np.eye(Z.shape[1])
+    R[0, 0] = 0
+    for _ in range(it):
+        p = 1 / (1 + np.exp(-Z @ w))
+        g = Z.T @ (p - y) + R @ w
+        Hs = (Z * (p * (1 - p))[:, None]).T @ Z + R
+        w -= np.linalg.solve(Hs, g)
+    return lambda Xn: np.c_[np.ones(len(Xn)), (Xn - mu) / sd] @ w
+
+
+def selector(arm="OR0F"):
+    """Offline (framewise, dev) agreement of GT-free selection rules with the GT-best raw hypothesis, on GT-present
+    frames where some hypothesis has J >= 0.5. Rules are fixed here BEFORE looking at results:
+      R_sggl: SGGL's own output J; R_piou: argmax decoder IoU; R_cos: argmax frame-0 cosine; R_tiou: argmax IoU with
+      the previous output; R_sum: argmax of z(piou)+z(cos)+z(tiou)-z(cdist) (z within frame); R_lr: logistic
+      regression on FEATS (+view, vscore), 2-fold video-cluster cross-fitting within each dataset."""
+    o = load(arm)
+    H = hyp_table(o)
+    key = ["unit", "video_idx"]
+    z = lambda c: (H[c] - H.groupby(key)[c].transform("mean")) / (H.groupby(key)[c].transform("std") + 1e-6)
+    H["s_sum"] = z("piou") + z("cos") + z("tiou") - z("cdist")
+    H["s_lr"] = np.nan
+    X = np.c_[H[list(FEATS)].to_numpy(), (H.view == "L").to_numpy(), H.vscore.to_numpy()]
+    y = (H.cJ >= TAU).to_numpy()
+    for ds in H.ds.unique():
+        vids = np.array(sorted(H[H.ds == ds].video.unique()))
+        fold = {v: i % 2 for i, v in enumerate(np.random.default_rng(10).permutation(vids))}
+        for f in (0, 1):
+            tr = (H.ds == ds) & (H.video.map(fold) != f)
+            te = (H.ds == ds) & (H.video.map(fold) == f)
+            H.loc[te, "s_lr"] = logit_fit(X[tr], y[tr])(X[te])
+    res = {}
+    for ds, g in H.groupby("ds"):
+        fr = g.groupby(key)
+        best = fr.cJ.max()
+        ok = best[(best >= TAU)].index
+        pres = fr.gt_empty.first()
+        r = {"frames_with_a_correct_hypothesis": len(ok), "present_frames": int((~pres).sum())}
+        sg = fr.J.first()
+        r["R_sggl_hit"] = float((sg.loc[ok] >= TAU).mean())
+        r["R_sggl_meanJ_present"] = float(sg[~pres].mean())
+        for name, col in (("R_piou", "piou"), ("R_cos", "cos"), ("R_tiou", "tiou"), ("R_sum", "s_sum"), ("R_lr", "s_lr")):
+            pick = g.loc[g.groupby(key)[col].idxmax()].set_index(key).cJ
+            r[f"{name}_hit"] = float((pick.loc[ok] >= TAU).mean())
+            r[f"{name}_meanJ_present"] = float(pick[~pres.loc[pick.index]].mean())
+        r["oracle_meanJ_present"] = float(best[~pres].mean())
+        res[ds] = r
+        print(ds, {k: round(v, 3) if isinstance(v, float) else v for k, v in r.items()})
+    save(res, "selector_offline.json")
+
+
 def parity():
     b = load("OR0")
     res = {}
