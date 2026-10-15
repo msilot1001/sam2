@@ -396,7 +396,7 @@ def boxwork(sets=SETS):
         df = box_unit(ip, s, sp, u)
         atomic_csv(df, f)
         lock(f).unlink()
-        print("OR9", u.name, len(df), round(df.JF_full.mean(), 4), round(df.JF_crop.mean(), 4), flush=True)
+        print("OR9", u.name, len(df), *(round(df[c].mean(), 4) for c in ("JF_full", "JF_crop") if c in df), flush=True)
 
 
 def rerun(listfile):
