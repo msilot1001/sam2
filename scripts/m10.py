@@ -41,7 +41,7 @@ import torch.nn.functional as Fn
 
 from baseline.dropout_runner import atomic_csv, atomic_json
 from memint import controlled
-from spatial import sggl, vcam
+from spatial import rescue as R, sggl, vcam
 
 _s = importlib.util.spec_from_file_location("m7", Path(__file__).with_name("m7.py"))
 m7 = importlib.util.module_from_spec(_s)
@@ -189,6 +189,8 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
     g0 = m7.gt(u, 0)
     hw = g0.shape
     d = sggl.Dual(pred, m7.paths(u), g0)
+    p0 = R.proto(d.features("G", 0), g0)                  # frame-0 appearance prototype (prompt only, GT-free)
+    prev_out = g0
     rblock = random_blocks(u, n) if A["admit"] == "random" else None
     other = getattr(m7, "other", None)
     rows, keep = [], {} if os.environ.get("M10_SAVE_MASKS") else None
@@ -204,8 +206,23 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
             planner = sggl._cond_only if A["memory"] == "cond0" else None
             V[v] = d.view(v, t, planner=planner)
             C[v] = cands(dec["lr"], V[v].box, hw, g)
+            PI = dec["iou"][0].float().cpu().numpy() if v == "G" else PI
+            if v == "L":
+                PI = np.concatenate([PI, dec["iou"][0].float().cpu().numpy()])
         out, ok = sggl.a2x(V["G"], V["L"], hw)
         mv = {"G": V["G"].mask, "L": vcam.paste(V["L"].mask, V["L"].box, hw)}
+        # GT-free per-hypothesis signals (selector design, M10 improvement phase): decoder IoU, area, temporal IoU and
+        # centre distance to the previous output, cross-view IoU, frame-0 appearance cosine on G stride-16 features
+        fG = d.features("G", t)
+        pc = vcam.center_of(prev_out)
+        feats = {}
+        for k, m in enumerate(C["G"] + C["L"]):
+            c = vcam.center_of(m)
+            pv = R.proto(fG, m) if m.any() else None
+            feats.update({f"piou{k}": float(PI[k]), f"area{k}": int(m.sum()), f"tiou{k}": jac(m, prev_out),
+                          f"cdist{k}": np.nan if c is None or pc is None else float(np.hypot(c[0] - pc[0], c[1] - pc[1]) / d.side),
+                          f"xiou{k}": jac(m, mv["L" if k < 3 else "G"]),
+                          f"cos{k}": np.nan if pv is None or p0 is None else float(pv @ p0)})
         gv = {"G": g, "L": region(g, V["L"].box)}
         ok_v = {v: correct(mv[v], gv[v]) for v in "GL"}
         pool = C["G"] + C["L"] + [np.zeros(hw, bool)]
@@ -260,7 +277,7 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
                      "J_G": jac(mv["G"], g), "J_L": jac(mv["L"], g), "Jv_L": jac(mv["L"], gv["L"]),
                      "ok_G": ok_v["G"], "ok_L": ok_v["L"], "adm_G": adm["G"], "adm_L": adm["L"],
                      "rew_G": rew["G"], "rew_L": rew["L"],
-                     **{f"cJ{k}": pj[k] for k in range(7)}, "best": best, "JF_best": m55.jf(bj, g)["JF"],
+                     **{f"cJ{k}": pj[k] for k in range(7)}, "best": best, "JF_best": m55.jf(bj, g)["JF"], **feats,
                      "crop_y0": y0, "crop_x0": x0, "crop_side": y1 - y0, "gt_area": int(g.sum()),
                      "gt_in_crop": float(gv["L"].sum() / g.sum()) if g.any() else np.nan,
                      "out_area": int(out.sum()), "out_inter_gt": int((out & g).sum()),
@@ -270,6 +287,7 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
         if keep is not None:                     # visualisation reruns only: bit-packed masks of every frame
             for k, m in (("out", out), ("G", mv["G"]), ("L", mv["L"])):
                 keep.setdefault(k, []).append(np.packbits(m))
+        prev_out = out
         if A["center"] != "gt":
             d.set_center(vcam.center_of(out))    # SGGL: centre follows the output (held while it is empty)
     peak = torch.cuda.max_memory_allocated()

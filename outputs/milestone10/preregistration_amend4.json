@@ -1,0 +1,9 @@
+{
+  "created_kst": "2026-10-15 12:29",
+  "before_any_output_of": "OR0F",
+  "why": "Phase 2/3 show hypothesis selection is the main actionable lever (OR5S +0.139/+0.183 output-only; OR5M +0.170/+0.299 with selected hypothesis written to memory; C75 selection+admission +0.152/+0.221 with no GT mask). The improvement phase needs GT-free per-hypothesis signals.",
+  "arms": {"OR0F": {}},
+  "definition": "OR0F = OR0 (SGGL, identical decisions; parity with OR0 required) re-run on dev with extra GT-free per-hypothesis columns for the 6 raw hypotheses k (0-2 G, 3-5 L): piou (decoder predicted IoU), area, tiou (IoU with previous output), cdist (centre distance to previous output / crop side), xiou (IoU with the other view's actual mask), cos (G stride-16 mask-pooled cosine to the frame-0 prompt prototype).",
+  "use": "dev only: fit/choose a selector rule offline (agreement with the GT-best hypothesis, framewise). The chosen deployable selector arm is then frozen by a further amendment BEFORE any conf run; conf is the confirmation set (one run), with a matched null control.",
+  "data": "MOSEV2:dev, VOST:dev, LVOSV2:dev"
+}
