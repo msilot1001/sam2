@@ -1,0 +1,26 @@
+{
+  "created_kst": "2026-10-15 13:45",
+  "before_any_output_of": "selector v2 offline gate (switch precision, state split, video CI, tau curve), VER / N1 / N2 online arms",
+  "source": "external critical review 'M10 Oracle 분해 비판적 분석' (2026-10-15) sections 11a-11e, adopted as written except where noted",
+  "disclosure": "Before this file, the first selector pass (13:05, commit 967c634) was seen: per-rule hit rate on frames with a correct hypothesis and mean J on GT-present frames (R_piou best on VOST/LVOS, LR ~ SGGL, cos worst). Switch precision, state split, CIs and tau curves had NOT been computed. The rule list below includes every rule from that pass plus R_anchor (added per review 11a: no self-reinforcing signals).",
+  "selector_scope": "Acts only on frames where the SGGL output is non-empty. Chooses among the 6 raw decoder hypotheses (G 0-2, L 3-5); never chooses the empty mask (presence is left to native SGGL; M9 CONSENSUS falsified presence rules). GT-absent frames are therefore untouched except through switches among non-empty hypotheses.",
+  "sggl_hypothesis": "k_sggl = argmax piou within the view SGGL output (L if gate passes else G) = SAM 2's own multimask choice.",
+  "rules": {
+    "R_piou": "s_k = piou_k (decoder predicted IoU, compared across both views)",
+    "R_sum4": "s_k = z(piou)+z(cos)+z(tiou)-z(cdist), z within frame over the 6 hypotheses",
+    "R_anchor": "s_k = z(piou)+z(cos)+z(xiou) (no previous-output signals)",
+    "R_cos": "s_k = cos_k (frame-0 prototype cosine)",
+    "R_lr": "ridge logistic regression on (piou, cos, tiou, cdist, xiou, log area, view, view object score), 2-fold video cross-fitting within dataset for the offline gate; for an online arm the coefficients are refit once on all dev rows and frozen"
+  },
+  "switch": "switch from k_sggl to pick = argmax s_k iff s(pick) - s(k_sggl) >= tau",
+  "tau_rule": "per rule, tau* = smallest tau on a fixed grid (quantiles of positive margins) where the POOLED (MOSEv2+VOST dev) switch precision >= 0.70; switch precision = share of switches with J(pick) > J(k_sggl)",
+  "offline_gate_11d1": "A rule passes iff, at its tau*: (a) mean dJ on GT-present frames (video-equal, video bootstrap 95% CI) has CI lower bound > 0 on MOSEv2 AND VOST; (b) switch precision >= 0.60 on MOSEv2 AND VOST separately; (c) mean dJ over OR0-drift frames (states wrong_region/wrong_object/empty with GT present) > 0 on both, and mean dJ over OR0-correct frames >= -0.005 on both (harm guard). LVOS reported, not gating (top-2 video share 0.80-0.86 in M10). If several rules pass: the one with the larger sum of MOSEv2+VOST dJ; a non-LR rule is preferred unless LR is larger by > 0.005 on both. If none passes: no online arm; conclusion 'GT-free selector not reachable with current signals' (M9 Q1 lower branch).",
+  "online_arms": {
+    "VER": "output: SGGL output, switched to the rule's pick when the switch condition holds; memory: per view v, if the rule's best hypothesis within v beats v's own native pick by >= tau* (and v's object score > 0), v's frame-t memory is re-encoded from that hypothesis via the SAM 2 mask-input path (same path as OR5M), else native",
+    "N1": "self re-encode control: SGGL, but every frame each view's memory is re-encoded from its OWN native mask via the same mask-input path (measures the path effect: fixed confidence, binarisation)",
+    "N2": "random switch control: per unit and view, the same NUMBER of output switches and memory re-encodings as VER on that unit, at seeded random frames, to a random non-native non-empty hypothesis"
+  },
+  "dev_gate_11d2": "VER - OR0 CI lower > 0 on MOSEv2 and VOST; VER - N1 > 0 and VER - N2 > 0 (point estimates, CIs reported); units below -0.05 for VER <= the same count for N2.",
+  "conf_11d3": "one run of VER and N2 on the conf split (MOSEV2:conf, VOST:conf) with the same rule and tau*; same criteria as 11d2 vs OR0 conf. Pass -> adopt; fail -> recorded as 'dev only'.",
+  "reporting_11d4": "always report the share of the oracle upper bound recovered: VER vs OR5M (+0.170 / +0.299) and vs OR5off GT-present-only (+0.068 / +0.146)."
+}
