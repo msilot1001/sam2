@@ -108,88 +108,176 @@
  },
  "C58": {
   "mosev2": {
-   "units": 26,
+   "units": 62,
    "arm": {
     "loss": {
-     "episodes": 63,
-     "per_unit": 2.423076923076923,
-     "mean_dur": 1.6825396825396826,
+     "episodes": 99,
+     "per_unit": 1.596774193548387,
+     "mean_dur": 1.5454545454545454,
      "median_dur": 1.0,
-     "recovered_frac": 1.0,
-     "loss_sum": 51.08097710148519,
-     "frames_in_episodes": 106
+     "recovered_frac": 0.9797979797979798,
+     "loss_sum": 76.01308040806003,
+     "frames_in_episodes": 153
     },
     "drift": {
-     "episodes": 47,
-     "per_unit": 1.8076923076923077,
-     "mean_dur": 1.3829787234042554,
+     "episodes": 71,
+     "per_unit": 1.1451612903225807,
+     "mean_dur": 1.3098591549295775,
      "median_dur": 1.0,
-     "recovered_frac": 1.0,
-     "loss_sum": 35.02247868098517,
-     "frames_in_episodes": 65
+     "recovered_frac": 0.9859154929577465,
+     "loss_sum": 51.00857113661577,
+     "frames_in_episodes": 93
     }
    },
    "OR0": {
     "loss": {
-     "episodes": 83,
-     "per_unit": 3.1923076923076925,
-     "mean_dur": 7.132530120481928,
+     "episodes": 159,
+     "per_unit": 2.564516129032258,
+     "mean_dur": 6.1069182389937104,
      "median_dur": 2.0,
-     "recovered_frac": 0.927710843373494,
-     "loss_sum": 439.33149119119156,
-     "frames_in_episodes": 592
+     "recovered_frac": 0.8930817610062893,
+     "loss_sum": 754.2280113010453,
+     "frames_in_episodes": 971
     },
     "drift": {
-     "episodes": 64,
-     "per_unit": 2.4615384615384617,
-     "mean_dur": 4.375,
-     "median_dur": 1.5,
-     "recovered_frac": 0.9375,
-     "loss_sum": 205.45138338908802,
-     "frames_in_episodes": 280
+     "episodes": 106,
+     "per_unit": 1.7096774193548387,
+     "mean_dur": 4.150943396226415,
+     "median_dur": 1.0,
+     "recovered_frac": 0.9056603773584906,
+     "loss_sum": 341.94315463948305,
+     "frames_in_episodes": 440
     }
    }
   },
   "vost": {
-   "units": 23,
+   "units": 31,
    "arm": {
     "loss": {
-     "episodes": 89,
-     "per_unit": 3.869565217391304,
-     "mean_dur": 1.4382022471910112,
+     "episodes": 105,
+     "per_unit": 3.3870967741935485,
+     "mean_dur": 1.6571428571428573,
      "median_dur": 1.0,
-     "recovered_frac": 0.9775280898876404,
-     "loss_sum": 54.68753521003533,
-     "frames_in_episodes": 128
+     "recovered_frac": 0.9809523809523809,
+     "loss_sum": 77.83991308005682,
+     "frames_in_episodes": 174
     },
     "drift": {
-     "episodes": 52,
-     "per_unit": 2.260869565217391,
-     "mean_dur": 1.2692307692307692,
+     "episodes": 61,
+     "per_unit": 1.967741935483871,
+     "mean_dur": 1.360655737704918,
      "median_dur": 1.0,
-     "recovered_frac": 0.9807692307692307,
-     "loss_sum": 29.46512187979859,
-     "frames_in_episodes": 66
+     "recovered_frac": 0.9836065573770492,
+     "loss_sum": 38.71206650669301,
+     "frames_in_episodes": 83
     }
    },
    "OR0": {
     "loss": {
-     "episodes": 145,
-     "per_unit": 6.304347826086956,
-     "mean_dur": 12.413793103448276,
+     "episodes": 174,
+     "per_unit": 5.612903225806452,
+     "mean_dur": 11.419540229885058,
      "median_dur": 2.0,
-     "recovered_frac": 0.8689655172413793,
-     "loss_sum": 1528.3077159495356,
-     "frames_in_episodes": 1800
+     "recovered_frac": 0.8735632183908046,
+     "loss_sum": 1657.188999477964,
+     "frames_in_episodes": 1987
     },
     "drift": {
-     "episodes": 112,
-     "per_unit": 4.869565217391305,
-     "mean_dur": 11.383928571428571,
+     "episodes": 140,
+     "per_unit": 4.516129032258065,
+     "mean_dur": 9.664285714285715,
      "median_dur": 2.0,
-     "recovered_frac": 0.8660714285714286,
-     "loss_sum": 1155.7731523824957,
-     "frames_in_episodes": 1275
+     "recovered_frac": 0.8785714285714286,
+     "loss_sum": 1217.0114247152887,
+     "frames_in_episodes": 1353
+    }
+   }
+  }
+ },
+ "C75": {
+  "mosev2": {
+   "units": 62,
+   "arm": {
+    "loss": {
+     "episodes": 117,
+     "per_unit": 1.8870967741935485,
+     "mean_dur": 3.58974358974359,
+     "median_dur": 2.0,
+     "recovered_frac": 0.9572649572649573,
+     "loss_sum": 262.8681364665008,
+     "frames_in_episodes": 420
+    },
+    "drift": {
+     "episodes": 95,
+     "per_unit": 1.532258064516129,
+     "mean_dur": 2.3789473684210525,
+     "median_dur": 1.0,
+     "recovered_frac": 0.9789473684210527,
+     "loss_sum": 154.01315321117227,
+     "frames_in_episodes": 226
+    }
+   },
+   "OR0": {
+    "loss": {
+     "episodes": 159,
+     "per_unit": 2.564516129032258,
+     "mean_dur": 6.1069182389937104,
+     "median_dur": 2.0,
+     "recovered_frac": 0.8930817610062893,
+     "loss_sum": 754.2280113010453,
+     "frames_in_episodes": 971
+    },
+    "drift": {
+     "episodes": 106,
+     "per_unit": 1.7096774193548387,
+     "mean_dur": 4.150943396226415,
+     "median_dur": 1.0,
+     "recovered_frac": 0.9056603773584906,
+     "loss_sum": 341.94315463948305,
+     "frames_in_episodes": 440
+    }
+   }
+  },
+  "vost": {
+   "units": 31,
+   "arm": {
+    "loss": {
+     "episodes": 223,
+     "per_unit": 7.193548387096774,
+     "mean_dur": 5.2959641255605385,
+     "median_dur": 2.0,
+     "recovered_frac": 0.9327354260089686,
+     "loss_sum": 856.9618816172199,
+     "frames_in_episodes": 1181
+    },
+    "drift": {
+     "episodes": 184,
+     "per_unit": 5.935483870967742,
+     "mean_dur": 3.989130434782609,
+     "median_dur": 1.0,
+     "recovered_frac": 0.9619565217391305,
+     "loss_sum": 607.1003620896865,
+     "frames_in_episodes": 734
+    }
+   },
+   "OR0": {
+    "loss": {
+     "episodes": 174,
+     "per_unit": 5.612903225806452,
+     "mean_dur": 11.419540229885058,
+     "median_dur": 2.0,
+     "recovered_frac": 0.8735632183908046,
+     "loss_sum": 1657.188999477964,
+     "frames_in_episodes": 1987
+    },
+    "drift": {
+     "episodes": 140,
+     "per_unit": 4.516129032258065,
+     "mean_dur": 9.664285714285715,
+     "median_dur": 2.0,
+     "recovered_frac": 0.8785714285714286,
+     "loss_sum": 1217.0114247152887,
+     "frames_in_episodes": 1353
     }
    }
   }
@@ -810,45 +898,45 @@
  },
  "OR8": {
   "lvosv2": {
-   "units": 12,
+   "units": 16,
    "arm": {
     "loss": {
-     "episodes": 40,
-     "per_unit": 3.3333333333333335,
-     "mean_dur": 1.325,
+     "episodes": 66,
+     "per_unit": 4.125,
+     "mean_dur": 1.5757575757575757,
      "median_dur": 1.0,
      "recovered_frac": 1.0,
-     "loss_sum": 33.41064532753629,
-     "frames_in_episodes": 53
+     "loss_sum": 69.47186263956534,
+     "frames_in_episodes": 104
     },
     "drift": {
-     "episodes": 11,
-     "per_unit": 0.9166666666666666,
-     "mean_dur": 1.3636363636363635,
+     "episodes": 25,
+     "per_unit": 1.5625,
+     "mean_dur": 1.44,
      "median_dur": 1.0,
      "recovered_frac": 1.0,
-     "loss_sum": 9.12220515579923,
-     "frames_in_episodes": 15
+     "loss_sum": 21.304302947703757,
+     "frames_in_episodes": 36
     }
    },
    "OR0": {
     "loss": {
-     "episodes": 36,
-     "per_unit": 3.0,
-     "mean_dur": 10.444444444444445,
+     "episodes": 70,
+     "per_unit": 4.375,
+     "mean_dur": 7.957142857142857,
      "median_dur": 1.0,
-     "recovered_frac": 0.9444444444444444,
-     "loss_sum": 287.91497888644466,
-     "frames_in_episodes": 376
+     "recovered_frac": 0.9571428571428572,
+     "loss_sum": 437.77583345265276,
+     "frames_in_episodes": 557
     },
     "drift": {
-     "episodes": 17,
-     "per_unit": 1.4166666666666667,
-     "mean_dur": 17.176470588235293,
+     "episodes": 32,
+     "per_unit": 2.0,
+     "mean_dur": 9.6875,
      "median_dur": 1.0,
-     "recovered_frac": 0.9411764705882353,
-     "loss_sum": 214.6007940985705,
-     "frames_in_episodes": 292
+     "recovered_frac": 0.96875,
+     "loss_sum": 226.21957736528674,
+     "frames_in_episodes": 310
     }
    }
   },
