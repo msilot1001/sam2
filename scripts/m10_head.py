@@ -23,7 +23,8 @@ A = importlib.util.module_from_spec(s := importlib.util.spec_from_file_location(
 s.loader.exec_module(A)
 
 OUT = Path("outputs/milestone10")
-HEAD = OUT / "head"
+TAG = os.environ.get("M10_HEAD_TAG", "")              # step-5 refit: "_a01" (never overwrites round 1)
+HEAD = OUT / f"head{TAG}"
 DEV_DIR = A.RUNS / "OR0K"
 HYPER = {"opt": "Adam", "lr": 1e-3, "weight_decay": 1e-4, "epochs": 30, "batch": 512, "seed": 0, "loss": "MSE to cJ",
          "hidden": {"b": [64, 64], "c": [128, 128]}, "folds": 5, "fold_seed": 0, "null_shuffle_seed": 0, "bootstrap_seed": 10}
@@ -343,7 +344,7 @@ def fit(*train_dirs):
            "training_rows": "hypotheses of frames in scope (out_area > 0); gt_empty frames kept",
            "null_without_tau_star": "treated as no switches (dJ 0, precision 0) in criterion (4)",
            "train": {"dirs": [str(d) for d in train_dirs], **counts(tr[0])}, "dev": {"dir": str(DEV_DIR), **counts(dev[0])}, **r}
-    A.save(out, "head_offline.json")
+    A.save(out, f"head_offline{TAG}.json")
     md(out)
     return out
 
@@ -378,7 +379,7 @@ def md(res):
             for ds, e in res["models"][m][hyp].get("dev", {}).items():
                 L.append(f"| {m} | {hyp} | {names[ds]} | {f3(e['dJ_drift_frames'])} | {f3(e['dJ_correct_frames'])} | {f3(e['precision'])} |")
     L += ["", "정밀도–tau 곡선 (학습 OOF, dev)과 fold 배정은 outputs/milestone10/reports/head_offline.json. 재적합 모델: outputs/milestone10/head/<model>.pt."]
-    Path("docs/m10/HEAD_RESULTS.md").write_text("\n".join(L) + "\n")
+    Path(f"docs/m10/HEAD_RESULTS{TAG}.md").write_text("\n".join(L) + "\n")
 
 
 def smoke(dev_dir=str(DEV_DIR)):
