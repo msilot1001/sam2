@@ -342,7 +342,8 @@ def hyp_table(o):
         h = o[["ds", "video", "unit", "video_idx", "gt_empty", "J", "acc", "score_G", "score_L"]].copy()
         h["k"], h["view"] = k, "G" if k < 3 else "L"
         for f in ("piou", "cos", "tiou", "cdist", "xiou", "area"):
-            h[f] = o[f"{f}{k}"].to_numpy()
+            c = f"h{f}{k}" if f == "area" and f"harea{k}" in o else f"{f}{k}"
+            h[f] = o[c].to_numpy()
         h["cJ"] = o[f"cJ{k}"].to_numpy()
         h["vscore"] = np.where(k < 3, o.score_G, o.score_L)
         rows.append(h)

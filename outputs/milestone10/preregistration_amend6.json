@@ -1,0 +1,22 @@
+{
+  "created_kst": "2026-10-15 13:51",
+  "status": "EXPLORATORY (outside the amend5 decision rule, which FAILED for every rule). Results are reported as exploratory; conf is the only unbiased test.",
+  "before_any_output_of": "VXO, VXM, N1M, N2X",
+  "post_hoc_disclosure": "The disagree gate (xiou(k_sggl) < 0.5) was chosen AFTER looking at dev OR0F: R_piou's offline gain sits entirely in disagree switches (VOST n=270 prec 0.61 dJ_sum +66; LVOS n=165 prec 0.85 +111; MOSEv2 n=235 prec 0.24 -10). Proposed by the independent Fable agent, reproduced exactly on Ubuntu.",
+  "arms": {
+    "VXO": {"output": "xswitch"},
+    "VXM": {"output": "xswitch", "memory": "xswitch"},
+    "N1M": {"memory": "self_at", "after": "VXM"},
+    "N2X": {"output": "random_x", "memory": "random_x", "after": "VXM"}
+  },
+  "definitions": {
+    "switch (GT-free)": "on frames with a non-empty SGGL output: k_sg = SAM 2's pick in the output view (argmax predicted IoU there); pick = argmax predicted IoU over all 6 raw hypotheses; switch iff pick != k_sg, piou(pick) > piou(k_sg) and IoU(k_sg mask, other view's mask) < 0.5",
+    "VXO": "output switched to pick; memory native (the L crop centre follows the output, so this is already an online test)",
+    "VXM": "VXO + the OUTPUT view's frame-t memory re-encoded from the picked (other-view) hypothesis via the SAM 2 mask-input path",
+    "N1M": "SGGL output; at exactly VXM's switch frames on that unit, the output view's memory re-encoded from its OWN native mask (path effect of the write itself)",
+    "N2X": "same NUMBER of switches as VXM per unit at seeded random frames (skipped when the output is empty): output = a random hypothesis of the other view, and the output view's memory re-encoded from it"
+  },
+  "criteria_dev": "VER = VXO and VXM separately. (1) VER - OR0 video-bootstrap CI lower > 0 on VOST; (2) MOSEv2 point estimate >= -0.005 (non-harm; offline says null there); (3) VXM > N1M and VXM > N2X point estimates on VOST and MOSEv2; (4) units below -0.05 for VER <= N2X's count. LVOS reported (not gating: few videos). Winner: VXM if it passes and beats VXO by > 0.005 on both VOST and MOSEv2, else VXO if it passes.",
+  "conf": "the winner (and N2X) run once on MOSEV2:conf, VOST:conf vs OR0 on conf (run on this pod); same criteria (1),(2),(4). Fail -> 'dev only'.",
+  "data_dev": "MOSEV2:dev, VOST:dev, LVOSV2:dev"
+}

@@ -183,6 +183,16 @@ def random_blocks(u, n):
     return {v: set(rng.choice(np.arange(1, n), size=int((~o[f"adm_{v}"]).sum()), replace=False).tolist()) for v in "GL"}
 
 
+def vxm_schedule(u, n):
+    """amend6 controls: frames where VXM fired its disagree-gated switch on this unit, and a seeded random set of the
+    same size (N2X)."""
+    o = pd.read_csv(RUNS / "VXM" / f"{m7.stem(u)}.csv")
+    fired = set(o.video_idx[o.xsw >= 0].astype(int).tolist())
+    rng = np.random.default_rng(int(hashlib.sha256(("N2X" + u.name).encode()).hexdigest()[:8], 16))
+    rand = set(rng.choice(np.arange(1, n), size=min(len(fired), n - 1), replace=False).tolist()) if fired else set()
+    return fired, rand, rng
+
+
 # ----------------------------------------------------------------------------- rollout
 def run_unit(pred, dec, s, sp, u, name, A, n=None):
     n = n or len(u.frames)
@@ -192,6 +202,7 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
     p0 = R.proto(d.features("G", 0), g0)                  # frame-0 appearance prototype (prompt only, GT-free)
     prev_out = g0
     rblock = random_blocks(u, n) if A["admit"] == "random" else None
+    fired, rand, xrng = vxm_schedule(u, n) if A.get("after") == "VXM" else (set(), set(), None)
     other = getattr(m7, "other", None)
     rows, keep = [], {} if os.environ.get("M10_SAVE_MASKS") else None
     for t in range(1, n):
@@ -219,7 +230,7 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
         for k, m in enumerate(C["G"] + C["L"]):
             c = vcam.center_of(m)
             pv = R.proto(fG, m) if m.any() else None
-            feats.update({f"piou{k}": float(PI[k]), f"area{k}": int(m.sum()), f"tiou{k}": jac(m, prev_out),
+            feats.update({f"piou{k}": float(PI[k]), f"harea{k}": int(m.sum()),   # harea: OR0F used area{k}, clobbering area0 f"tiou{k}": jac(m, prev_out),
                           f"cdist{k}": np.nan if c is None or pc is None else float(np.hypot(c[0] - pc[0], c[1] - pc[1]) / d.side),
                           f"xiou{k}": jac(m, mv["L" if k < 3 else "G"]),
                           f"cos{k}": np.nan if pv is None or p0 is None else float(pv @ p0)})
@@ -230,6 +241,21 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
         j_sggl = jac(out, g)
         best = int(np.argmax(pj))
         src = "L" if ok else "G"
+        # amend6 (exploratory): disagree-gated cross-view switch, GT-free. k_sg = SAM 2's own pick in the output view.
+        ov = "L" if ok else "G"
+        xsw, xk = -1, -1
+        if out.any():
+            kv = 3 if ok else 0
+            k_sg = kv + int(np.argmax(PI[kv:kv + 3]))
+            pick = int(np.argmax(PI))
+            if pick != k_sg and PI[pick] > PI[k_sg] and feats[f"xiou{k_sg}"] < 0.5:
+                xsw = pick
+            if A["output"] == "random_x" and t in rand:
+                xk = (0 if ok else 3) + int(xrng.integers(0, 3))      # random hypothesis of the other view
+        if A["output"] == "xswitch" and xsw >= 0:
+            out, src = pool[xsw], ("G", "L")[xsw // 3]
+        elif A["output"] == "random_x" and xk >= 0:
+            out, src = pool[xk], ("G", "L")[xk // 3]
         if A["output"] == "select" and pj[best] > j_sggl + 1e-9:
             out, src = pool[best], ("G", "L", "E")[min(best // 3, 2)]
         elif A["output"] == "correct" and not correct(out, g):
@@ -259,6 +285,15 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
             if A["memory"] == "gt" and t % A.get("every", 1) == 0:
                 rewrite_memory(pred, st.st, st.od, t, crop(gv[v]))
                 rew[v] = True
+            elif A["memory"] == "xswitch" and v == ov and xsw >= 0:     # write the picked other-view hypothesis
+                rewrite_memory(pred, st.st, st.od, t, crop(pool[xsw]))
+                rew[v] = True
+            elif A["memory"] == "random_x" and v == ov and xk >= 0:
+                rewrite_memory(pred, st.st, st.od, t, crop(pool[xk]))
+                rew[v] = True
+            elif A["memory"] == "self_at" and v == ov and t in fired:     # path-effect control at VXM's frames
+                rewrite_memory(pred, st.st, st.od, t, crop(mv[v]))
+                rew[v] = True
             elif A["memory"] == "cand":
                 cj = [jac(m, gv[v]) for m in C[v]] + [jac(np.zeros(hw, bool), gv[v])]
                 k = int(np.argmax(cj))
@@ -277,7 +312,7 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
                      "J_G": jac(mv["G"], g), "J_L": jac(mv["L"], g), "Jv_L": jac(mv["L"], gv["L"]),
                      "ok_G": ok_v["G"], "ok_L": ok_v["L"], "adm_G": adm["G"], "adm_L": adm["L"],
                      "rew_G": rew["G"], "rew_L": rew["L"],
-                     **{f"cJ{k}": pj[k] for k in range(7)}, "best": best, "JF_best": m55.jf(bj, g)["JF"], **feats,
+                     **{f"cJ{k}": pj[k] for k in range(7)}, "best": best, "JF_best": m55.jf(bj, g)["JF"], **feats, "xsw": xsw, "xk": xk,
                      "crop_y0": y0, "crop_x0": x0, "crop_side": y1 - y0, "gt_area": int(g.sum()),
                      "gt_in_crop": float(gv["L"].sum() / g.sum()) if g.any() else np.nan,
                      "out_area": int(out.sum()), "out_inter_gt": int((out & g).sum()),
@@ -351,6 +386,9 @@ def work(arms=None, sets=SETS):
             if f.exists() or lock(f).exists():
                 continue
             A = spec(a)
+            if A.get("after") == "VXM" and not (RUNS / "VXM" / f"{m7.stem(u)}.csv").exists():
+                waiting.append((a, s, sp, u))
+                continue
             if A["admit"] == "random" and not (RUNS / "OR7" / f"{m7.stem(u)}.csv").exists():
                 waiting.append((a, s, sp, u))                      # needs OR7's blocked counts first
                 continue
