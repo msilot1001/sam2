@@ -50,6 +50,7 @@ m55 = m7.m55
 OUT = Path("outputs/milestone10")
 RUNS = Path(os.environ.get("M10_RUNS_DIR", OUT / "runs"))
 PREREG = Path(os.environ.get("M10_PREREG", OUT / "preregistration.json"))
+LOCKS = Path(os.environ.get("M10_LOCKS", OUT / "locks"))    # outside the synced runs dir
 TAU = 0.5
 
 ARMS = {   # single oracles (phase 2), in queue priority order; combinations are added by amendment after phase 2
@@ -278,9 +279,14 @@ def tasks(arms, sets):
     return [(a, s, sp, u) for a in arms for s, sp, u in us]
 
 
+def lock(f):
+    return LOCKS / f.parent.name / f"{f.stem}.lock"
+
+
 def claim(f):
+    lock(f).parent.mkdir(parents=True, exist_ok=True)
     try:
-        os.close(os.open(f.with_suffix(".lock"), os.O_CREAT | os.O_EXCL))
+        os.close(os.open(lock(f), os.O_CREAT | os.O_EXCL))
         return True
     except FileExistsError:
         return False
@@ -301,7 +307,7 @@ def work(arms=None, sets=SETS):
             dd = RUNS / a
             dd.mkdir(parents=True, exist_ok=True)
             f = dd / f"{m7.stem(u)}.csv"
-            if f.exists() or f.with_suffix(".lock").exists():
+            if f.exists() or lock(f).exists():
                 continue
             A = spec(a)
             if A["admit"] == "random" and not (RUNS / "OR7" / f"{m7.stem(u)}.csv").exists():
@@ -315,7 +321,7 @@ def work(arms=None, sets=SETS):
             w0 = time.time()
             df = run_unit(pred, dec, s, sp, u, a, A)
             atomic_csv(df.assign(wall_s=time.time() - w0, machine=env["machine"]), f)
-            f.with_suffix(".lock").unlink()
+            lock(f).unlink()
             print(a, u.name, len(df), round(df.JF.mean(), 4), f"{len(df) / (time.time() - w0):.2f} fps", flush=True)
         left = waiting
         if left:
