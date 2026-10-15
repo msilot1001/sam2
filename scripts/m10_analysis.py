@@ -570,8 +570,12 @@ def degraded():
             pres = m.groupby("unit").apply(lambda q: q.d[~q.gt_empty].sum() / len(q))
             vid = g.groupby("unit").video.first()
             dpres = pres.groupby(vid).mean().mean()
-            prec, nsw = switch_precision(g) if "xsw" in g else (None, 0)
-            prec_nt = switch_precision.last_no_ties if "xsw" in g and nsw else None
+            prec, nsw = switch_precision(g) if arm in ("VXO", "VXM") else (None, 0)
+            prec_nt = switch_precision.last_no_ties if arm in ("VXO", "VXM") and nsw else None
+            if arm == "N2X":                       # controls: actual intervention counts (xsw there is only logged)
+                nsw = int((g.xk >= 0).sum())
+            elif arm == "N1M":
+                nsw = int((g.rew_G | g.rew_L).sum())
             res["arms"][arm][ds] = {"dJF": st["dJF"], "ci": st["ci"], "dJF_present_part": float(dpres), "units": st["n_units"],
                                     "complete": g.unit.nunique() == g0.unit.nunique(),
                                     "realized_precision": prec, "realized_precision_no_ties": prec_nt, "switches": nsw,

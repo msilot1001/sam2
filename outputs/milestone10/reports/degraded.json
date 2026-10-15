@@ -124,10 +124,10 @@
     "dJF_present_part": 0.00025041114277414377,
     "units": 16,
     "complete": true,
-    "realized_precision": 0.8766233766233766,
-    "realized_precision_no_ties": 0.8881578947368421,
-    "switches": 154,
-    "switch_per_100f": 3.374233128834356,
+    "realized_precision": null,
+    "realized_precision_no_ties": null,
+    "switches": 32,
+    "switch_per_100f": 0.7011393514461,
     "units_below_m005": 0
    },
    "mosev2": {
@@ -139,10 +139,10 @@
     "dJF_present_part": -0.0033022911076835376,
     "units": 62,
     "complete": true,
-    "realized_precision": 0.2682926829268293,
-    "realized_precision_no_ties": 0.3374233128834356,
-    "switches": 205,
-    "switch_per_100f": 4.265501456512692,
+    "realized_precision": null,
+    "realized_precision_no_ties": null,
+    "switches": 96,
+    "switch_per_100f": 1.9975031210986267,
     "units_below_m005": 4
    },
    "vost": {
@@ -154,10 +154,10 @@
     "dJF_present_part": 0.01303127823072808,
     "units": 31,
     "complete": true,
-    "realized_precision": 0.45517241379310347,
-    "realized_precision_no_ties": 0.7810650887573964,
-    "switches": 290,
-    "switch_per_100f": 8.013263332412269,
+    "realized_precision": null,
+    "realized_precision_no_ties": null,
+    "switches": 112,
+    "switch_per_100f": 3.094777562862669,
     "units_below_m005": 1
    }
   },
@@ -171,10 +171,10 @@
     "dJF_present_part": 0.013933360697351335,
     "units": 16,
     "complete": true,
-    "realized_precision": 0.8020833333333334,
-    "realized_precision_no_ties": 0.8191489361702128,
-    "switches": 96,
-    "switch_per_100f": 2.1034180543382996,
+    "realized_precision": null,
+    "realized_precision_no_ties": null,
+    "switches": 27,
+    "switch_per_100f": 0.5915863277826467,
     "units_below_m005": 0
    },
    "mosev2": {
@@ -186,10 +186,10 @@
     "dJF_present_part": -0.015800854304098572,
     "units": 62,
     "complete": true,
-    "realized_precision": 0.3232758620689655,
-    "realized_precision_no_ties": 0.4032258064516129,
-    "switches": 232,
-    "switch_per_100f": 4.827299209321681,
+    "realized_precision": null,
+    "realized_precision_no_ties": null,
+    "switches": 89,
+    "switch_per_100f": 1.8518518518518519,
     "units_below_m005": 6
    },
    "vost": {
@@ -201,10 +201,10 @@
     "dJF_present_part": 0.0024045791610741957,
     "units": 31,
     "complete": true,
-    "realized_precision": 0.5337620578778135,
-    "realized_precision_no_ties": 0.7345132743362832,
-    "switches": 311,
-    "switch_per_100f": 8.593534125449018,
+    "realized_precision": null,
+    "realized_precision_no_ties": null,
+    "switches": 106,
+    "switch_per_100f": 2.928985907709312,
     "units_below_m005": 2
    }
   },
