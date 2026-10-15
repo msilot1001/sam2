@@ -393,8 +393,8 @@ def selector(arm="OR0F"):
     for ds, g in H.groupby("ds"):
         fr = g.groupby(key)
         best = fr.cJ.max()
-        ok = best[(best >= TAU)].index
-        pres = fr.gt_empty.first()
+        pres = fr.gt_empty.first()                      # True = GT absent
+        ok = best[(best >= TAU) & ~pres].index          # GT present and some hypothesis is correct
         r = {"frames_with_a_correct_hypothesis": len(ok), "present_frames": int((~pres).sum())}
         sg = fr.J.first()
         r["R_sggl_hit"] = float((sg.loc[ok] >= TAU).mean())
