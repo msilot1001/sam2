@@ -1,0 +1,12 @@
+{
+  "created_kst": "2026-10-16 08:05",
+  "status": "DIAGNOSTIC ONLY. Never adopted, no online arm, no conf run, no tau carried anywhere. User decision 2026-10-16: (1) no conf; (2) run option (ga) once as a diagnostic, then wrap up (option da).",
+  "before_any_output_of": "same-dataset ceiling of the amend10 learned head (reports/head_upper.json, HEAD_RESULTS.md section 'same-dataset ceiling')",
+  "question": "amend10 trained on LVOS v2 only (no eligible MOSEv2/VOST extras). Does a head trained on the SAME datasets reach switch precision 0.70? If not even here, the failure is not cross-dataset transfer.",
+  "data": "outputs/milestone10/runpod/runs/OR0K (dev, 109 units, OR0-identical). No new GPU output. The dev split is used for training here, which is why the result can never be adopted.",
+  "folds": "5 folds by video, assigned within each dataset (MOSEv2, VOST, LVOS v2 separately, seed 0), so every held-out video has same-dataset training videos. Each row is scored by the model that did not see its video (OOF).",
+  "models_and_hyper": "identical to amend10 (scripts/m10_head.py HYPER, SCALAR, models R_piou, a, b, c, null_b, null_c, H1 and H2, training rows = in-scope frames). Nothing retuned.",
+  "tau": "tau* = smallest tau on the amend10 grid (0 + quantiles 0.05..0.95 of positive OOF margins) where the POOLED MOSEv2+VOST OOF precision >= 0.70 with >= 20 switches. tau is chosen on the same OOF scores it is evaluated on, so the result is an optimistic ceiling.",
+  "report": "per model and hypothesis: max pooled MOSEv2+VOST precision over the grid (>= 20 switches) with switch count; at tau*: amend5 gate_eval per dataset (dJ on GT-present frames, video bootstrap CI) and the amend10 criteria (1)-(4) as a description, not a decision.",
+  "reading_rule": "If no learned model reaches tau* here: 'even trained on the same datasets, the head does not reach 0.70' -> the amend10 failure is not explained by LVOS-only training. If one does: report it as a same-dataset ceiling only; it says the information exists but a transferable training set would be needed. Either way the next step is the wrap-up (da)."
+}
