@@ -341,6 +341,53 @@ def work(arms=None, sets=SETS):
             time.sleep(30)
 
 
+@torch.inference_mode()
+def box_unit(ip, s, sp, u):
+    """OR9 (amend2): SAM 2 IMAGE mode, GT box prompt, every GT-present frame, no memory. 'full' = whole frame;
+    'crop' = square crop of the unit's SGGL side centred on the GT box (perfect geometry), box given in crop coords.
+    GT-absent frames are skipped (rows only for present frames)."""
+    g0 = m7.gt(u, 0)
+    hw, side = g0.shape, vcam.crop_side(g0)
+    rows = []
+    for t, pth in enumerate(m7.paths(u)):
+        if t == 0:
+            continue
+        g = m7.gt(u, t)
+        b = vcam.bbox(g)
+        if b is None:
+            continue
+        img = np.array(__import__("PIL.Image", fromlist=["Image"]).open(pth).convert("RGB"))
+        r = {"set": s, "split": sp, "unit": u.name, "video": u.video, "arm": "OR9", "video_idx": t, "gt_area": int(g.sum()),
+             "area0": float(g0.mean())}
+        t0 = time.perf_counter()
+        ip.set_image(img)
+        m, sc, _ = ip.predict(box=np.array([b[2], b[0], b[3], b[1]], float), multimask_output=False)
+        r.update({f"{k}_full": v for k, v in m55.jf(m[0] > 0, g).items()}, score_full=float(sc[0]))
+        y0, y1, x0, x1 = vcam.place(vcam.center_of(g), side, hw)
+        ip.set_image(img[y0:y1, x0:x1])
+        bb = np.array([b[2] - x0, b[0] - y0, b[3] - x0, b[1] - y0], float).clip(0, [x1 - x0, y1 - y0, x1 - x0, y1 - y0])
+        m, sc, _ = ip.predict(box=bb, multimask_output=False)
+        r.update({f"{k}_crop": v for k, v in m55.jf(vcam.paste(m[0] > 0, (y0, y1, x0, x1), hw), g).items()},
+                 score_crop=float(sc[0]), latency_s=time.perf_counter() - t0)
+        rows.append(r)
+    return pd.DataFrame(rows)
+
+
+def boxwork(sets=SETS):
+    ip = m55.build_image_predictor()
+    ip.model.fill_hole_area = 0
+    dd = RUNS / "OR9"
+    dd.mkdir(parents=True, exist_ok=True)
+    for s, sp, u in sorted(m7.units(sets), key=lambda x: -len(x[2].frames)):
+        f = dd / f"{m7.stem(u)}.csv"
+        if f.exists() or lock(f).exists() or not claim(f):
+            continue
+        df = box_unit(ip, s, sp, u)
+        atomic_csv(df, f)
+        lock(f).unlink()
+        print("OR9", u.name, len(df), round(df.JF_full.mean(), 4), round(df.JF_crop.mean(), 4), flush=True)
+
+
 def rerun(listfile):
     """Visualisation reruns: `arm unit-name` per line -> masks + rows under $M10_SAVE_MASKS (never touches RUNS)."""
     pred = m55.build_predictor()
