@@ -440,6 +440,8 @@ def work(arms=None, sets=SETS):
         m55.CFG = f"configs/sam2.1/sam2.1_hiera_{k}.yaml"
         m55.CKPT = f"checkpoints/sam2.1_hiera_{dict(t='tiny', s='small', l='large').get(k, 'base_plus')}.pt"
     pred = m55.build_predictor()
+    # amend10 incident: one pod worker produced NaN scores for every unit (healthy workers bit-exact) -> fail fast
+    assert all(torch.isfinite(p).all() for p in pred.parameters()), "non-finite model weights"
     controlled.install(pred, None, {})
     dec = hook_decoder(pred)
     env = {"machine": os.environ.get("M8_MACHINE", socket.gethostname()), "torch": torch.__version__,
@@ -470,6 +472,8 @@ def work(arms=None, sets=SETS):
             torch.cuda.reset_peak_memory_stats()
             w0 = time.time()
             df = base_unit(pred, s, sp, u, a, A["p5"]) if "p5" in A else run_unit(pred, dec, s, sp, u, a, A)
+            if "score_G" in df and df.score_G.isna().any():
+                raise SystemExit(f"NaN object scores in {u.name}: worker state is corrupt, not writing")
             atomic_csv(df.assign(wall_s=time.time() - w0, machine=env["machine"]), f)
             lock(f).unlink()
             print(a, u.name, len(df), round(df.JF.mean(), 4), f"{len(df) / (time.time() - w0):.2f} fps", flush=True)
