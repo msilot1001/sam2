@@ -180,7 +180,7 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
     d = sggl.Dual(pred, m7.paths(u), g0)
     rblock = random_blocks(u, n) if A["admit"] == "random" else None
     other = getattr(m7, "other", None)
-    rows = []
+    rows, keep = [], {} if os.environ.get("M10_SAVE_MASKS") else None
     for t in range(1, n):
         g = m7.gt(u, t)
         if A["center"] == "gt" and g.any():        # non-causal: GT of the frame being predicted
@@ -256,10 +256,17 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
                      "out_inter_other": int((out & oth).sum()), "other_area": int(oth.sum()),
                      "G_area": int(mv["G"].sum()), "G_inter_gt": int((mv["G"] & g).sum()),
                      "L_area": int(mv["L"].sum()), "L_inter_gt": int((mv["L"] & g).sum())})
+        if keep is not None:                     # visualisation reruns only: bit-packed masks of every frame
+            for k, m in (("out", out), ("G", mv["G"]), ("L", mv["L"])):
+                keep.setdefault(k, []).append(np.packbits(m))
         if A["center"] != "gt":
             d.set_center(vcam.center_of(out))    # SGGL: centre follows the output (held while it is empty)
     peak = torch.cuda.max_memory_allocated()
     d.close()
+    if keep is not None:
+        f = Path(os.environ["M10_SAVE_MASKS"]) / name / f"{m7.stem(u)}.npz"
+        f.parent.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(f, hw=np.array(hw), **{k: np.stack(v) for k, v in keep.items()})
     return pd.DataFrame(rows).assign(peak_vram_bytes=peak)
 
 
@@ -332,6 +339,19 @@ def work(arms=None, sets=SETS):
         left = waiting
         if left:
             time.sleep(30)
+
+
+def rerun(listfile):
+    """Visualisation reruns: `arm unit-name` per line -> masks + rows under $M10_SAVE_MASKS (never touches RUNS)."""
+    pred = m55.build_predictor()
+    controlled.install(pred, None, {})
+    dec = hook_decoder(pred)
+    want = [ln.split() for ln in Path(listfile).read_text().splitlines() if ln.strip()]
+    for a, name in want:
+        s, sp, u = next(x for x in m7.units(name.split("__")[0].upper()) if x[2].name == name)
+        df = run_unit(pred, dec, s, sp, u, a, spec(a))
+        atomic_csv(df, Path(os.environ["M10_SAVE_MASKS"]) / a / f"{m7.stem(u)}.csv")
+        print("rerun", a, name, round(df.JF.mean(), 4), flush=True)
 
 
 if __name__ == "__main__":
