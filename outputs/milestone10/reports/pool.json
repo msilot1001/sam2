@@ -1,0 +1,80 @@
+{
+ "lvosv2": {
+  "present_frames": 485,
+  "sggl_hit_rate": 0.9958762886597938,
+  "pool_hit_rate": 1.0,
+  "miss_frames": 2,
+  "miss_loss_share_of_total_loss": 0.08200690095588695,
+  "classes_frames": {
+   "own_view_suppressed": 2
+  },
+  "classes_loss_share": {
+   "own_view_suppressed": 1.0
+  },
+  "classes_recoverable_gain": {
+   "own_view_suppressed": 1.63
+  },
+  "absent_false_present_loss_share": 0.0,
+  "units": 2
+ },
+ "mosev2": {
+  "present_frames": 3378,
+  "sggl_hit_rate": 0.7125518058022499,
+  "pool_hit_rate": 0.8214920071047958,
+  "miss_frames": 971,
+  "miss_loss_share_of_total_loss": 0.560491035586312,
+  "classes_frames": {
+   "none": 603,
+   "own_view_misselect": 202,
+   "own_view_suppressed": 67,
+   "other_view_hyp": 55,
+   "other_view_output": 44
+  },
+  "classes_loss_share": {
+   "none": 0.6694,
+   "other_view_hyp": 0.0603,
+   "other_view_output": 0.0418,
+   "own_view_misselect": 0.1397,
+   "own_view_suppressed": 0.0888
+  },
+  "classes_recoverable_gain": {
+   "none": 97.35,
+   "other_view_hyp": 31.25,
+   "other_view_output": 23.15,
+   "own_view_misselect": 67.78,
+   "own_view_suppressed": 55.59
+  },
+  "absent_false_present_loss_share": 0.2378022676169615,
+  "units": 62
+ },
+ "vost": {
+  "present_frames": 3441,
+  "sggl_hit_rate": 0.42255158384190644,
+  "pool_hit_rate": 0.5678581807614066,
+  "miss_frames": 1987,
+  "miss_loss_share_of_total_loss": 0.8414799710259725,
+  "classes_frames": {
+   "none": 1487,
+   "own_view_misselect": 199,
+   "other_view_hyp": 151,
+   "other_view_output": 128,
+   "own_view_suppressed": 22
+  },
+  "classes_loss_share": {
+   "none": 0.785,
+   "other_view_hyp": 0.0663,
+   "other_view_output": 0.064,
+   "own_view_misselect": 0.0715,
+   "own_view_suppressed": 0.0133
+  },
+  "classes_recoverable_gain": {
+   "none": 133.09,
+   "other_view_hyp": 74.21,
+   "other_view_output": 79.31,
+   "own_view_misselect": 78.3,
+   "own_view_suppressed": 16.6
+  },
+  "absent_false_present_loss_share": 0.054331978385170496,
+  "units": 31
+ }
+}

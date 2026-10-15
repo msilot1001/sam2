@@ -26,8 +26,9 @@ REPO = Path(__file__).resolve().parent.parent
 DIST = (REPO / "dashboard/frontend/dist").resolve()
 M8 = "outputs/milestone8"
 M9 = "outputs/milestone9"
-ALLOW = ["docs/m7", "docs/m8", "docs/m9", "docs/GPU_WORKER_OPERATIONS.md", "AGENTS.md", "outputs/milestone7",
-         M8, M9, "outputs/SYNC_LEDGER.tsv", "outputs/SYNC_STATUS.json", "scripts", "src/spatial", "tests"]
+M10 = "outputs/milestone10"
+ALLOW = ["docs/m7", "docs/m8", "docs/m9", "docs/m10", "docs/GPU_WORKER_OPERATIONS.md", "AGENTS.md", "outputs/milestone7",
+         M8, M9, M10, "outputs/SYNC_LEDGER.tsv", "outputs/SYNC_STATUS.json", "scripts", "src/spatial", "tests"]
 ROOTS = [(a, (REPO / a).resolve()) for a in ALLOW]
 DENY_PARTS = {"tcache", "checkpoints", "data", ".ssh", "__pycache__", ".git"}
 BINARY = {".npz", ".npy", ".pt"}  # listed with size only, never served
@@ -43,6 +44,8 @@ MILESTONES = {
                     "ubuntu": [f"{M9}/diag/{{ds}}/{{stem}}.csv", f"{M9}/runs/SGGL/{{stem}}.csv"]},
            "cand": [f"{M9}/runpod/diag/{{ds}}/{{stem}}.cand.csv", f"{M9}/diag/{{ds}}/{{stem}}.cand.csv"],
            "logs": [f"{M9}/*.log", f"{M9}/logs/*.log", f"{M9}/runpod/logs/*.log"]},
+    "m10": {"dir": M10, "runs": {"runpod": f"{M10}/runpod/runs"}, "base": {"runpod": [f"{M10}/runpod/runs/OR0/{{stem}}.csv"]},
+            "cand": [], "logs": [f"{M10}/*.log", f"{M10}/runpod/logs/*.log"]},
 }
 MACHINES = MILESTONES["m8"]["runs"]
 M9_PREFIXES = ("mosev2__", "vost__", "lvos")
@@ -155,13 +158,13 @@ def overview():
 
 def docs():
     out = []
-    for d in ["docs/m9", "docs/m8", "docs/m7"]:
+    for d in ["docs/m10", "docs/m9", "docs/m8", "docs/m7"]:
         out += [rel(p) for p in sorted((REPO / d).glob("*.md"))]
     return out + [f for f in ["docs/GPU_WORKER_OPERATIONS.md", "AGENTS.md"] if (REPO / f).exists()]
 
 
 def images():
-    return [entry(p) for d in [M9, f"{M8}/viz", "outputs/milestone7/viz"]
+    return [entry(p) for d in [M10, M9, f"{M8}/viz", "outputs/milestone7/viz"]
             for p in sorted((REPO / d).rglob("*.png")) if is_listable(p)]
 
 
@@ -392,6 +395,26 @@ def m9():
             "causal_units": [rel(p) for p in sorted(rep.glob("causal_units_*.csv"))]}
 
 
+def m10():
+    """M10 oracle decomposition: frozen prereg + amendments, run progress per arm/dataset/machine, analysis reports."""
+    rep = REPO / M10 / "reports"
+    runs = {f"runpod/{a.name}": ds_count(a.glob("*.csv"))
+            for a in sorted((REPO / M10 / "runpod/runs").glob("*")) if a.is_dir()}
+    for d in sorted((REPO / M10 / "ubuntu").glob("runs_*")):      # capacity diagnostic (2080): one dir per model
+        runs[f"ubuntu/{d.name[5:]}"] = ds_count(d.glob("OR0/*.csv"))
+    totals = {}
+    for p in sorted((REPO / M9 / "manifests").glob("*_units.json")):
+        j = jsonf(p)
+        totals[j.get("dataset", p.stem[:-6])] = sum(u.get("split") == "dev" for u in j["units"])
+    return {"prereg": jsonf(REPO / M10 / "preregistration.json"),
+            "amendments": {p.stem: jsonf(p) for p in sorted((REPO / M10).glob("preregistration_amend*.json"))},
+            "runs": runs, "dev_units": totals,
+            "reports": {p.stem: jsonf(p) for p in sorted(rep.glob("*.json"))},
+            "docs": [rel(p) for p in sorted((REPO / "docs/m10").glob("*.md"))],
+            "figures": [rel(p) for p in sorted((REPO / M10).rglob("*.png")) if is_listable(p)],
+            "logs": latest_logs("m10", n=6, lines=6)}
+
+
 _index = {"at": 0.0, "files": []}
 
 
@@ -513,6 +536,8 @@ class H(BaseHTTPRequestHandler):
             return self.send(200, m7())
         if name == "m9":
             return self.send(200, m9())
+        if name == "m10":
+            return self.send(200, m10())
         if name == "tasks":
             ms = q.get("ms", "m8")
             if ms not in MILESTONES:

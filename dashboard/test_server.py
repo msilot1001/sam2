@@ -13,14 +13,14 @@ from server import Denied, safe  # noqa: E402
 for bad in ["../.gpu_worker.env", ".gpu_worker.env", "/etc/passwd", "~/.ssh/id_rsa", "outputs/milestone8/../../AGENTS.md",
             "outputs/milestone7/tcache", "checkpoints", "data", "pyproject.toml", "scripts/.env", "",
             "data/mosev2", "data/vost/JPEGImages", "outputs/milestone9/data/x", "outputs/milestone9/../../data/vost",
-            "docs/m9/../../data", "outputs/milestone10/x", "docs/m10"]:
+            "docs/m9/../../data"]:
     try:
         safe(bad)
         raise AssertionError(f"allowed: {bad!r}")
     except Denied:
         pass
 for ok in ["AGENTS.md", "docs/m8", "outputs/milestone8/arms.json", "scripts/m8.py", "outputs/SYNC_STATUS.json",
-           "docs/m9", "outputs/milestone9/TASKS.json", "outputs/milestone9/manifests/vost_units.json"]:
+           "docs/m9", "docs/m10", "outputs/milestone10/preregistration.json", "outputs/milestone9/TASKS.json", "outputs/milestone9/manifests/vost_units.json"]:
     assert safe(ok).exists(), ok
 meta = "outputs/milestone9/manifests/mosev2_meta_train.json"
 assert server.size_only(server.REPO / meta) and server.size_only(server.REPO / "x/a.vec.npy")
@@ -92,6 +92,8 @@ try:
     strict = lambda b: _json.loads(b, parse_constant=lambda c: (_ for _ in ()).throw(ValueError(c)))  # JSON.parse rules
     m9 = strict(urllib.request.urlopen(f"{base}/api/m9").read())
     assert m9["causal"] is not None
+    m10 = strict(urllib.request.urlopen(f"{base}/api/m10").read())
+    assert m10["prereg"] is not None and "runpod/OR0" in m10["runs"]
     strict(urllib.request.urlopen(f"{base}/api/file?path=outputs/milestone9/reports/causal.json").read())
     assert server.finite({"a": [float("nan"), float("-inf"), 1.5]}) == {"a": [None, None, 1.5]}
     assert "pumavos" not in _json.dumps(m9["manifests"]).lower()

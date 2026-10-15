@@ -110,7 +110,7 @@ def vstats(u, rng):
 
 def table(*arms):
     b = load("OR0")
-    arms = arms or [p.name for p in sorted(RUNS.iterdir()) if p.is_dir() and p.name != "OR0"] + list(OFFLINE)
+    arms = arms or [p.name for p in sorted(RUNS.iterdir()) if p.is_dir() and p.name not in ("OR0", "OR9")] + list(OFFLINE)
     rng = np.random.default_rng(10)
     res = {"baseline": {ds: {"units": int(g.unit.nunique()), "videos": int(g.video.nunique()), "frames": len(g),
                              "JF_video_equal": g.groupby(["video", "unit"]).JF.mean().groupby("video").mean().mean()}
@@ -162,7 +162,7 @@ def states(*arms):
     b = load("OR0")
     b["state"] = state(b)
     b["loss0"] = 1 - b.JF
-    arms = arms or [p.name for p in sorted(RUNS.iterdir()) if p.is_dir() and p.name != "OR0"] + list(OFFLINE)
+    arms = arms or [p.name for p in sorted(RUNS.iterdir()) if p.is_dir() and p.name not in ("OR0", "OR9")] + list(OFFLINE)
     res = {"OR0_loss_share": {}, "recovery": {}}
     for ds, g in b.groupby("ds"):
         tot = g.loss0.sum()
@@ -267,6 +267,26 @@ def pool():
                    "units": int(g.unit.nunique())}
     print(json.dumps(finite(res), indent=1))
     save(res, "pool.json")
+
+
+def or9():
+    """OR9 (amend2): GT-box-prompted image-mode SAM 2 vs OR0 on the same GT-present frames (video-equal)."""
+    b, o = load("OR0"), load("OR9")
+    m = o.merge(b[["unit", "video_idx", "JF", "J"]], on=["unit", "video_idx"])
+    rng = np.random.default_rng(10)
+    res = {}
+    for ds, g in m.groupby("ds"):
+        res[ds] = {}
+        for v in ("full", "crop"):
+            u = g.groupby(["ds", "video", "unit"]).agg(JF=(f"JF_{v}", "mean"), JF0=("JF", "mean"), J=(f"J_{v}", "mean"),
+                                                        J0=("J", "mean"), F=(f"F_{v}", "mean"), area0=("area0", "first")).reset_index()
+            u["F0"] = 2 * u.JF0 - u.J0
+            u["d"], u["dJ"], u["dF"] = u.JF - u.JF0, u.J - u.J0, u.F - u.F0
+            res[ds][v] = {**vstats(u, rng), "JF_oracle": u.groupby("video").JF.mean().mean(),
+                          "tiny_JF_oracle": u[u.area0 < 0.001].JF.mean() if (u.area0 < 0.001).any() else None}
+        res[ds]["frames"], res[ds]["units"] = len(g), int(g.unit.nunique())
+        print(ds, {v: (round(res[ds][v]["JF_oracle"], 3), round(res[ds][v]["JF0"], 3)) for v in ("full", "crop")})
+    save(res, "or9.json")
 
 
 def parity():

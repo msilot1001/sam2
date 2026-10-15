@@ -1,0 +1,29 @@
+{
+ "lvosv2": {
+  "frames": 598,
+  "max_abs": 0.0,
+  "mean_abs": 0.0,
+  "frames_diff_gt_1e-6": 0,
+  "units_identical": 2,
+  "units": 2,
+  "m9_source": "outputs/milestone9/runpod/runs/SGGL"
+ },
+ "mosev2": {
+  "frames": 4806,
+  "max_abs": 0.0,
+  "mean_abs": 0.0,
+  "frames_diff_gt_1e-6": 0,
+  "units_identical": 62,
+  "units": 62,
+  "m9_source": "outputs/milestone9/runpod/diag/mosev2"
+ },
+ "vost": {
+  "frames": 3619,
+  "max_abs": 0.0,
+  "mean_abs": 0.0,
+  "frames_diff_gt_1e-6": 0,
+  "units_identical": 31,
+  "units": 31,
+  "m9_source": "outputs/milestone9/runpod/runs/SGGL"
+ }
+}
