@@ -1,21 +1,33 @@
 {
  "lvosv2": {
-  "present_frames": 485,
-  "sggl_hit_rate": 0.9958762886597938,
-  "pool_hit_rate": 1.0,
-  "miss_frames": 2,
-  "miss_loss_share_of_total_loss": 0.08200690095588695,
+  "present_frames": 4144,
+  "sggl_hit_rate": 0.865588803088803,
+  "pool_hit_rate": 0.9413610038610039,
+  "miss_frames": 557,
+  "miss_loss_share_of_total_loss": 0.5743879353378407,
   "classes_frames": {
-   "own_view_suppressed": 2
+   "none": 243,
+   "other_view_output": 167,
+   "own_view_misselect": 82,
+   "own_view_suppressed": 40,
+   "other_view_hyp": 25
   },
   "classes_loss_share": {
-   "own_view_suppressed": 1.0
+   "none": 0.4481,
+   "other_view_hyp": 0.0382,
+   "other_view_output": 0.3183,
+   "own_view_misselect": 0.1039,
+   "own_view_suppressed": 0.0914
   },
   "classes_recoverable_gain": {
-   "own_view_suppressed": 1.63
+   "none": 28.57,
+   "other_view_hyp": 7.27,
+   "other_view_output": 131.73,
+   "own_view_misselect": 27.53,
+   "own_view_suppressed": 31.79
   },
-  "absent_false_present_loss_share": 0.0,
-  "units": 2
+  "absent_false_present_loss_share": 0.05641855792891411,
+  "units": 16
  },
  "mosev2": {
   "present_frames": 3378,

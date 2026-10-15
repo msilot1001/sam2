@@ -45,7 +45,7 @@ def load(arm):
     fs = sorted((RUNS / arm).glob("*.csv"))
     if not fs:
         return pd.DataFrame()
-    df = pd.concat([pd.read_csv(f) for f in fs], ignore_index=True)
+    df = pd.concat([pd.read_csv(f) for f in fs if f.stat().st_size > 1], ignore_index=True)   # OR9: units w/o GT frames
     df["ds"] = df.set.str.split(":").str[0].str.lower()
     for c in ("gt_empty", "acc", "ok_G", "ok_L", "adm_G", "adm_L", "rew_G", "rew_L"):
         if c in df:
