@@ -15,7 +15,10 @@ const ARM_LABEL: Record<string, string> = {
   OR1M: '존재 → 기억 기록', OR2: '위치 (GT 중심)', OR3: '크기 (GT 크기)', OR4: '기하 (위치+크기)',
   OR5S: '후보 선택 (온라인 출력)', OR5M: '후보 선택 + 기억', OR6: '대상 영역 판별 + 기록 차단',
   OR7: '기억 기록 허용 (GT)', OR7W: '대상 밖 기록만 차단', OR7R: '대조: 같은 횟수 무작위 차단',
-  OR8: '완벽한 기억 (GT 재부호화)', OR8C0: 'frame 0 기억만',
+  OR8: '완벽한 기억 (GT 재부호화)', OR8C0: 'frame 0 기억만', OR8K10: '완벽한 기억, 10 frame마다',
+  C48: '기하 + 완벽한 기억', C58: '선택 + 완벽한 기억', C47: '기하 + 기록 허용', C75: '선택 + 기록 허용',
+  OR0F: 'OR0 + 가설별 신호 기록', OR0T: 'OR0 + 디코더 신호 기록 (탐색)',
+  VXO: '[탐색] view 불일치 시 전환, 출력만', VXM: '[탐색] view 불일치 시 전환 + 기억', N1M: '[탐색 대조] 같은 frame 자기 재부호화', N2X: '[탐색 대조] 같은 횟수 무작위 전환',
 }
 const STATES = ['correct', 'partial', 'empty', 'wrong_region', 'wrong_object', 'false_present']
 const POOL = ['none', 'own_view_misselect', 'own_view_suppressed', 'other_view_output', 'other_view_hyp']
