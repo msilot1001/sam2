@@ -296,6 +296,7 @@ CI는 영상을 다시 뽑아 네 값을 함께 계산한 bootstrap이다. 서�
   "m10.rule.R_anchor": arm("R_anchor — 기준점 신호만", "z(예측 IoU) + z(frame 0 cosine) + z(다른 view 출력과의 IoU). 직전 출력에 기대지 않는 신호만 쓴다(검토 11a 권고)."),
   "m10.rule.R_cos": arm("R_cos — frame 0 외형 cosine", "G stride-16 특징을 mask로 평균한 벡터와 frame 0 prompt 원형의 cosine이 가장 큰 가설을 고른다."),
   "m10.rule.R_lr": arm("R_lr — 로지스틱 회귀", "예측 IoU, cosine, 직전 IoU, 거리, 교차 view IoU, log 면적, view, view 객체 점수로 'J ≥ 0.5' 확률을 예측한다. 같은 데이터셋 안에서 영상 단위 2-fold로 교차 적합했다(numpy ridge)."),
+  "m10.arm.OR0F": arm("OR0F — OR0 + 가설별 신호 기록 (수정 4)", "SGGL 결정은 OR0과 같다(12,989 frame 전부 |Δ| = 0). 6개 원시 가설마다 GT 없이 쓸 수 있는 신호를 기록한다: 디코더 예측 IoU, 면적, 직전 출력과의 IoU·중심 거리, 다른 view와의 IoU, frame 0 외형 cosine. 선택기 관문의 입력이다. ΔJ&F는 정의상 0이다."),
   "m10.arm.OR0": arm("OR0 — SGGL 기준선", "SGGL(G 전체 frame view + L crop view + 자기 게이트) 그대로. 같은 Pod에서 다시 돌렸고, M9과 frame 단위로 완전히 같다. 다른 모든 arm은 이것과 단위·frame을 짝지어 비교한다."),
   "m10.arm.OR1off": arm("OR1off — 완벽한 존재 판단 (출력만, 오프라인)", "GT가 없는 frame의 출력을 비운다. 나머지는 OR0와 같다. 대상이 있는지 없는지만 완벽히 알 때의 상한이다. 기억에는 영향이 없다(사후 계산)."),
   "m10.arm.OR1M": arm("OR1M — 존재 정보로 기억 기록 막기 (온라인)", "GT가 없는 frame에서 비어 있지 않은 mask를 낸 view는 그 frame을 기억에 기록하지 않는다. 출력과 crop은 SGGL 그대로다. '없는 대상을 있다고 기록한 것'이 이후 frame을 오염시키는지 본다."),
