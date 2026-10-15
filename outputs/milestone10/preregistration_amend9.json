@@ -12,5 +12,19 @@
   "secondary": "극소 단위(area0 < 0.001) Δ, 단위 가중 Δ, 상태별 손실 분해(states), ±0.01 영상 수 (↑/↓), LOVO 최솟값.",
   "machine": "같은 RunPod 4090. 비교는 같은 Pod의 OR0와만.",
   "machine_disclosure": "The M10 pod (xiad2lw7xihhe6) that produced OR0 is gone (connection refused at amend9 time); the user supplied a new RunPod RTX 4090 pod (aqg09likkdsw3z) on the same /workspace network volume. Same-pod comparison is therefore not literally possible. Plan: before B0, rerun OR0 on ONE VOST dev unit and ONE MOSEv2 dev unit on the new pod as a machine-parity check only (written to runs/_parity_OR0, never used as results); B0 vs stored OR0 is reported as same-machine-equivalent only if the parity rows match the stored OR0 rows exactly (J, F per frame). Precedent: M10 OR0 on pod xiad2lw7xihhe6 matched M9 SGGL rows from pod j8kzvm72ssk505 frame for frame. If parity fails: stop and report.",
-  "not_done": "no other arm; no rerun of existing arms (except the 2-unit parity check above); conf split and PUMaVOS C not opened; dashboard only after all steps."
+  "not_done": "no other arm; no rerun of existing arms (except the 2-unit parity check above); conf split and PUMaVOS C not opened; dashboard only after all steps.",
+  "P5_derivation (added 2026-10-15 20:51, step 2, before any B0/P5 output)": {
+    "statement": "P5 derived from OR0 JF_G; G-state independence verified at src/spatial/sggl.py:75,105-114,100 and scripts/m10.py:218-219,285-307,349 (OR0 path), src/memint/engine.py:31-41, src/memint/controlled.py:80",
+    "evidence": [
+      "sggl.py:75 G is its own SAM 2 state started with p5=True from the frame-0 GT mask only (= scripts/m56.py start_dir, the M6 P5 baseline; full frame via identity lazy loader, bit-identical to official frames per M6 test)",
+      "sggl.py:105-114 view(name) reads and writes only self.S[name] (its own st/od); G's memory is its own output (store=True), never the fused SGGL output or L's output",
+      "sggl.py:100 set_center moves only crop states (side is not None); G has side None. set_side is called only with 'L' (m10.py:214, side=gt arms only)",
+      "m10.py:218 OR0 memory=native -> planner None; m10.py:285-287 admit=all -> G.excluded stays empty; m10.py:292-307 rewrite_memory only for memory arms (gt/xswitch/random_x/self_at/cand), never in OR0; m10.py:349 crop centre follows the output but does not touch G",
+      "engine.py:31-41 predict uses only (state, output_dict) of the given view; controlled.py:80 planner None -> native retrieval; hooks (decoder, iou, memint_log) only record",
+      "Data check: on OR0 rows with acc=False (output = G mask, 3595 rows) J == J_G and JF == JF_G exactly, so J_G uses the same J as m55.jf; P5 F = 2*JF_G - J_G"
+    ],
+    "P5_columns": "J=J_G, JF=JF_G, F=2*JF_G-J_G, out_area=G_area, out_inter_gt=G_inter_gt",
+    "limitation": "OR0 rows have no G-vs-other-object intersection, so for P5 the states wrong_object and wrong_region cannot be separated; Table 3 reports them merged ('wrong_region+wrong_object') for P5 (and also merged for B0/SGGL in that column for comparability, with the split shown for B0/SGGL).",
+    "empirical_crosscheck": "the 2 parity units run on the new pod also get a standalone P5 run (same runner as B0 with p5=True; runs/_parity_P5, check only, never used as results); it must equal OR0 JF_G frame for frame."
+  }
 }
