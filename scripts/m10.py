@@ -116,6 +116,8 @@ def hook_decoder(pred):
     """Keep the raw decoder output of the last call (3 multimask logits BEFORE the no-object suppression)."""
     box = {}
     pred.sam_mask_decoder.register_forward_hook(lambda m, a, o: box.update(lr=o[0].detach(), iou=o[1].detach(), tok=o[2].detach()))
+    # amend10: IoU token (input of the IoU head, 1x256), one per decoder call
+    pred.sam_mask_decoder.iou_prediction_head.register_forward_hook(lambda m, a, o: box.update(itok=a[0].detach()))
     return box
 
 
@@ -209,6 +211,7 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
     other = getattr(m7, "other", None)
     rows, keep = [], {} if os.environ.get("M10_SAVE_MASKS") else None
     keep_tok = [] if A.get("extra") else None
+    keep_itok = [] if A.get("extra") == "k" else None
     for t in range(1, n):
         g = m7.gt(u, t)
         if A["center"] == "gt" and g.any():        # non-causal: GT of the frame being predicted
@@ -225,7 +228,7 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
                 lr = dec["lr"][0].float()
                 EX[v] = {"stab": ((lr > 1).sum((1, 2)) / (lr > -1).sum((1, 2)).clamp(min=1)).cpu().numpy(),
                          "mlogit": torch.stack([x[x > 0].mean() if (x > 0).any() else x.max() for x in lr]).cpu().numpy(),
-                         "tok": dec["tok"][0].float()}
+                         "tok": dec["tok"][0].float(), "itok": dec["itok"].reshape(-1).float()}
             PI = dec["iou"][0].float().cpu().numpy() if v == "G" else PI
             if v == "L":
                 PI = np.concatenate([PI, dec["iou"][0].float().cpu().numpy()])
@@ -239,7 +242,8 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
         for k, m in enumerate(C["G"] + C["L"]):
             c = vcam.center_of(m)
             pv = R.proto(fG, m) if m.any() else None
-            feats.update({f"piou{k}": float(PI[k]), f"harea{k}": int(m.sum()),   # harea: OR0F used area{k}, clobbering area0 f"tiou{k}": jac(m, prev_out),
+            # harea: OR0F used area{k}, clobbering area0. tiou was lost from OR0T by a comment typo (restored for OR0K)
+            feats.update({f"piou{k}": float(PI[k]), f"harea{k}": int(m.sum()), f"tiou{k}": jac(m, prev_out),
                           f"cdist{k}": np.nan if c is None or pc is None else float(np.hypot(c[0] - pc[0], c[1] - pc[1]) / d.side),
                           f"xiou{k}": jac(m, mv["L" if k < 3 else "G"]),
                           f"cos{k}": np.nan if pv is None or p0 is None else float(pv @ p0)})
@@ -341,12 +345,19 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
                 for i in range(3):
                     k = base + i
                     m, ms = C[v][i], (C["G"] + C["L"])[ksv]
-                    a1, a2 = R.proto(fG, m & ~ms), R.proto(fG, ms & ~m)       # disputed regions only
-                    dc = np.nan if k == ksv else (np.nan if a1 is None or a2 is None or p0 is None else float(a1 @ p0 - a2 @ p0))
+                    if A["extra"] == "k" or k == ksv:                         # amend10 OR0K: no dcos (speed)
+                        dc = np.nan
+                    else:
+                        a1, a2 = R.proto(fG, m & ~ms), R.proto(fG, ms & ~m)   # disputed regions only
+                        dc = np.nan if a1 is None or a2 is None or p0 is None else float(a1 @ p0 - a2 @ p0)
                     rows[-1].update({f"stab{k}": float(EX[v]["stab"][i]), f"mlogit{k}": float(EX[v]["mlogit"][i]),
                                      f"ptrcos{k}": float(pc[i]), f"dcos{k}": dc})
             if keep_tok is not None:
                 keep_tok.append(torch.cat([EX["G"]["tok"], EX["L"]["tok"]]).half().cpu().numpy())
+            if keep_itok is not None:                                     # amend10: IoU tokens G, L; view-region J
+                keep_itok.append(torch.stack([EX["G"]["itok"], EX["L"]["itok"]]).half().cpu().numpy())
+                rows[-1].update({f"vJ{k}": jac(m, gv["G" if k < 3 else "L"]) for k, m in enumerate(C["G"] + C["L"])},
+                                frame_long=max(hw))
         prev_out = out
         if A["center"] != "gt":
             d.set_center(vcam.center_of(out))    # SGGL: centre follows the output (held while it is empty)
@@ -354,7 +365,8 @@ def run_unit(pred, dec, s, sp, u, name, A, n=None):
     d.close()
     if keep_tok is not None:                              # 6 x 256 decoder tokens per frame (float16)
         (RUNS / name).mkdir(parents=True, exist_ok=True)
-        np.savez_compressed(RUNS / name / f"{m7.stem(u)}.tok.npz", tok=np.stack(keep_tok))
+        np.savez_compressed(RUNS / name / f"{m7.stem(u)}.tok.npz", tok=np.stack(keep_tok),
+                            **({"itok": np.stack(keep_itok)} if keep_itok else {}))
     if keep is not None:
         f = Path(os.environ["M10_SAVE_MASKS"]) / name / f"{m7.stem(u)}.npz"
         f.parent.mkdir(parents=True, exist_ok=True)

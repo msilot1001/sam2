@@ -11,6 +11,7 @@ import json
 import random
 import sys
 import time
+from multiprocessing import Pool
 from pathlib import Path
 
 import numpy as np
@@ -32,8 +33,9 @@ def main(dataset, area0_max, tag=""):
                   and (r / "JPEGImages" / p.name).is_dir())
     rng = random.Random(SEED)
     units = []
-    for v in vids:
-        d = xdata.describe_video(dataset, v)
+    with Pool(12) as pool:                                   # GT scan is I/O bound (network volume); order kept
+        descs = pool.starmap(xdata.describe_video, [(dataset, v) for v in vids])
+    for v, d in zip(vids, descs):
         cand = []
         for oid, o in sorted(d["objects"].items()):
             m0 = np.array(Image.open(r / "Annotations" / v / f"{o['first_frame']}.png")) == oid
