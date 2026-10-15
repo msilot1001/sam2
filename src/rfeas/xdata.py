@@ -50,8 +50,10 @@ def paths(u: Unit) -> list:
 
 
 def units(dataset: str, split: str | None = None) -> list:
-    """(split, Unit) pairs from the frozen manifest; split in {None, 'dev', 'conf'}."""
-    m = json.loads((MANIFESTS / f"{dataset}_units.json").read_text())
+    """(split, Unit) pairs from the frozen manifest; split in {None, 'dev', 'conf'} or 'train' (M10 amend10 head-training
+    units: outputs/milestone10/train_manifest, disjoint from dev/conf videos)."""
+    src = REPO / "outputs/milestone10/train_manifest" if split == "train" else MANIFESTS
+    m = json.loads((src / f"{dataset}_units{os.environ.get('M10_TRAIN_TAG', '') if split == 'train' else ''}.json").read_text())
     out = []
     for r in m["units"]:
         if split is None or r["split"] == split:
