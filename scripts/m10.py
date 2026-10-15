@@ -47,6 +47,9 @@ _s = importlib.util.spec_from_file_location("m7", Path(__file__).with_name("m7.p
 m7 = importlib.util.module_from_spec(_s)
 _s.loader.exec_module(m7)
 m55 = m7.m55
+_xd = m7._xd()
+_xd._ann = __import__("functools").lru_cache(maxsize=64)(_xd._ann.__wrapped__)   # pod cgroup = 61 GB; 4096 x 1080p PNGs
+                                                                                    # per worker OOM-killed a worker (M10)
 OUT = Path("outputs/milestone10")
 RUNS = Path(os.environ.get("M10_RUNS_DIR", OUT / "runs"))
 PREREG = Path(os.environ.get("M10_PREREG", OUT / "preregistration.json"))
