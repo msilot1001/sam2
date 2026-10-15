@@ -259,6 +259,44 @@ function Gate({ d }: { d: any }) {
   )
 }
 
+function HeadGate({ d }: { d: any }) {
+  const rounds = [['head_offline', '1회차 (면적 < 0.5%, 50단위)'], ['head_offline_a01', '2회차 (면적 < 1%, 65단위)']].filter(([k]) => d.reports?.[k])
+  if (!rounds.length) return null
+  const best = (c: any[]) => {
+    const ok = (c ?? []).filter((x) => x.precision != null && x.switches >= 20)
+    return ok.length ? ok.reduce((a, b) => (b.precision > a.precision ? b : a)) : null
+  }
+  const models = ['R_piou', 'a', 'b', 'c', 'null_b', 'null_c']
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>학습한 선택 head 오프라인 관문 (수정 10, 탐색)<Help k="m10.head" /></CardTitle>
+        <CardDescription>reports/head_offline*.json · 학습 = LVOS v2 여분만 · τ*는 학습 OOF에서 정밀도 ≥ 0.70 · 관문은 dev · 두 회차 모두 H1·H2 불통과</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {rounds.map(([k, title]) => { const R = d.reports[k].models; return (
+          <div key={k} className="space-y-1">
+            <p className="font-medium">{title}</p>
+            <Table className="text-xs">
+              <TableHeader><TableRow><TableHead>모델 · 가설</TableHead><TableHead>τ*</TableHead><TableHead>학습 OOF 최대 정밀도 (전환 수)</TableHead><TableHead>dev MOSEv2+VOST 최대 정밀도 (전환 수)</TableHead><TableHead>τ=0 dev ΔJ M / V / L</TableHead><TableHead>통과</TableHead></TableRow></TableHeader>
+              <TableBody>{models.flatMap((m) => ['H1', 'H2'].map((h) => { const r = R?.[m]?.[h]; if (!r) return null
+                const bo = best(r.curve_train_oof), bd = best(r.curve_dev), t0 = r.dev_at_tau0 ?? {}
+                return (
+                  <TableRow key={m + h}>
+                    <TableCell className="font-mono">{m} · {h}</TableCell>
+                    <TableCell>{r.tau_star == null ? '—' : num(r.tau_star, 3)}</TableCell>
+                    <TableCell>{bo ? `${num(bo.precision, 3)} (${bo.switches})` : '—'}</TableCell>
+                    <TableCell>{bd ? `${num(bd.precision, 3)} (${bd.switches})` : '—'}</TableCell>
+                    <TableCell>{DS.map((x) => signed(t0[x]?.dJ_present, 3)).join(' / ')}</TableCell>
+                    <TableCell>{r.pass ? '통과' : '불통과'}</TableCell>
+                  </TableRow>) }))}</TableBody>
+            </Table>
+          </div>) })}
+      </CardContent>
+    </Card>
+  )
+}
+
 function Baselines({ d }: { d: any }) {
   const g = d.reports?.baselines
   if (!g) return null
@@ -383,6 +421,7 @@ export default function M10({ nav }: { nav: Nav }) {
           </CardContent>
         </Card>
       </div>
+      <HeadGate d={d} />
       <Baselines d={d} />
       <Degraded d={d} />
       <Gate d={d} />
