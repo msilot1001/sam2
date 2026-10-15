@@ -401,6 +401,47 @@ def smoke(dev_dir=str(DEV_DIR)):
         print(hyp, "R_piou disagreements in scope", int((F.active & (F.pick != F.k_sggl)).sum()))
 
 
+def upper():
+    """amend11 diagnostic (never adopted): same-dataset ceiling. Dev rows only, video 5-fold OOF assigned within each
+    dataset; tau* on pooled MOSEv2+VOST OOF precision, evaluated on the same OOF scores (optimistic)."""
+    dev = load_runs([DEV_DIR])
+    df = dev[0]
+    key = (df.ds + "/" + df.video).to_numpy()
+    fold = np.empty(len(df), int)
+    for ds in A.DSETS:
+        m = df.ds.to_numpy() == ds
+        fold[m] = folds(key[m])
+    scope, y = df.active.to_numpy(), labels(df)
+    y_null = shuffled(y)
+    rng = np.random.default_rng(HYPER["bootstrap_seed"])
+    mv = df.ds.isin(("mosev2", "vost")).to_numpy()
+    res = {}
+    for m in MODELS:
+        if m == "R_piou":
+            S = piou(df)
+        else:
+            S = np.zeros(y.shape, np.float32)                 # out of scope: never used by any rule
+            S[scope] = cv_scores(m, inputs(*dev, m)[scope], (y_null if m.startswith("null") else y)[scope], fold[scope])
+        res[m] = {}
+        for hyp in ("H1", "H2"):
+            F = frame_table(df, S, hyp)
+            r = gate_one(F[mv], F, rng)
+            r["max_precision"] = {}
+            for name, dsets in (("pooled_mosev2_vost", ("mosev2", "vost")),) + tuple((ds, (ds,)) for ds in A.DSETS):
+                ok = [x for x in curve(F, r["grid"], dsets) if x["switches"] >= MIN_SW]
+                r["max_precision"][name] = max(ok, key=lambda x: x["precision"]) if ok else None
+            res[m][hyp] = r
+            print(m, hyp, "tau*", r["tau_star"], "max", {k: v and (round(v["precision"], 3), v["switches"]) for k, v in r["max_precision"].items()}, flush=True)
+    for m in CANDS["H1"]:                                      # null heads are fitted after a/b/c: describe criteria now
+        for hyp in ("H1", "H2"):
+            if m in CANDS[hyp]:
+                res[m][hyp]["pass_description_only"], res[m][hyp]["criteria"] = passes(res[m][hyp], res[NULL_OF[m]][hyp])
+    out = {"amend": "preregistration_amend11.json", "diagnostic_only": True, "hyper": HYPER, "device": DEVICE,
+           "dev": {"dir": str(DEV_DIR), **counts(df)}, "folds": {k: int(f) for k, f in zip(key, fold)}, "models": res}
+    A.save(out, "head_upper.json")
+    return out
+
+
 # ----------------------------------------------------------------------------- selftest
 def synth(n_videos, frames, rng, set_="LVOSV2:train", prefix="v"):
     rows, n = [], n_videos * frames

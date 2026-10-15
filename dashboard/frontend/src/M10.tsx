@@ -260,7 +260,7 @@ function Gate({ d }: { d: any }) {
 }
 
 function HeadGate({ d }: { d: any }) {
-  const rounds = [['head_offline', '1회차 (면적 < 0.5%, 50단위)'], ['head_offline_a01', '2회차 (면적 < 1%, 65단위)']].filter(([k]) => d.reports?.[k])
+  const rounds = [['head_offline', '1회차 (면적 < 0.5%, 50단위)'], ['head_offline_a01', '2회차 (면적 < 1%, 65단위)'], ['head_upper', '같은 데이터셋 상한 (수정 11, 진단): dev 영상 5-fold OOF, 두 정밀도 열 모두 dev OOF']].filter(([k]) => d.reports?.[k])
   if (!rounds.length) return null
   const best = (c: any[]) => {
     const ok = (c ?? []).filter((x) => x.precision != null && x.switches >= 20)
@@ -271,7 +271,7 @@ function HeadGate({ d }: { d: any }) {
     <Card>
       <CardHeader>
         <CardTitle>학습한 선택 head 오프라인 관문 (수정 10, 탐색)<Help k="m10.head" /></CardTitle>
-        <CardDescription>reports/head_offline*.json · 학습 = LVOS v2 여분만 · τ*는 학습 OOF에서 정밀도 ≥ 0.70 · 관문은 dev · 두 회차 모두 H1·H2 불통과</CardDescription>
+        <CardDescription>reports/head_offline*.json · 학습 = LVOS v2 여분만 · τ*는 학습 OOF에서 정밀도 ≥ 0.70 · 관문은 dev · 두 회차 모두 H1·H2 불통과 · 같은 데이터셋에서 학습해도 합동 최대 0.41</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {rounds.map(([k, title]) => { const R = d.reports[k].models; return (
