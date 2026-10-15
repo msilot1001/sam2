@@ -210,24 +210,30 @@ def episodes(*arms):
                 else:
                     i += 1
         return pd.DataFrame(out)
-    arms = ("OR0",) + tuple(arms or [p.name for p in sorted(RUNS.iterdir()) if p.is_dir() and p.name != "OR0"])
-    res = {}
-    for arm in arms:
+
+    def stats(g):
+        r = {}
+        for name, fl in (("loss", (~g.gt_empty) & (g.J < TAU)), ("drift", g.state.isin(["wrong_region", "wrong_object"]))):
+            e = ep(g, fl)
+            r[name] = {"episodes": len(e), "per_unit": len(e) / g.unit.nunique(),
+                       "mean_dur": e.dur.mean() if len(e) else None, "median_dur": e.dur.median() if len(e) else None,
+                       "recovered_frac": e.recovered.mean() if len(e) else None,
+                       "loss_sum": e.loss.sum() if len(e) else 0.0,
+                       "frames_in_episodes": int(e.dur.sum()) if len(e) else 0}
+        return r
+    arms = arms or [p.name for p in sorted(RUNS.iterdir()) if p.is_dir() and p.name not in ("OR0", "OR9")]
+    b = load("OR0").sort_values(["unit", "video_idx"]).reset_index(drop=True)
+    b["state"] = state(b)
+    res = {"OR0_all": {ds: stats(g) for ds, g in b.groupby("ds")}}
+    for arm in arms:                                        # each arm next to OR0 on exactly the same units
         a = load(arm).sort_values(["unit", "video_idx"]).reset_index(drop=True)
         if not len(a):
             continue
         a["state"] = state(a)
         res[arm] = {}
         for ds, g in a.groupby("ds"):
-            r = {}
-            for name, fl in (("loss", (~g.gt_empty) & (g.J < TAU)), ("drift", g.state.isin(["wrong_region", "wrong_object"]))):
-                e = ep(g, fl)
-                r[name] = {"episodes": len(e), "per_unit": len(e) / g.unit.nunique(),
-                           "mean_dur": e.dur.mean() if len(e) else None, "median_dur": e.dur.median() if len(e) else None,
-                           "recovered_frac": e.recovered.mean() if len(e) else None,
-                           "loss_sum": e.loss.sum() if len(e) else 0.0,
-                           "frames_in_episodes": int(e.dur.sum()) if len(e) else 0}
-            res[arm][ds] = r
+            g0 = b[b.unit.isin(set(g.unit))].reset_index(drop=True)
+            res[arm][ds] = {"units": int(g.unit.nunique()), "arm": stats(g.reset_index(drop=True)), "OR0": stats(g0)}
     save(res, "episodes.json")
 
 
