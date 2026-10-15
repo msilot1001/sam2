@@ -293,7 +293,7 @@ def claim(f):
 
 
 def work(arms=None, sets=SETS):
-    arms = (arms or ",".join(json.loads(PREREG.read_text())["arms"])).split(",")
+    arms = (",".join(json.loads(PREREG.read_text())["arms"]) if arms in (None, "all") else arms).split(",")
     if os.environ.get("M10_MODEL"):                     # capacity diagnostic (amend1): t | s | b+ | l
         k = os.environ["M10_MODEL"]
         m55.CFG = f"configs/sam2.1/sam2.1_hiera_{k}.yaml"
