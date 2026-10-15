@@ -1,0 +1,15 @@
+{
+  "created_kst": "2026-10-16 08:40",
+  "status": "diagnostic only; not for adoption; dev cross-validation",
+  "file_name_note": "The user asked for this spec under preregistration_amend11.json. That file already exists (commit 42db590, 08:05) for a related diagnostic and is frozen, so this spec is filed as amend12.",
+  "seen_before_this_file": "amend11 result WAS seen: the same heads trained on ALL dev datasets pooled (folds by video within each dataset), OOF scores: no model reaches tau*; pooled MOSEv2+VOST max precision b(H1) 0.414, R_piou 0.391, null_b 0.285; LVOS v2 alone 0.52-0.87 (reports/head_upper.json). This file differs only in training WITHIN one dataset at a time and in the verdict sentences fixed below.",
+  "purpose": "amend10's head was trained on LVOS v2 only, so it cannot separate cross-dataset transfer failure from absent signal. Measure the ceiling with training and evaluation inside the same dataset (video-level 5-fold cross-validation).",
+  "data": "outputs/milestone10/runpod/runs/OR0K (dev dump, OR0-identical): MOSEv2 62 units, VOST 31 units, LVOS v2 16 units. No GPU, no new output from SAM 2, no conf, no PUMaVOS C, no extra training videos.",
+  "folds": "per dataset separately: its videos split into 5 folds (scripts/m10_head.py folds(), seed 0); a head is fitted on 4 folds of that dataset only and scores the 5th (OOF). Rows = in-scope frames (out_area > 0), as amend10.",
+  "models": "amend10 unchanged: R_piou (raw predicted IoU, reference), a (per-view affine on piou), b (scalar MLP), c (MLP + mask/IoU tokens), null_b and null_c (labels shuffled among the 6 hypotheses within each frame). Hyperparameters = amend10 HYPER, nothing retuned.",
+  "hypotheses": "H1 = view choice (switch to the other view's own SAM 2 pick), H2 = within-view choice among the SGGL view's 3 hypotheses. Same choose() as amend10.",
+  "metrics": "per dataset, per model, per hypothesis: OOF switch precision (share of switches with J(pick) > J(k_sggl)) on the tau grid {0} + quantiles 0.05..0.95 of that dataset's positive OOF margins (tau curve: tau, switches, precision); max precision over taus with >= 20 switches; precision and dJ (GT-present, video-equal, video bootstrap CI) at tau = 0.",
+  "verdict": "per dataset and hypothesis, on the best learned model (a, b or c) by max OOF precision (>= 20 switches): <= 0.45 -> 'OOF 정밀도 ≤ 0.45: 얕은 head로는 데이터가 있어도 안 된다'; >= 0.70 -> 'OOF 정밀도 ≥ 0.70: 데이터 부족이 원인일 수 있다'; otherwise 'OOF 정밀도 0.45–0.70: 구분 불가'. Max over tau is the most favourable reading and is chosen on the same OOF scores (optimistic).",
+  "outputs": "reports/head_within.json; docs/m10/HEAD_RESULTS.md section '같은 데이터셋 안 상한 (진단)'.",
+  "not_allowed": "using this result as grounds for adoption; online arm; conf; tau carried anywhere."
+}
