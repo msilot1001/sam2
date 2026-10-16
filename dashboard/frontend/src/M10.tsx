@@ -297,6 +297,32 @@ function HeadGate({ d }: { d: any }) {
   )
 }
 
+function HeadWithin({ d }: { d: any }) {
+  const R = d.reports?.head_within?.datasets
+  if (!R) return null
+  const models = ['R_piou', 'a', 'b', 'c', 'null_b', 'null_c']
+  const mp = (r: any) => (r?.max_precision ? `${num(r.max_precision.precision, 3)} (${r.max_precision.switches})` : '—')
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>같은 데이터셋 안 상한 (수정 12, 진단)<Help k="m10.within" /></CardTitle>
+        <CardDescription>reports/head_within.json · 데이터셋마다 dev 영상 5-fold OOF · 전환 20회 이상 τ 중 최대 정밀도 (전환 수) · 채택 근거 아님</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table className="text-xs">
+          <TableHeader><TableRow><TableHead>데이터셋 · 가설</TableHead>{models.map((m) => <TableHead key={m}>{m}</TableHead>)}<TableHead>판정</TableHead></TableRow></TableHeader>
+          <TableBody>{Object.entries(R).flatMap(([ds, r]: [string, any]) => ['H1', 'H2'].map((h) => (
+            <TableRow key={ds + h}>
+              <TableCell className="font-mono">{ds} · {h}</TableCell>
+              {models.map((m) => <TableCell key={m}>{mp(r.models?.[m]?.[h])}</TableCell>)}
+              <TableCell>{r.verdict?.[h]?.verdict ?? '—'}</TableCell>
+            </TableRow>)))}</TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  )
+}
+
 function Baselines({ d }: { d: any }) {
   const g = d.reports?.baselines
   if (!g) return null
@@ -422,6 +448,7 @@ export default function M10({ nav }: { nav: Nav }) {
         </Card>
       </div>
       <HeadGate d={d} />
+      <HeadWithin d={d} />
       <Baselines d={d} />
       <Degraded d={d} />
       <Gate d={d} />
