@@ -86,6 +86,12 @@
 | 08:05 | **수정 11 사전 등록** (`42db590`): dev OR0K, 데이터셋별 영상 5-fold OOF. 채택·온라인·conf 없음 |
 | 08:10 | `m10_head.py upper` (Ubuntu CPU, 67 s): **τ\* 도달 모델 없음.** 합동 최대 b(H1) 0.414, R_piou 0.391 → `reports/head_upper.json`, `HEAD_RESULTS.md` '같은 데이터셋 상한' 절 |
 | 08:20 | 정리(다): `FINAL_REPORT.md`에 수정 9 기준선, 4.1 VXO/VXM, 4.2 학습 head, 7절 고찰을 반영. 대시보드 head 카드에 수정 11 행 추가 |
+| 08:40 | 논문 자료 작업 시작(사용자 지시). 사용자는 이 진단을 `amend11` 파일로 요청했지만, 그 파일은 이미 동결돼 있어 **수정 12**로 등록했다(`b10d301`). 수정 11 결과를 본 뒤라는 점도 공개했다 |
+| 08:50 | `m10_head.py within` (CPU 50 s) → `reports/head_within.json` (`e59e184`). MOSEv2 ≤ 0.45, VOST 구분 불가, LVOS H1 ≥ 0.70이지만 영 대조도 0.93 |
+| 08:55 | 4단계: LVOS OR8 상위 2영상 비중 0.593 → `CORE_CONCLUSIONS.md` (`bdb8135`) |
+| 09:00 | 3·6단계: `scripts/paper_tables.py` 표 5/6/8/9/10, 그림 3/4/5 CSV (`b12f6fa`, 서브에이전트). 갱신 루프가 다시 만든 report 스냅샷을 함께 커밋했고, CI 차이는 표 9 각주에 적었다 |
+| 09:30 | 5단계: `scripts/paper_appendixB.py` 부록 B, 64행 (`10fc3eb`, 서브에이전트). 수정 11은 사후 진단으로 표시했다 |
+| 08:5x–09:48 | 그림 6: MOSEv2 frame이 Ubuntu에 없어 HF train 분할 58 GB를 한 번 스트리밍해 영상 하나만 추출했다(sha256 3개 모두 M9와 일치). 이때 `tar -C`를 끝에 둬 저장소 루트에 풀렸고, `data/m9/mosev2`로 옮겼다. 2080 재실행 J&F는 4090과 같다 (`140273c`) |
 
 ## 2. 처리량
 
