@@ -14,17 +14,21 @@
 | `fig5_episodes.csv` | 그림 5 데이터: arm × 데이터셋 → 에피소드 수, 평균 길이 | `scripts/paper_tables.py` | `outputs/milestone10/reports/episodes.json` |
 | `fig6_examples.png` | 그림 6 예시 frame: B0 / SGGL / GT, crop 사각형 | `scripts/paper_fig6.py select` → `scripts/m10.py rerun` (2080) → `scripts/paper_fig6.py plot` | `runs/{B0,OR0}` (선택), `outputs/milestone10/fig6/` (2080 마스크) |
 | `fig6_selection.md` | 그림 6 단위·frame 선택 규칙과 근거, 2080/4090 J&F 대조 | `scripts/paper_fig6.py` | 위와 같음 |
+| `fig3.png/.svg`, `fig4.png/.svg`, `fig5.png/.svg` | 그림 3 상태별 손실(B0 대 SGGL), 그림 4 oracle 상한(점 + CI, 회복 비율), 그림 5 이탈 에피소드 수 대 길이. 300 dpi, NanumGothic(OFL, `data/fonts/`, sha256은 스크립트에), Okabe-Ito 팔레트 + 빗금·마커 모양 | `scripts/paper_figs.py` | `fig3_states.csv`, `fig4_oracle.csv`, `fig5_episodes.csv` |
+| `captions.md` | 그림 3·4·5 캡션 초안 (수치는 CSV에서 읽음) | `scripts/paper_figs.py` | 위와 같음 |
 | `appendixB_amendments.md` | 부록 B 사전 등록·수정 이력 M6 – M10 수정 12 | `scripts/paper_appendixB.py` (+ 출처를 밝힌 수동 행 11개) | `outputs/milestone*/preregistration*.json`, `outputs/milestone{8,9}/arms.json`, `docs/m{9,10}/EXECUTION_LOG.md`, git 커밋 시각 |
 
 ```
 uv run python scripts/paper_tables.py
 uv run python scripts/paper_appendixB.py
+uv run python scripts/paper_figs.py
+uv run python scripts/paper_check.py      # 문서 수치 대 reports/*.json, 불일치 0이면 exit 0
 uv run python scripts/paper_fig6.py select
 M9_DATA=data/m9 M10_SAVE_MASKS=outputs/milestone10/fig6 uv run python scripts/m10.py rerun outputs/milestone10/fig6/rerun.txt
 M9_DATA=data/m9 uv run python scripts/paper_fig6.py plot
 ```
 
 **주의**
-- 표 9와 그림 4·5는 모든 run이 끝난 뒤 다시 만든 `oracle_table.json`·`episodes.json` 스냅샷(커밋 `b12f6fa`)을 읽는다. bootstrap 난수 흐름 때문에 이전 보고서와 CI 끝이 최대 0.003 다를 수 있다(표 9 각주).
+- report 스냅샷은 커밋 `b212cc9`가 최종본이다. bootstrap 난수는 비교 쌍마다 고정돼(`m10_analysis.pair_rng`) 같은 입력이면 바이트 단위로 같고, 같은 비교는 어느 report에서나 같은 CI다. 자동 갱신 루프는 껐다.
 - 그림 6의 MOSEv2 frame은 공개 HF `FudanCVL/MOSEv2` train 분할을 Ubuntu에서 한 번 스트리밍해 해당 영상 하나만 추출했다(분할 sha256은 M9 기록과 대조, `outputs/milestone10/fig6/dl/`).
 - 같은 데이터셋 진단(수정 11·12)은 dev로 학습했으므로 채택 근거가 아니다.
