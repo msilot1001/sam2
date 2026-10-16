@@ -388,7 +388,7 @@ def base_unit(pred, s, sp, u, name, p5, n=None):
     with vcam.lazy_loader(fr, hw):
         st, od = sggl.start_dir(pred, "lazy", g0, p5=p5)
     other = getattr(m7, "other", None)
-    rows = []
+    rows, keep = [], [] if os.environ.get("M10_SAVE_MASKS") else None
     for t in range(1, n):
         t0 = time.perf_counter()
         o, out, _, score = engine.predict(pred, st, od, t)
@@ -401,8 +401,14 @@ def base_unit(pred, s, sp, u, name, p5, n=None):
                      "latency_s": lat, "score": score, "gt_empty": not g.any(), "area0": float(g0.mean()), **m55.jf(out, g),
                      "gt_area": int(g.sum()), "out_area": int(out.sum()), "out_inter_gt": int((out & g).sum()),
                      "out_inter_other": int((out & oth).sum()), "other_area": int(oth.sum())})
+        if keep is not None:                     # visualisation reruns only (paper fig. 6)
+            keep.append(np.packbits(out))
     peak = torch.cuda.max_memory_allocated()
     pred.reset_state(st)
+    if keep is not None:
+        f = Path(os.environ["M10_SAVE_MASKS"]) / name / f"{m7.stem(u)}.npz"
+        f.parent.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(f, hw=np.array(hw), out=np.stack(keep))
     return pd.DataFrame(rows).assign(peak_vram_bytes=peak)
 
 
@@ -542,7 +548,9 @@ def rerun(listfile):
     dec = hook_decoder(pred)
     want = [ln.split() for ln in Path(listfile).read_text().splitlines() if ln.strip()]
     for a, name in want:
-        s, sp, u = next(x for x in m7.units(name.split("__")[0].upper()) if x[2].name == name)
+        ds = name.split("__")[0]                  # look up only this unit (other videos' frames need not be on disk)
+        sp, u = next(x for x in m7._xd().units(ds) if x[1].name == name)
+        s = f"{ds.upper()}:{sp}"
         A = spec(a)
         df = base_unit(pred, s, sp, u, a, A["p5"]) if "p5" in A else run_unit(pred, dec, s, sp, u, a, A)
         (Path(os.environ["M10_SAVE_MASKS"]) / a).mkdir(parents=True, exist_ok=True)

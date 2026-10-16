@@ -1,0 +1,98 @@
+{
+ "rules": "- MOSEv2: tiny unit (area0 < 0.001) with the largest unit-mean SGGL - B0 J&F (paired frames, 4090 rows).\n- VOST: unit with the largest (SGGL - B0) per-frame loss contribution of wrong_object frames\n  (sum of 1 - J&F over wrong_object frames / frames, as amend9 Table 3).\n- Frames: in the WORSE arm of that unit (MOSEv2: B0, VOST: SGGL), loss episodes = maximal runs of GT-present frames with\n  J < 0.5 (m10_analysis.episodes); take the episode with the largest summed J&F gap (better - worse arm). Show\n  the last GT-present frame with J >= 0.5 before the onset (the onset itself if none: the arm fails from frame 1),\n  the episode's middle frame, and the first GT-present frame with J >= 0.5 after it (recovery) or the unit's last frame.\n  (Revised once after the first draft picked a GT-absent frame as 'before'; disclosed in fig6_selection.md.)",
+ "units": {
+  "mosev2": {
+   "unit": "mosev2__mosev2/2c713560__obj1",
+   "worse_arm": "B0",
+   "frames_video_idx": [
+    1,
+    31,
+    62
+   ],
+   "episode": {
+    "onset": 1,
+    "dur": 62,
+    "recovered": false,
+    "gap_sum": 54.326421968733655,
+    "n_episodes": 1
+   },
+   "JF_unit_mean": {
+    "B0": 0.0,
+    "SGGL": 0.8762326123989299
+   },
+   "area0": 7.71604938271605e-06
+  },
+  "vost": {
+   "unit": "vost__vost/1186_cut_chilli__obj2",
+   "worse_arm": "SGGL",
+   "frames_video_idx": [
+    50,
+    71,
+    157
+   ],
+   "episode": {
+    "onset": 55,
+    "dur": 33,
+    "recovered": true,
+    "gap_sum": 5.965995108665083,
+    "n_episodes": 4
+   },
+   "JF_unit_mean": {
+    "B0": 0.320121830501546,
+    "SGGL": 0.2937688568859748
+   },
+   "area0": 0.0006712962962962
+  }
+ },
+ "ranking": {
+  "mosev2_tiny_SGGL_minus_B0": [
+   {
+    "unit": "mosev2__mosev2/2c713560__obj1",
+    "d": 0.87623261239893,
+    "area0": 7.71604938271605e-06
+   },
+   {
+    "unit": "mosev2__mosev2/82ucmhmx__obj2",
+    "d": 0.7738533835005235,
+    "area0": 0.0003698881172839
+   },
+   {
+    "unit": "mosev2__mosev2/82ucmhmx__obj1",
+    "d": 0.5756705481949851,
+    "area0": 0.0003886959876543
+   },
+   {
+    "unit": "mosev2__mosev2/5ten05az__obj1",
+    "d": 0.4406557489395344,
+    "area0": 0.0006838348765432
+   },
+   {
+    "unit": "mosev2__mosev2/fa3e0b85__obj7",
+    "d": 0.36239938395434673,
+    "area0": 0.0004243827160493
+   }
+  ],
+  "vost_wrong_object_loss_SGGL_minus_B0": [
+   {
+    "unit": "vost__vost/1186_cut_chilli__obj2",
+    "d": 0.3905521690279764
+   },
+   {
+    "unit": "vost__vost/9673_cut_tomato__obj1",
+    "d": 0.2315860421684164
+   },
+   {
+    "unit": "vost__vost/1201_cut_chili__obj1",
+    "d": 0.15914447568055895
+   },
+   {
+    "unit": "vost__vost/3559_break_egg__obj2",
+    "d": 0.05883151990397528
+   },
+   {
+    "unit": "vost__vost/1206_cut_mango__obj1",
+    "d": 0.04027162460240502
+   }
+  ]
+ }
+}
