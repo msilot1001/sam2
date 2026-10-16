@@ -194,8 +194,9 @@ def table9():
     L += [f"- 이 표에 없는 arm: {', '.join(k for k in arms if k not in shown)}. "
           f"데이터셋 일부만 실행된 arm(미완료): {', '.join(incomplete)}. B0는 표 5, VXO·VXM·N1M·N2X는 표 10, "
           "OR0F·OR0K·OR0T는 OR0 재실행 대조다.",
-          "- CI는 2026-10-16 스냅샷의 `oracle_table.json`(모든 run 완료 뒤 재생성)에서 읽었다. bootstrap 난수 흐름이 arm 목록에 따라 달라져, "
-          "`FINAL_REPORT.md`·`CORE_CONCLUSIONS.md`의 이전 값과 CI 끝이 최대 0.003, OR7W MOSEv2 점추정이 0.001 다르다(원인 미확인, 이전 값 0.042). 판정은 바뀌지 않는다."]
+          "- CI는 비교 쌍마다 고정한 bootstrap 난수로 계산했다(`m10_analysis.py` `pair_rng`, 2026-10-16). 같은 비교는 어느 report에서나 같은 CI다. "
+          "이전 보고서의 CI는 공유 난수를 arm 디렉터리 순서로 이어 써서 run이 늘 때마다 최대 0.003 움직였다. 문서 쪽은 `scripts/paper_check.py`로 이 값에 맞췄다. "
+          "OR7W MOSEv2의 이전 값 +0.042는 0.04149를 넷째 자리 로그(0.0415)에서 다시 반올림한 이중 반올림이었다."]
     write("table9_oracle.md", L)
     with open(OUT / "fig4_oracle.csv", "w", newline="") as f:
         f.write("# source: outputs/milestone10/reports/oracle_table.json\n")

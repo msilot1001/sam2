@@ -1,0 +1,79 @@
+{
+ "baseline": "tiny (runs_t, Ubuntu 2080)",
+ "units_tiny": 31,
+ "small": {
+  "n_units": 31,
+  "n_videos": 19,
+  "dJF": 0.036597661721010435,
+  "ci": [
+   -0.013137933033630507,
+   0.09490891624445633
+  ],
+  "dJ": 0.04005563624085416,
+  "dF": 0.033139687201166695,
+  "dJF_unit_weighted": 0.027726167629778743,
+  "dJF_tiny_units": 0.06871394538966161,
+  "n_tiny": 5,
+  "JF0": 0.49945280306726675,
+  "recovered_frac": 0.07311530649911653,
+  "lovo_min": 0.017361600736433384,
+  "lovo_max": 0.048040777927693276,
+  "top2_share": 0.9884289173307531,
+  "videos_up": 8,
+  "videos_down": 5,
+  "worst_video": "vost/7359_fold_tape_measure",
+  "worst_video_d": -0.16937842999928077,
+  "units_below_m005": 2,
+  "units_above_005": 6
+ },
+ "base+": {
+  "n_units": 31,
+  "n_videos": 19,
+  "dJF": 0.020683588960936267,
+  "ci": [
+   -0.010148015050869033,
+   0.05678299512821206
+  ],
+  "dJ": 0.023124779605736567,
+  "dF": 0.018242398316135968,
+  "dJF_unit_weighted": 0.01504174415144186,
+  "dJF_tiny_units": -4.748778914960283e-05,
+  "n_tiny": 5,
+  "JF0": 0.49945280306726675,
+  "recovered_frac": 0.041321955427343765,
+  "lovo_min": 0.008769897518033821,
+  "lovo_max": 0.02766582534784073,
+  "top2_share": 0.9639937736998733,
+  "videos_up": 8,
+  "videos_down": 5,
+  "worst_video": "vost/7359_fold_tape_measure",
+  "worst_video_d": -0.10499666600334406,
+  "units_below_m005": 3,
+  "units_above_005": 3
+ },
+ "large": {
+  "n_units": 31,
+  "n_videos": 19,
+  "dJF": -0.00516420971680558,
+  "ci": [
+   -0.0848104908031094,
+   0.0650753685863693
+  ],
+  "dJ": -0.0031264830432828684,
+  "dF": -0.007201936390328313,
+  "dJF_unit_weighted": 0.0008882323311454278,
+  "dJF_tiny_units": 0.07116338614432248,
+  "n_tiny": 5,
+  "JF0": 0.49945280306726675,
+  "recovered_frac": -0.010317128431546444,
+  "lovo_min": -0.027540303031241515,
+  "lovo_max": 0.02403537016441644,
+  "top2_share": null,
+  "videos_up": 9,
+  "videos_down": 4,
+  "worst_video": "vost/3562_break_egg",
+  "worst_video_d": -0.5307566475788019,
+  "units_below_m005": 6,
+  "units_above_005": 8
+ }
+}

@@ -12,6 +12,7 @@ bootstrap. All JSON is written with allow_nan=False (non-finite -> null).
 import json
 import math
 import sys
+import zlib
 from pathlib import Path
 
 import numpy as np
@@ -25,6 +26,26 @@ B = 10000
 OFFLINE = ("OR1off", "OR5off", "OR6off")
 DSETS = ("mosev2", "vost", "lvosv2")
 B_ = 10000
+SEED = 10
+
+
+def rng_for(*key):
+    """Bootstrap stream fixed per estimate (function, arm, dataset, ...). Before 2026-10-16 one generator was shared in
+    run-directory order, so adding a run directory shifted every later arm's CI (by up to 0.003)."""
+    return np.random.default_rng([SEED, zlib.crc32("/".join(map(str, key)).encode())])
+
+
+def pair_rng(a, b, ds, sub="all"):
+    """One stream per comparison (unordered arm pair, dataset, unit subset): the same estimate gets the same CI in every
+    report (oracle_table, degraded, interactions, baselines), and a - b gets exactly the mirrored CI of b - a."""
+    a, b = ("OR0" if x == "SGGL" else x for x in (a, b))
+    return rng_for("pair", *sorted((a, b)), ds, sub)
+
+
+def dev_arms(offline=True):
+    """Arms paired with OR0 on dev: every run directory except OR0, OR9 and training dumps (*_train, amend10)."""
+    return [p.name for p in sorted(RUNS.iterdir()) if p.is_dir() and p.name not in ("OR0", "OR9") and not p.name.endswith("_train")] \
+        + (list(OFFLINE) if offline else [])
 
 
 def finite(o):
@@ -113,8 +134,7 @@ def vstats(u, rng):
 
 def table(*arms):
     b = load("OR0")
-    arms = arms or [p.name for p in sorted(RUNS.iterdir()) if p.is_dir() and p.name not in ("OR0", "OR9")] + list(OFFLINE)
-    rng = np.random.default_rng(10)
+    arms = arms or dev_arms()
     res = {"baseline": {ds: {"units": int(g.unit.nunique()), "videos": int(g.video.nunique()), "frames": len(g),
                              "JF_video_equal": g.groupby(["video", "unit"]).JF.mean().groupby("video").mean().mean()}
                         for ds, g in b.groupby("ds")}, "arms": {}}
@@ -127,10 +147,10 @@ def table(*arms):
         for ds, g in a.groupby("ds"):
             u = paired(g, b[b.ds == ds])
             us.append(u)
-            r["per_dataset"][ds] = {**vstats(u, rng), "complete": g.unit.nunique() == b[b.ds == ds].unit.nunique()}
+            r["per_dataset"][ds] = {**vstats(u, pair_rng(arm, "OR0", ds)), "complete": g.unit.nunique() == b[b.ds == ds].unit.nunique()}
         U = pd.concat(us)
         U["video"] = U.ds + "/" + U.video
-        r["pooled_secondary"] = vstats(U, rng)
+        r["pooled_secondary"] = vstats(U, pair_rng(arm, "OR0", "pooled"))
         if "adm_G" in a:
             r["admit_rate"] = {"G": a.adm_G.mean(), "L": a.adm_L.mean()}
             r["rewrite_rate"] = {"G": a.rew_G.mean(), "L": a.rew_L.mean()}
@@ -165,7 +185,7 @@ def states(*arms):
     b = load("OR0")
     b["state"] = state(b)
     b["loss0"] = 1 - b.JF
-    arms = arms or [p.name for p in sorted(RUNS.iterdir()) if p.is_dir() and p.name not in ("OR0", "OR9")] + list(OFFLINE)
+    arms = arms or dev_arms()
     res = {"OR0_loss_share": {}, "recovery": {}}
     for ds, g in b.groupby("ds"):
         tot = g.loss0.sum()
@@ -224,7 +244,7 @@ def episodes(*arms):
                        "loss_sum": e.loss.sum() if len(e) else 0.0,
                        "frames_in_episodes": int(e.dur.sum()) if len(e) else 0}
         return r
-    arms = arms or [p.name for p in sorted(RUNS.iterdir()) if p.is_dir() and p.name not in ("OR0", "OR9")]
+    arms = arms or dev_arms(offline=False)
     b = load("OR0").sort_values(["unit", "video_idx"]).reset_index(drop=True)
     b["state"] = state(b)
     res = {"OR0_all": {ds: stats(g) for ds, g in b.groupby("ds")}}
@@ -277,7 +297,6 @@ def or9():
     """OR9 (amend2): GT-box-prompted image-mode SAM 2 vs OR0 on the same GT-present frames (video-equal)."""
     b, o = load("OR0"), load("OR9")
     m = o.merge(b[["unit", "video_idx", "JF", "J"]], on=["unit", "video_idx"])
-    rng = np.random.default_rng(10)
     res = {}
     for ds, g in m.groupby("ds"):
         res[ds] = {}
@@ -286,7 +305,7 @@ def or9():
                                                         J0=("J", "mean"), F=(f"F_{v}", "mean"), area0=("area0", "first")).reset_index()
             u["F0"] = 2 * u.JF0 - u.J0
             u["d"], u["dJ"], u["dF"] = u.JF - u.JF0, u.J - u.J0, u.F - u.F0
-            res[ds][v] = {**vstats(u, rng), "JF_oracle": u.groupby("video").JF.mean().mean(),
+            res[ds][v] = {**vstats(u, rng_for("or9", ds, v)), "JF_oracle": u.groupby("video").JF.mean().mean(),
                           "tiny_JF_oracle": u[u.area0 < 0.001].JF.mean() if (u.area0 < 0.001).any() else None}
         res[ds]["frames"], res[ds]["units"] = len(g), int(g.unit.nunique())
         print(ds, {v: (round(res[ds][v]["JF_oracle"], 3), round(res[ds][v]["JF0"], 3)) for v in ("full", "crop")})
@@ -300,7 +319,6 @@ def interact():
     """Per dataset on units common to OR0, A, B, AB: standalone dA, dB; joint dAB; conditional (dAB - dA, dAB - dB);
     interaction dAB - dA - dB. Video-equal; one bootstrap over videos resamples all four jointly."""
     b = load("OR0")
-    rng = np.random.default_rng(10)
     res = {}
     for ab, (A, B) in PAIRS.items():
         X = {k: load(k) for k in (A, B, ab)}
@@ -319,7 +337,7 @@ def interact():
                 V[k] = u.groupby("video").d.mean()
             v = pd.DataFrame(V)
             n = len(v)
-            idx = rng.integers(0, n, (B_, n))
+            idx = pair_rng(ab, "OR0", ds, "all" if len(common) == b[b.ds == ds].unit.nunique() else f"common{len(common)}").integers(0, n, (B_, n))
             def ci(col):
                 bs = col.to_numpy()[idx].mean(1)
                 return [np.percentile(bs, 2.5), np.percentile(bs, 97.5)]
@@ -479,7 +497,6 @@ def gate(arm="OR0F"):
     o = load(arm)
     o["state"] = state(o)
     H = rule_scores(hyp_table(o))
-    rng = np.random.default_rng(10)
     res = {"amend": "preregistration_amend5.json", "rules": {}}
     for rule in RULES:
         F = frame_choices(o, H, rule)
@@ -493,9 +510,9 @@ def gate(arm="OR0F"):
             curve.append({"tau": float(tau), "switches": int(len(sw)), "precision_pooled": prec})
             if tau_star is None and prec is not None and prec >= 0.70:
                 tau_star = float(tau)
-        r = {"tau_star": tau_star, "curve": curve, "at_tau0": gate_eval(F, 0.0, rng)}
+        r = {"tau_star": tau_star, "curve": curve, "at_tau0": gate_eval(F, 0.0, rng_for("gate", arm, rule, "tau0"))}
         if tau_star is not None:
-            ev = gate_eval(F, tau_star, rng)
+            ev = gate_eval(F, tau_star, rng_for("gate", arm, rule, "tau_star"))
             r["at_tau_star"] = ev
             md, vo = ev.get("mosev2"), ev.get("vost")
             r["pass"] = bool(md and vo and md["ci"][0] > 0 and vo["ci"][0] > 0
@@ -552,7 +569,6 @@ def degraded():
     X = H.pivot_table(index=["unit", "video_idx"], columns="k", values="xiou").reindex(pd.MultiIndex.from_frame(F[["unit", "video_idx"]])).to_numpy()
     F["xiou_sg"] = X[np.arange(len(F)), F.k_sggl]
     off = F[F.active & (F.pick != F.k_sggl) & (F.margin > 0) & (F.xiou_sg < 0.5)]
-    rng = np.random.default_rng(10)
     nt = lambda g: float((g.J_pick > g.J_sggl)[g.J_pick != g.J_sggl].mean())
     res = {"offline_disagree_precision": {ds: {"precision": float((g.J_pick > g.J_sggl).mean()), "precision_no_ties": nt(g), "switches": len(g),
                                                "dJ_sum": float((g.J_pick - g.J_sggl).sum())} for ds, g in off.groupby("ds")},
@@ -565,7 +581,7 @@ def degraded():
         for ds, g in x.groupby("ds"):
             g0 = b[b.ds == ds]
             u = paired(g, g0)
-            st = vstats(u, rng)
+            st = vstats(u, pair_rng(arm, "OR0", ds))
             m = g[["unit", "video_idx", "JF", "gt_empty"]].merge(g0[["unit", "video_idx", "JF"]], on=["unit", "video_idx"], suffixes=("", "_0"))
             m["d"] = m.JF - m.JF_0
             pres = m.groupby("unit").apply(lambda q: q.d[~q.gt_empty].sum() / len(q))
@@ -608,6 +624,39 @@ def parity():
 LOSS_STATES = ("correct", "partial", "empty", "wrong_region", "wrong_object", "false_present")
 
 
+def present(*arms):
+    """GT-present frames per arm: absolute J&F (unit -> video -> video-equal) and candidate survival (share of frames
+    where any of the 7 pool candidates has J >= 0.5). FINAL_REPORT section 3 table."""
+    arms = arms or ("OR0",) + tuple(dev_arms(offline=False))
+    res = {}
+    for arm in arms:
+        o = load(arm)
+        if not len(o):
+            continue
+        g = o[~o.gt_empty]
+        cj = [f"cJ{k}" for k in range(7) if f"cJ{k}" in g]
+        res[arm] = {ds: {"JF_present": x.groupby(["video", "unit"]).JF.mean().groupby("video").mean().mean(), "frames": len(x),
+                         "candidate_survival": float((x[cj].max(1) >= TAU).mean()) if len(cj) == 7 else None}
+                    for ds, x in g.groupby("ds")}
+    save(res, "present.json")
+
+
+def capacity():
+    """amend1 model-size diagnostic (Ubuntu RTX 2080, VOST dev): OR0 with small / base+ / large vs tiny, paired frames."""
+    def ld(m):
+        fs = sorted((OUT / "ubuntu" / f"runs_{m}" / "OR0").glob("*.csv"))
+        df = pd.concat([pd.read_csv(f) for f in fs if f.stat().st_size > 1], ignore_index=True)
+        df["ds"] = df.set.str.split(":").str[0].str.lower()
+        return df
+    t = ld("t")
+    res = {"baseline": "tiny (runs_t, Ubuntu 2080)", "units_tiny": int(t.unit.nunique())}
+    for m, name in (("s", "small"), ("b+", "base+"), ("l", "large")):
+        x = ld(m)
+        common = set(x.unit) & set(t.unit)
+        res[name] = vstats(paired(x[x.unit.isin(common)], t[t.unit.isin(common)]), rng_for("capacity", m))
+    save(res, "capacity.json")
+
+
 def p5_rows(b):
     """amend9: P5 = SGGL's G state (verified independent of L), so its frame rows are OR0's G columns."""
     p = b.copy()
@@ -619,7 +668,6 @@ def p5_rows(b):
 
 def baselines():
     """amend9 Tables 1-3: B0 (official SAM 2.1) / P5 / SGGL (OR0), dev, video-equal, video bootstrap."""
-    rng = np.random.default_rng(9)
     b = load("OR0")
     A = {"B0": load("B0"), "P5": p5_rows(b), "SGGL": b}
     done = A["B0"].groupby("ds").unit.unique().to_dict()
@@ -638,7 +686,7 @@ def baselines():
             for k, g in G.items():
                 r["abs"][k] = g.groupby(["video", "unit"]).JF.mean().groupby("video").mean().mean()
             for x, y in pairs:
-                st = vstats(paired(G[x], G[y]), rng)
+                st = vstats(paired(G[x], G[y]), pair_rng(x, y, ds, tag))
                 r["delta"][f"{x}-{y}"] = {c: st[c] for c in ("dJF", "ci", "dJF_unit_weighted", "videos_up", "videos_down",
                                                             "lovo_min", "lovo_max", "n_videos", "n_units", "dJ", "dF")}
     S = res["states"] = {}
